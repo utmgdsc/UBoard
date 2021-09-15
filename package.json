@@ -1,0 +1,21 @@
+{
+  "name": "uboard",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "touch /tmp/app-initialized && npm install --prefix server && node server/server.js",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false cd client && npm install && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danielduong8/UBoard.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/danielduong8/UBoard/issues"
+  },
+  "homepage": "https://github.com/danielduong8/UBoard#readme"
+}

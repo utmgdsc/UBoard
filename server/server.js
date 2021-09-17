@@ -3,8 +3,8 @@ const path = require('path');
 const pg = require('pg');
 
 const app = express();
-const port = process.env.PORT || 8080;
-const nginx_port = "/tmp/nginx.socket";
+const port = 8080;
+// const nginx_port = "/tmp/nginx.socket";
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,15 +21,15 @@ app.post('/api/world', (req, res) => {
     );
 });
 
-if (process.env.NODE_ENV === 'production') {
-    // Serve any static files
-    app.use(express.static(path.join(__dirname, '../client/build')));
+// if (process.env.NODE_ENV === 'production') {
+//     // Serve any static files
+//     app.use(express.static(path.join(__dirname, '../client/build')));
 
-    // Handle React routing, return all requests to React app
-    app.get('*', function (req, res) {
-        res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-    });
-}
+//     // Handle React routing, return all requests to React app
+//     app.get('*', function (req, res) {
+//         res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+//     });
+// }
 
-// app.listen(port, () => console.log(`Listening on port ${port}`));
-app.listen(nginx_port, () => console.log(`Listening on port ${nginx_port}`));
+app.listen(port, () => console.log(`Listening on port ${port}`));
+// app.listen(nginx_port, () => console.log(`Listening on port ${nginx_port}`));

@@ -1,0 +1,16 @@
+{
+    "name": "UofTBoard",
+    "description": "Official UofT Bulletin Board.",
+    "keywords": [
+        "uoft",
+        "university",
+        "toronto"
+    ],
+    "success_url": "/",
+    "stack": "container",
+    "addons": [
+        {
+            "plan": "heroku-postgresql"
+        }
+    ]
+}

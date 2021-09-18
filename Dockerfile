@@ -1,35 +1,32 @@
-# => Build container
-FROM node:alpine as builder
-WORKDIR /app
-COPY client client
-COPY server server
-COPY package.json .
-RUN npm install
+# => Build client
+FROM node:alpine as client_builder
+WORKDIR /app/client
+COPY client .
+RUN npm install --production && npm run build
+
+# => Build server
+FROM node:alpine as server_builder
+WORKDIR /app/server
+COPY server .
+RUN npm install --production && npm run build
 
 # => Run container
 FROM nginx:alpine
 
 # Nginx config
-# RUN rm -rf /etc/nginx/conf.d
-# COPY nginx/conf /etc/nginx
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf
+COPY nginx/conf.d/default.conf.template /etc/nginx/conf.d/default.conf.template
 
 # Static build
 WORKDIR /app
-COPY --from=builder /app/client/build /usr/share/nginx/html/build
-COPY --from=builder /app/server server
-COPY package.json .
+COPY --from=client_builder /app/client/build /usr/share/nginx/html/build
+COPY --from=server_builder /app/server server
 
 # Default port exposure
 EXPOSE 80
 
 # Add npm
-RUN apk add bash && apk add npm
-
-# Copy .env file and shell script to container
-# WORKDIR /usr/share/nginx/html
-# COPY .env .
+RUN apk update nodejs && apk add nodejs
 
 # Start Nginx server
-CMD ["/bin/bash", "-c", "nginx && node server/server.js"]
+CMD /bin/sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf" && nginx && node server/server.js

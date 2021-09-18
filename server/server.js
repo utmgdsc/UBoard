@@ -1,35 +1,18 @@
-const express = require('express');
-const path = require('path');
-const pg = require('pg');
-
-const app = express();
-const port = 8080;
-// const nginx_port = "/tmp/nginx.socket";
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// API calls
-app.get('/api/hello', (req, res) => {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var express_1 = __importDefault(require("express"));
+var app = (0, express_1.default)();
+var port = 8080;
+app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ extended: true }));
+app.get('/api/hello', function (req, res) {
     res.send({ express: 'Hello From Express' });
 });
-
-app.post('/api/world', (req, res) => {
+app.post('/api/world', function (req, res) {
     console.log(req.body);
-    res.send(
-        `I received your POST request. This is what you sent me: ${req.body.post}`,
-    );
+    res.send("I received your POST request. This is what you sent me: " + req.body.post);
 });
-
-// if (process.env.NODE_ENV === 'production') {
-//     // Serve any static files
-//     app.use(express.static(path.join(__dirname, '../client/build')));
-
-//     // Handle React routing, return all requests to React app
-//     app.get('*', function (req, res) {
-//         res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-//     });
-// }
-
-app.listen(port, () => console.log(`Listening on port ${port}`));
-// app.listen(nginx_port, () => console.log(`Listening on port ${nginx_port}`));
+app.listen(port, function () { return console.log("Listening on port " + port); });

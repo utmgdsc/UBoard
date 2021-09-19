@@ -6,5 +6,5 @@ build:
   docker:
     release:
       dockerfile: Dockerfile
-      target: client_builder
+      target: base
     web: Dockerfile

@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "UBoard",
+  "name": "UofTBoard",
   "icons": [
     {
       "src": "favicon.ico",

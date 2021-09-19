@@ -3,12 +3,8 @@ server {
     server_name  localhost;
 
     location / {
-        root   /usr/share/nginx/html/build;
+        root   /usr/share/nginx/html;
         index  index.html index.htm;
-    }
-
-    location /api {
-        proxy_pass http://localhost:8080;
     }
 
     error_page   500 502 503 504  /50x.html;

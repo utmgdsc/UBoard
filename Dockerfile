@@ -8,19 +8,10 @@ RUN npm install --production && npm run build
 FROM node:alpine as server_builder
 WORKDIR /app/server
 COPY server .
-RUN npm install --production && npm run build
+RUN npm install && npm run build
 
 # => Run container
-FROM nginx:alpine
-
-# Nginx config
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
-COPY nginx/conf.d/default.conf.template /etc/nginx/conf.d/default.conf.template
-
-# Static build
-WORKDIR /app
-COPY --from=client_builder /app/client/build /usr/share/nginx/html/build
-COPY --from=server_builder /app/server server
+FROM nginx:alpine as base
 
 # Default port exposure
 EXPOSE 80
@@ -28,5 +19,14 @@ EXPOSE 80
 # Add npm
 RUN apk update nodejs && apk add nodejs
 
+# Nginx config
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/conf.d/default.conf.template /etc/nginx/conf.d/default.conf.template
+
+# Static build
+WORKDIR /app
+COPY --from=client_builder /app/client/build/. /usr/share/nginx/html/.
+COPY --from=server_builder /app/server server
+
 # Start Nginx server
-CMD /bin/sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf" && nginx && node server/server.js
+CMD /bin/sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf" && nginx && node server/build/server.js

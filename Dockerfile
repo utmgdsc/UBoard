@@ -2,13 +2,13 @@
 FROM node:alpine as client_builder
 WORKDIR /app/client
 COPY client .
-RUN npm install --production && npm run build
+RUN yarn install --production && yarn run build
 
 # => Build server
 FROM node:alpine as server_builder
 WORKDIR /app/server
 COPY server .
-RUN npm install && npm run build
+RUN yarn install && yarn run build
 
 # => Run container
 FROM nginx:alpine as base

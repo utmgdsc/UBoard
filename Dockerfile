@@ -17,7 +17,7 @@ FROM nginx:alpine as base
 EXPOSE 80
 
 # Add npm
-RUN apk update nodejs && apk add nodejs
+RUN apk add --update nodejs
 
 # Nginx config
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

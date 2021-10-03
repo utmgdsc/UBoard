@@ -65,3 +65,12 @@ build/
 
 # Visual Studio 6 auto-generated workspace file (contains which files were open etc.)
 *.vbw
+
+# Prettier files
+client/src/.prettierrc
+client/src/.prettierignore
+
+# .DS_store ignore
+.DS_Store
+client/.DS_Store
+client/src/.DS_Store

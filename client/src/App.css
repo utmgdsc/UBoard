@@ -1,5 +1,11 @@
 .App {
   text-align: center;
+  background-image: url("https://media.gettyimages.com/videos/loopable-color-gradient-background-animation-video-id1182636595?s=640x640");
+  position: fixed;
+  min-width: 100%;
+  min-height: 100%;
+  background-size: cover;
+  background-position: center;
 }
 
 .App-logo {
@@ -14,7 +20,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #1f242e;
   min-height: 100vh;
   display: flex;
   flex-direction: column;

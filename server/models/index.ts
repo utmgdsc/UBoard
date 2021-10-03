@@ -1,14 +1,14 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const config = require('../config/config');
+import fs from 'fs';
+import path from 'path';
+import Sequelize from 'sequelize';
+const config = require( '../config/config');
 const basename = path.basename(__filename);
 const db: any = {};
 
-const sequelize = new Sequelize(config.DB_URL,  {
-  dialect: config.DIALECET,
+const sequelize = new Sequelize.Sequelize(config.DB_URL,  {
+  dialect: config.dialect,
   dialectOptions: {
     ssl:  { /* Required for our host */
       rejectUnauthorized: false,

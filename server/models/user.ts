@@ -5,7 +5,7 @@ import { Model, UUIDV4, DataTypes } from "sequelize";
 interface UserAttributes {
   
   /* Login Specific */
-  uid: string;
+  id: string;
   userName: string;
   password: string; // hash
   salt: string;
@@ -20,22 +20,25 @@ interface UserAttributes {
 module.exports = (sequelize: any) => {
 
   class User extends Model<UserAttributes> implements UserAttributes {
-    uid!: string; // uuidv4
+    id!: string; // uuidv4
     userName!: string;
     password!: string;
     salt!: string;
     email!: string;
+
     lastLogin!: Date;
-    karma!: Number;
+    karma!: Number; // Should not be revealed to public
 
     static associate(model: any){
-      User.hasMany(model.Post);
+      User.hasMany(model.Post); 
+      User.hasMany(model.Comment);
+      /* Userid is stored inside of respective Post, and Comment */
     }
 
   };
 
    User.init({
-    uid :
+    id :
     {
       type: DataTypes.UUID,
       defaultValue: UUIDV4,

@@ -1,22 +1,20 @@
 "use strict";
-import { Model, UUIDV4 } from "sequelize"
+import { Model, UUIDV4, DataTypes } from "sequelize"
 
 interface PostAttributes {
   id: string;
-  userId: string; // Post author
   title: string;
   body: string;
   thumbnail: string;
   tags: string;
-  location: string; // Integrate with maps later
+  location: string; 
   capacity: Number;
   feedbackScore: Number;
 }
 
-module.exports = (sequelize: any, DataTypes: any) => {
+module.exports = (sequelize: any) => {
   class Post extends Model<PostAttributes> implements PostAttributes {
         id!: string;
-        userId!: string;  
         title!: string;
         body!: string;
         thumbnail!: string;
@@ -24,24 +22,23 @@ module.exports = (sequelize: any, DataTypes: any) => {
         location!: string;  
         capacity!: Number;
         feedbackScore!: Number;
+
+
     }
   Post.init(
     {
       id: {
-        defaultValue: UUIDV4,
-        primaryKey: true,
         type: DataTypes.UUID,
+        defaultValue: UUIDV4,
+        allowNull: false,
+        primaryKey: true,
         unique: true
       },
-      userId: {
-        type: DataTypes.STRING,
-      },
-
       title: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
       },
       body: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
       },
       thumbnail: {
         type: DataTypes.STRING,

@@ -9,6 +9,9 @@
   },
   "author": "",
   "license": "ISC",
+  "resolutions": {
+    "ansi-regex": "^5.0.1"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

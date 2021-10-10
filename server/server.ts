@@ -1,6 +1,4 @@
 import express from 'express';
-import path from 'path';
-import pg from 'pg';
 
 const app = express();
 const port = 8080;

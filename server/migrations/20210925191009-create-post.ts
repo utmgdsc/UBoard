@@ -19,9 +19,6 @@ module.exports = {
       thumbnail: {
         type: Sequelize.STRING,
       },
-      tags: {
-        type: Sequelize.JSON,
-      },
       location: {
         type: Sequelize.STRING,
       },

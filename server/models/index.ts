@@ -7,7 +7,14 @@ const config = require( '../config/config');
 const basename = path.basename(__filename);
 const db: any = {};
 
-const sequelize = new Sequelize.Sequelize(config.DB_URL,  {
+let sequelize: Sequelize.Sequelize;
+
+if (process.env.CI){
+  /* For CI testing */
+  sequelize = new Sequelize.Sequelize('sqlite::memory');
+}
+else{
+  sequelize = new Sequelize.Sequelize(config.DB_URL,  {
   dialect: config.dialect,
   dialectOptions: {
     ssl:  { /* Required for our host */
@@ -15,6 +22,8 @@ const sequelize = new Sequelize.Sequelize(config.DB_URL,  {
     }
   }
 });
+}
+
 
 fs
   .readdirSync(__dirname)
@@ -34,5 +43,6 @@ Object.keys(db).forEach(modelName => {
 
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
+
 
 export default db;

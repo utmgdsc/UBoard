@@ -5,11 +5,11 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUIDV4,
+        type: Sequelize.UUID,
         unique: true
       },
       userName: {
-        type: Sequelize.STRING(8),
+        type: Sequelize.STRING(32),
         allowNull: false,
         unique: true
       },
@@ -17,12 +17,13 @@ module.exports = {
         type: Sequelize.STRING,
         allowNUll: false
       },
-      salt: {
-        type: Sequelize.STRING,
-      },
       email: {
-        type: Sequelize.STRING,
-        unique: true
+      type: Sequelize.STRING(64),
+      allowNull: false,
+      unique: true,
+      validate : {
+         is: [".[a-zA-z\-\_\.0-9]*@[a-zA-z\-\_\.0-9]*utoronto.ca"],  // only utor emails
+      }
       },
       lastLogin: {
         type: Sequelize.DATE,

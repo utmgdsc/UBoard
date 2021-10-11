@@ -10,7 +10,7 @@ const port = 8080;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/test", (req: express.Request, res: express.Response) => {
+app.get("/v1/test", (req: express.Request, res: express.Response) => {
     res.send({ express: 'Hello From Express' });
 });
 

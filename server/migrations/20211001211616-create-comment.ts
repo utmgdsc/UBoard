@@ -1,11 +1,12 @@
 "use strict";
 module.exports = {
   up: async (queryInterface: any, Sequelize: any) => {
-    await queryInterface.createTable("Comments", {
+    await queryInterface.createTable("PostComments", {
       id: {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
+        unique: true
       },
       body: {
         type: Sequelize.TEXT,
@@ -21,6 +22,6 @@ module.exports = {
     });
   },
   down: async (queryInterface: any, Sequelize: any) => {
-    await queryInterface.dropTable("Comments");
+    await queryInterface.dropTable("PostComments");
   },
 };

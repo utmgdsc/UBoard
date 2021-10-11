@@ -1,14 +1,12 @@
 "use strict";
-import { Model, UUIDV4, DataTypes } from "sequelize";
+import Sequelize, { Model, UUIDV4, DataTypes } from "sequelize";
 
 
 interface UserAttributes {
-  
   /* Login Specific */
   id: string;
   userName: string;
   password: string; // hash
-  salt: string;
   email: string;
 
   /* Logs */
@@ -17,13 +15,12 @@ interface UserAttributes {
 };
 
 
-module.exports = (sequelize: any) => {
+module.exports = (sequelize: Sequelize.Sequelize) => {
 
   class User extends Model<UserAttributes> implements UserAttributes {
     id!: string; // uuidv4
     userName!: string;
     password!: string;
-    salt!: string;
     email!: string;
 
     lastLogin!: Date;
@@ -38,7 +35,7 @@ module.exports = (sequelize: any) => {
   };
 
    User.init({
-    id :
+    id:
     {
       type: DataTypes.UUID,
       defaultValue: UUIDV4,
@@ -49,7 +46,7 @@ module.exports = (sequelize: any) => {
     
     userName:
     {
-      type: DataTypes.STRING(8),
+      type: DataTypes.STRING(32),
       allowNull: false,
       unique: true
     },    
@@ -58,19 +55,16 @@ module.exports = (sequelize: any) => {
     {
       type: DataTypes.STRING,
       allowNull: false
-    },  
-    
-    salt:
-    {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    
+    },   
     email:
     {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(64),
       allowNull: false,
-      unique: true
+      unique: true,
+      validate : {
+         is: [".[a-zA-z\-\_\.0-9]*@[a-zA-z\-\_\.0-9]*utoronto.ca"],  // only utor emails
+      }
+      
     },
     lastLogin:
     {

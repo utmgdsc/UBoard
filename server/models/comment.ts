@@ -1,5 +1,5 @@
 "use strict";
-import { Model, DataTypes, UUIDV4 } from "sequelize";
+import Sequelize, { Model, DataTypes, UUIDV4 } from "sequelize";
 
 
 interface CommentAttribute {
@@ -8,7 +8,7 @@ interface CommentAttribute {
 
 }
 
-module.exports = (sequelize: any) => {
+module.exports = (sequelize: Sequelize.Sequelize) => {
   class Comment extends Model<CommentAttribute> implements CommentAttribute {
     id!: string;
     body!: string;

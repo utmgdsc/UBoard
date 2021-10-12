@@ -10,6 +10,7 @@ module.exports = {
       },
       body: {
         type: Sequelize.TEXT,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

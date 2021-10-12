@@ -39,9 +39,11 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
       },
       title: {
         type: DataTypes.STRING,
+        allowNull: false
       },
       body: {
         type: DataTypes.TEXT,
+        allowNull: false
       },
       thumbnail: {
         type: DataTypes.STRING,

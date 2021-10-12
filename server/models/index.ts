@@ -9,11 +9,11 @@ const db: any = {};
 
 let sequelize: Sequelize.Sequelize;
 
-if (process.env.CI){
+if (process.env.CI && process.env.CI.toLowerCase() === 'true') {
   /* For CI testing */
   sequelize = new Sequelize.Sequelize('sqlite::memory');
 }
-else{
+else {
   sequelize = new Sequelize.Sequelize(config.DB_URL,  {
   dialect: config.dialect,
   dialectOptions: {

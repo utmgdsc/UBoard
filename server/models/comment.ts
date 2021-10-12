@@ -26,7 +26,10 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
         primaryKey: true,
         unique: true
       },
-      body: DataTypes.TEXT,
+      body: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      } 
     },
     {
       sequelize,

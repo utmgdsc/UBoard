@@ -62,9 +62,9 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
       allowNull: false,
       unique: true,
       validate : {
-         is: [".[a-zA-z\-\_\.0-9]*@[a-zA-z\-\_\.0-9]*utoronto.ca"],  // only utor emails
+         isEmail: true, /* Check for valid email format */
+         is: [".*.utoronto.ca"],  /* Check for utoronto domain */
       }
-      
     },
     lastLogin:
     {

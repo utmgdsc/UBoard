@@ -1,33 +1,42 @@
 "use strict";
 
+import { UUIDV4 } from "sequelize";
+
 
 module.exports = {
   up: async (queryInterface: any, Sequelize: any) => {
     await queryInterface.createTable("Posts", {
+        
       id: {
+        type: Sequelize.UUID,
+        defaultValue: UUIDV4,
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
         unique: true
       },
       title: {
         type: Sequelize.STRING,
+        allowNull: false
       },
       body: {
         type: Sequelize.TEXT,
+        allowNull: false
       },
       thumbnail: {
         type: Sequelize.STRING,
       },
-      location: {
+      location: { // to use with maps API later
         type: Sequelize.STRING,
       },
       capacity: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.INTEGER, /* Optional: An event ad can indicate maximum capacity of attendees */
       },
-      feedbackScore: {
+      feedbackScore: { /* Post 'score' decreases if it is reported too many times, 
+                          can increase if liked. Post with score too low is auto removed.*/
         type: Sequelize.INTEGER,
+        defaultValue: 1
       },
+      
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -1,35 +1,47 @@
 "use strict";
+
+import { UUIDV4 } from "sequelize";
+
 module.exports = {
   up: async (queryInterface: any, Sequelize: any) => {
     await queryInterface.createTable("Users", {
-      id: {
+      id:
+      {
+        type: Sequelize.UUID,
+        defaultValue: UUIDV4,
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
         unique: true
       },
-      userName: {
+      userName:
+      {
         type: Sequelize.STRING(32),
         allowNull: false,
         unique: true
-      },
-      password: {
+      },          
+      password:
+      {
         type: Sequelize.STRING,
-        allowNUll: false
+        allowNull: false
+      },   
+      email:
+      {
+        type: Sequelize.STRING(64),
+        allowNull: false,
+        unique: true,
+        validate : {
+          isEmail: true, /* Check for valid email format */
+          is: [".*.utoronto.ca"],  /* Check for utoronto domain */
+        }
       },
-      email: {
-      type: Sequelize.STRING(64),
-      allowNull: false,
-      unique: true,
-      validate : {
-         is: [".[a-zA-z\-\_\.0-9]*@[a-zA-z\-\_\.0-9]*utoronto.ca"],  // only utor emails
-      }
-      },
-      lastLogin: {
+      lastLogin:
+      {
         type: Sequelize.DATE,
       },
-      karma: {
+      karma: 
+      {
         type: Sequelize.INTEGER,
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,

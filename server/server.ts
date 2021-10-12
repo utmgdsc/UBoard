@@ -1,8 +1,5 @@
 import express from 'express';
-import path from 'path';
-import pg from 'pg';
-import db from "./models/index"
-
+import db from './models/index';
 
 const app = express();
 const port = 8080;

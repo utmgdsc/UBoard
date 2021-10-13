@@ -60,10 +60,10 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
     {
       type: DataTypes.STRING(64),
       allowNull: false,
-      unique: true,
+      unique: true, /* In the controller, lets force email to lowercase */
       validate : {
          isEmail: true, /* Check for valid email format */
-         is: [".*.utoronto.ca"],  /* Check for utoronto domain */
+         is: [".*@(mail\.||alum\.||^$)utoronto.ca"],  /* Check for utoronto domain */
       }
     },
     lastLogin:

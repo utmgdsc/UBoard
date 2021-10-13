@@ -5,7 +5,7 @@ import { UUIDV4 } from "sequelize";
 module.exports = {
   up: async (queryInterface: any, Sequelize: any) => {
     await queryInterface.createTable("Users", {
-      id:
+    id:
       {
         type: Sequelize.UUID,
         defaultValue: UUIDV4,
@@ -13,12 +13,14 @@ module.exports = {
         primaryKey: true,
         unique: true
       },
+      
       userName:
       {
         type: Sequelize.STRING(32),
         allowNull: false,
         unique: true
-      },          
+      },    
+      
       password:
       {
         type: Sequelize.STRING,
@@ -28,10 +30,10 @@ module.exports = {
       {
         type: Sequelize.STRING(64),
         allowNull: false,
-        unique: true,
+        unique: true, /* In the controller, lets force email to lowercase */
         validate : {
           isEmail: true, /* Check for valid email format */
-          is: [".*.utoronto.ca"],  /* Check for utoronto domain */
+          is: [".*@(mail\.||alum\.||^$)utoronto.ca"],  /* Check for utoronto domain */
         }
       },
       lastLogin:

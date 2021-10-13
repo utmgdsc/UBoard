@@ -1,6 +1,6 @@
 import {makeUser, makePost, dbSync} from './testHelpers'
 
-process.env.CI = "true"
+dbSync()
 
 test("Attempt to make posts with invalid or empty author", async() => {
     await expect(makePost(null, "asd", "aaaaaaaaa")).rejects.toThrowError("notNull Violation"); // NULL author

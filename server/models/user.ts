@@ -27,8 +27,8 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
     karma!: Number; // Should not be revealed to public
 
     static associate(model: any){
-      User.hasMany(model.Post); 
-      User.hasMany(model.Comment);
+      User.hasMany(model.Post,  {foreignKey: { allowNull: false }}); 
+      User.hasMany(model.Comment, {  foreignKey: { allowNull: false }});
       /* Userid is stored inside of respective Post, and Comment */
     }
 

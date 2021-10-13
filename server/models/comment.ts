@@ -14,7 +14,7 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
     body!: string;
 
     static associate(models: any) {
-      Comment.belongsTo(models.Post); /* Postid will be in Comment */
+      Comment.belongsTo(models.Post, {  foreignKey: { allowNull: false } }); /* Postid will be in Comment */
     }
   }
   Comment.init(

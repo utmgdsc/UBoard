@@ -12,7 +12,7 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
 
     static associate(model: any)
     {
-      Tag.belongsToMany(model.Post, {through: "PostTags"}); /* Junction table for Post & Tags relationship */
+      Tag.belongsToMany(model.Post, {through: "PostTags", foreignKey: { allowNull: false }}); /* Junction table for Post & Tags relationship */
     }
 
   }

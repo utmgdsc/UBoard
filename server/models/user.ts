@@ -73,7 +73,7 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
       unique: true, /* In the controller, lets force email to lowercase */
       validate : {
          isEmail: true, /* Check for valid email format */
-         is: [".*@(mail\.||alum\.||^$)utoronto.ca"],  /* Check for utoronto domain */
+         is: [".*@(mail\.|alum\.|)utoronto.ca"],  /* Check for utoronto domain */
       }
     },
     confirmed: { /* Email Confirmed */ 

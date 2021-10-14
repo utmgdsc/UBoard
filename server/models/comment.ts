@@ -1,4 +1,3 @@
-"use strict";
 import Sequelize, { Model, DataTypes, UUIDV4 } from "sequelize";
 
 

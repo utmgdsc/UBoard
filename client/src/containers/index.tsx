@@ -1,55 +1,65 @@
 import React, { useState } from "react";
+
 import PropTypes from "prop-types";
+
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import Login from "../components/Login";
-import SignUp from "../components/SignUp";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 
-function LoginSignUpContainer() {
-  const paperStyle = {
-    width: 386,
-    height: 570,
-    borderRadius: "20px",
-    margin: "80px 180px",
-  };
+import Login from "../components/Login";
+import SignUp from "../components/SignUp";
 
-  const [value, setValue] = useState(0);
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
-  const handleChange = (event: any, newValue: any) => {
-    setValue(newValue);
-  };
-  function TabPanel(props: any) {
-    const { children, value, index, ...other } = props;
-
-    return (
-      <div
-        role="tabpanel"
-        hidden={value !== index}
-        id={`full-width-tabpanel-${index}`}
-        aria-labelledby={`full-width-tab-${index}`}
-        {...other}
-      >
-        {value === index && (
-          <Box>
-            <Typography>{children}</Typography>
-          </Box>
-        )}
-      </div>
-    );
-  }
+function TabPanel(props: any) {
+  const { children, value, index, ...rest } = props;
 
   return (
-    <Grid container justifyContent="flex-end">
-      <Grid item>
-        <Paper elevation={20} style={paperStyle}>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...rest}
+    >
+      {value === index && (
+        <Box>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function AuthContainer() {
+  const paperStyle = {
+    height: "100%",
+    borderRadius: "20px",
+  };
+
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleChange = (event: any, newValue: any) => {
+    setTabIndex(newValue);
+  };
+
+  const matches = useMediaQuery("(min-width: 1080px)");
+
+  return (
+    <Grid
+      container
+      justifyContent={matches ? "flex-end" : "center"}
+      style={{ padding: matches ? "20px" : 0 }}
+    >
+      <Grid item xs={10} sm={10} md={6} lg={4}>
+        <Paper elevation={5} style={paperStyle}>
           <Tabs
-            value={value}
+            value={tabIndex}
             onChange={handleChange}
-            aria-label="disabled tabs example"
+            aria-label="Login and Signup tabs"
             variant="fullWidth"
             textColor="primary"
           >
@@ -57,11 +67,11 @@ function LoginSignUpContainer() {
             <Tab label="Sign Up" />
           </Tabs>
 
-          <TabPanel value={value} index={0}>
-            <Login handleChange={handleChange} /> {/* Opening Login Page*/}
+          <TabPanel value={tabIndex} index={0}>
+            <Login handleChange={handleChange} />
           </TabPanel>
-          <TabPanel value={value} index={1}>
-            <SignUp handleChange={handleChange} /> {/* Opening SignUp Page*/}
+          <TabPanel value={tabIndex} index={1}>
+            <SignUp handleChange={handleChange} />
           </TabPanel>
         </Paper>
       </Grid>
@@ -69,4 +79,4 @@ function LoginSignUpContainer() {
   );
 }
 
-export default LoginSignUpContainer;
+export default AuthContainer;

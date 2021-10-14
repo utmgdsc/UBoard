@@ -2,13 +2,12 @@ import React, { useState } from "react";
 
 import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import CircleOutlined from "@material-ui/icons/AddCircleOutlineOutlined";
+import { AlternateEmailTwoTone, RestorePageRounded } from "@material-ui/icons";
 
 function SignUp(props: any) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",
-    height: 570,
-    width: 350,
   };
 
   const avatarStyle = {
@@ -17,27 +16,54 @@ function SignUp(props: any) {
     height: 50,
   };
 
-  // create hooks for username and password
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
-  const [email, setEmail] = useState("");
-  const [phNum, setPhNum] = useState("");
+  // create hooks for inputs and errors associated
+  const [firstName, setFirstName] = useState("");
+  const [firstNameError, setFirstNameError] = useState("");
 
-  // handle function for submitting username and password
+  const [lastName, setLastName] = useState("");
+  const [lastNameError, setLastNameError] = useState("");
+
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const [confirmPass, setConfirmPass] = useState("");
+  const [confirmPassError, setConfirmPassError] = useState("");
+
+  // handle function
   const handleSubmit = (e: any) => {
     e.preventDefault(); // no refresh; default
+    // TODO api calls here acter submit
+  };
 
-    if (username && password) {
-      console.log(username, password);
+  const validateBlur = (
+    regexPattern: any,
+    checkString: String,
+    setHook: Function,
+    errorMessage: String,
+    confirmPassword = false
+  ) => {
+    // only check for the confirm password field
+    if (confirmPassword && password !== confirmPass) {
+      setHook("Passwords don't match!");
+      return;
     }
 
-    // TODO: only submit successful if passwords match
+    if (!regexPattern.test(checkString)) {
+      setHook(errorMessage);
+    } else {
+      setHook("");
+    }
   };
 
   return (
     <Paper style={paperStyle}>
-      <Grid container justifyContent="center" style={{ paddingTop: "10px" }}>
+      <Grid container justifyContent="center">
         <Grid item>
           <Avatar style={avatarStyle}>
             <CircleOutlined fontSize="large" />
@@ -49,13 +75,46 @@ function SignUp(props: any) {
         <h1>Sign Up</h1>
       </Box>
       <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-        <TextField
-          label="Name"
-          placeholder="FirstName LastName"
-          onChange={(e) => setUsername(e.target.value)}
-          fullWidth
-          required
-        />
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <TextField
+              label="First Name"
+              placeholder="FirstName"
+              onChange={(e) => setFirstName(e.target.value)}
+              fullWidth
+              required
+              onBlur={(e) =>
+                validateBlur(
+                  /^[a-zA-Z]+$/,
+                  firstName,
+                  setFirstNameError,
+                  "Please enter a valid first name"
+                )
+              }
+              error={firstNameError !== ""}
+              helperText={firstNameError}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField
+              label="Last Name"
+              placeholder="LastName"
+              onChange={(e) => setLastName(e.target.value)}
+              fullWidth
+              required
+              onBlur={(e) =>
+                validateBlur(
+                  /^[a-zA-Z]+$/,
+                  lastName,
+                  setLastNameError,
+                  "Please enter a valid last name"
+                )
+              }
+              error={lastNameError !== ""}
+              helperText={lastNameError}
+            />
+          </Grid>
+        </Grid>
 
         <TextField
           label="Email"
@@ -63,16 +122,36 @@ function SignUp(props: any) {
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
           required
-          type="password"
+          type="email"
+          onBlur={(e) =>
+            validateBlur(
+              /.*@(mail\.|alum\.^$)utoronto.ca/,
+              email,
+              setEmailError,
+              "Invalid Email. Only utoronto emails allowed"
+            )
+          }
+          error={emailError !== ""}
+          helperText={emailError}
         />
 
         <TextField
-          label="Phone Number"
-          placeholder="Enter Password"
-          onChange={(e) => setPhNum(e.target.value)}
+          label="Username"
+          placeholder="Enter Username"
+          onChange={(e) => setUsername(e.target.value)}
           fullWidth
           required
-          type="password"
+          type="tel"
+          onBlur={(e) =>
+            validateBlur(
+              /^[a-zA-Z0-9]+$/,
+              username,
+              setUsernameError,
+              "Please enter a valid username"
+            )
+          }
+          error={usernameError !== ""}
+          helperText={usernameError}
         />
         <TextField
           label="Password"
@@ -81,6 +160,16 @@ function SignUp(props: any) {
           fullWidth
           required
           type="password"
+          onBlur={(e) =>
+            validateBlur(
+              /.{8,}/,
+              password,
+              setPasswordError,
+              "Ensure password is 8 characters or long"
+            )
+          }
+          error={passwordError !== ""}
+          helperText={passwordError}
         />
 
         <TextField
@@ -90,6 +179,17 @@ function SignUp(props: any) {
           fullWidth
           required
           type="password"
+          onBlur={(e) =>
+            validateBlur(
+              /.{8,}/,
+              confirmPass,
+              setConfirmPassError,
+              "Ensure password is 8 characters or long",
+              true
+            )
+          }
+          error={confirmPassError !== ""}
+          helperText={confirmPassError}
         />
 
         <Box paddingTop="30px">

@@ -7,8 +7,6 @@ function Login(props: any) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",
-    height: 570,
-    width: 350,
   };
 
   const avatarStyle = {
@@ -32,7 +30,7 @@ function Login(props: any) {
 
   return (
     <Paper style={paperStyle}>
-      <Grid container justifyContent="center" style={{ paddingTop: "10px" }}>
+      <Grid container justifyContent="center">
         <Grid item>
           <Avatar style={avatarStyle}>
             <LockOutlinedIcon fontSize="large" />
@@ -45,8 +43,8 @@ function Login(props: any) {
       </Box>
       <form noValidate autoComplete="off" onSubmit={handleSubmit}>
         <TextField
-          label="Username / Email"
-          placeholder="Enter Username / Email"
+          label="Username"
+          placeholder="Enter Username"
           onChange={(e) => setUsername(e.target.value)}
           variant="outlined"
           fullWidth

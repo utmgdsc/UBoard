@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  background-image: url("https://media.gettyimages.com/videos/loopable-color-gradient-background-animation-video-id1182636595?s=640x640");
+  background: url("./background.jpg");
   position: fixed;
   min-width: 100%;
   min-height: 100%;

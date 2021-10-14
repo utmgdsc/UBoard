@@ -1,14 +1,12 @@
 import React from "react";
 import "./App.css";
 
-import Login from "./components/Login";
-import SignUp from "./components/SignUp";
-import LoginSignUpContainer from "./containers";
+import AuthContainer from "./containers";
 
 function App() {
   return (
     <div className="App">
-      <LoginSignUpContainer />
+      <AuthContainer />
     </div>
   );
 }

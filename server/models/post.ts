@@ -1,5 +1,4 @@
-"use strict";
-import Sequelize, { Model, UUIDV4, DataTypes } from "sequelize"
+import Sequelize, { Model, UUIDV4, DataTypes, BelongsToGetAssociationMixin } from "sequelize"
 
 interface PostAttributes {
   id: string;
@@ -11,23 +10,23 @@ interface PostAttributes {
   feedbackScore: Number;
 }
 
-module.exports = (sequelize: Sequelize.Sequelize) => {
-  class Post extends Model<PostAttributes> implements PostAttributes {
-        id!: string;
-        title!: string;
-        body!: string;
-        thumbnail!: string;
-        location!: string;  
-        capacity!: Number;
-        feedbackScore!: Number;
-    
-    
-    static associate(model: any)
-    {
-      Post.belongsToMany(model.Tag, {through: "PostTags", foreignKey: { allowNull: false }}); /* Junction table for Post & Tags relationship */
-    }
-  }
+export class Post extends Model<PostAttributes> implements PostAttributes {
+  id!: string;
+  title!: string;
+  body!: string;
+  thumbnail!: string;
+  location!: string;  
+  capacity!: Number;
+  feedbackScore!: Number;
+  
+  UserId?: string; /* Foreign Key from UserId. Defined this way for TS */
 
+  static associate(model: any) {
+    Post.belongsToMany(model.Tag, {through: "PostTags"}); /* Junction table for Post & Tags relationship */
+  }
+}
+
+module.exports = (sequelize: Sequelize.Sequelize) => {
   Post.init(
     { 
       id: {
@@ -43,7 +42,13 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
       },
       body: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          len: {
+            args: [25, 1000],
+            msg: "Length Validation Failed" // Error handling
+          }
+        }
       },
       thumbnail: {
         type: DataTypes.STRING,

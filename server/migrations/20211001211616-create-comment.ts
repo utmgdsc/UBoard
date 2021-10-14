@@ -1,4 +1,3 @@
-"use strict";
 module.exports = {
   up: async (queryInterface: any, Sequelize: any) => {
     await queryInterface.createTable("PostComments", {
@@ -9,7 +8,11 @@ module.exports = {
         unique: true
       },
       body: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING(200),
+        validate: {
+          len: [25, 200],
+          msg: "Length Validation Failed"
+        },
         allowNull: false
       },
       createdAt: {

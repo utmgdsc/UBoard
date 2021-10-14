@@ -1,12 +1,8 @@
-"use strict";
-
 import { UUIDV4 } from "sequelize";
-
 
 module.exports = {
   up: async (queryInterface: any, Sequelize: any) => {
     await queryInterface.createTable("Posts", {
-        
       id: {
         type: Sequelize.UUID,
         defaultValue: UUIDV4,
@@ -20,7 +16,13 @@ module.exports = {
       },
       body: {
         type: Sequelize.TEXT,
-        allowNull: false
+        allowNull: false,
+        validate: {
+          len: {
+            args: [25, 1000],
+            msg: "Length Validation Failed" // Error handling
+          }
+        }
       },
       thumbnail: {
         type: Sequelize.STRING,
@@ -36,7 +38,6 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 1
       },
-      
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -1,22 +1,17 @@
-"use strict";
-import Sequelize, { Model, DataTypes, UUIDV4 } from "sequelize";
+import Sequelize, { Model, DataTypes } from "sequelize";
 
-
-interface TagAttribute {
+export interface TagAttribute {
   text: string;
 }
 
-module.exports = (sequelize: Sequelize.Sequelize) => {
-  class Tag extends Model<TagAttribute> implements TagAttribute {
-    text!: string;
-
-    static associate(model: any)
-    {
-      Tag.belongsToMany(model.Post, {through: "PostTags", foreignKey: { allowNull: false }}); /* Junction table for Post & Tags relationship */
-    }
-
+export class Tag extends Model<TagAttribute> implements TagAttribute {
+  text!: string;
+  static associate(model: any) {
+    Tag.belongsToMany(model.Post, {through: "PostTags"}); /* Junction table for Post & Tags relationship */
   }
+}
 
+module.exports = (sequelize: Sequelize.Sequelize) => {
   Tag.init(
     {
       text: {

@@ -1,63 +1,73 @@
-"use strict";
-import Sequelize, { Model, UUIDV4, DataTypes } from "sequelize";
+import Sequelize, { Model, UUIDV4, DataTypes, ForeignKeyConstraintError } from "sequelize";
 
-
-interface UserAttributes {
+interface UserAttributes  {
   /* Login Specific */
   id: string;
+  firstName: string;
+  lastName: string;
   userName: string;
   password: string; // hash
   email: string;
+  confirmed: boolean;
 
   /* Logs */
   lastLogin: Date;
   karma: Number;
+};  
+
+/* Useful for typescript definitions of Users */
+export class User extends Model<UserAttributes> implements UserAttributes {
+  id!: string; // uuidv4
+  firstName!: string;
+  lastName!: string;
+  userName!: string;
+  password!: string;
+  email!: string;
+  confirmed!: boolean;
+  
+  lastLogin!: Date;
+  karma!: Number; // Should not be revealed to public
+
+  static associate(model: any){
+    User.hasMany(model.Post,  {foreignKey: { allowNull: false }}); 
+    User.hasMany(model.Comment, {  foreignKey: { allowNull: false }});
+    /* Userid is stored inside of respective Post, and Comment */
+  }
 };
 
-
 module.exports = (sequelize: Sequelize.Sequelize) => {
-
-  class User extends Model<UserAttributes> implements UserAttributes {
-    id!: string; // uuidv4
-    userName!: string;
-    password!: string;
-    email!: string;
-
-    lastLogin!: Date;
-    karma!: Number; // Should not be revealed to public
-
-    static associate(model: any){
-      User.hasMany(model.Post,  {foreignKey: { allowNull: false }}); 
-      User.hasMany(model.Comment, {  foreignKey: { allowNull: false }});
-      /* Userid is stored inside of respective Post, and Comment */
-    }
-
-  };
-
    User.init({
-    id:
-    {
+    id: {
       type: DataTypes.UUID,
       defaultValue: UUIDV4,
       allowNull: false,
       primaryKey: true,
       unique: true
     },
-    
-    userName:
-    {
+    firstName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isAlpha: true
+      }
+    },
+    lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isAlpha: true
+      }
+    },
+    userName: {
       type: DataTypes.STRING(32),
       allowNull: false,
       unique: true
     },    
-    
-    password:
-    {
+    password: {
       type: DataTypes.STRING,
       allowNull: false
     },   
-    email:
-    {
+    email: {
       type: DataTypes.STRING(64),
       allowNull: false,
       unique: true, /* In the controller, lets force email to lowercase */
@@ -66,12 +76,14 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
          is: [".*@(mail\.||alum\.||^$)utoronto.ca"],  /* Check for utoronto domain */
       }
     },
-    lastLogin:
-    {
+    confirmed: { /* Email Confirmed */ 
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
+    },
+    lastLogin: {
       type: DataTypes.DATE,
     },
-    karma: 
-    {
+    karma: {
       type: DataTypes.INTEGER,
       defaultValue: 0
     }
@@ -81,6 +93,5 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
     sequelize
   });
 
- 
   return User;
 };

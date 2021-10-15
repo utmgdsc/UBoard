@@ -8,11 +8,11 @@ module.exports = {
         defaultValue: UUIDV4,
         allowNull: false,
         primaryKey: true,
-        unique: true
+        unique: true,
       },
       title: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
       },
       body: {
         type: Sequelize.TEXT,
@@ -20,23 +20,25 @@ module.exports = {
         validate: {
           len: {
             args: [25, 1000],
-            msg: "Length Validation Failed" // Error handling
-          }
-        }
+            msg: "Length Validation Failed", // Error handling
+          },
+        },
       },
       thumbnail: {
         type: Sequelize.STRING,
       },
-      location: { // to use with maps API later
+      location: {
+        // to use with maps API later
         type: Sequelize.STRING,
       },
       capacity: {
-        type: Sequelize.INTEGER, /* Optional: An event ad can indicate maximum capacity of attendees */
+        type: Sequelize.INTEGER /* Optional: An event ad can indicate maximum capacity of attendees */,
       },
-      feedbackScore: { /* Post 'score' decreases if it is reported too many times, 
+      feedbackScore: {
+        /* Post 'score' decreases if it is reported too many times, 
                           can increase if liked. Post with score too low is auto removed.*/
         type: Sequelize.INTEGER,
-        defaultValue: 1
+        defaultValue: 1,
       },
       createdAt: {
         allowNull: false,

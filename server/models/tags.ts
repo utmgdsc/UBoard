@@ -7,7 +7,9 @@ export interface TagAttribute {
 export class Tag extends Model<TagAttribute> implements TagAttribute {
   text!: string;
   static associate(model: any) {
-    Tag.belongsToMany(model.Post, {through: "PostTags"}); /* Junction table for Post & Tags relationship */
+    Tag.belongsToMany(model.Post, {
+      through: "PostTags",
+    }); /* Junction table for Post & Tags relationship */
   }
 }
 
@@ -20,8 +22,8 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
         primaryKey: true,
         unique: true,
         validate: {
-            isAlphanumeric: true
-        }
+          isAlphanumeric: true,
+        },
       },
     },
     {

@@ -5,15 +5,15 @@ module.exports = {
         allowNull: false,
         primaryKey: true,
         type: Sequelize.UUID,
-        unique: true
+        unique: true,
       },
       body: {
         type: Sequelize.STRING(200),
         validate: {
           len: [25, 200],
-          msg: "Length Validation Failed"
+          msg: "Length Validation Failed",
         },
-        allowNull: false
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,

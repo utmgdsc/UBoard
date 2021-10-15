@@ -7,6 +7,8 @@ function Login(props: any) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",
+    height: '600px',
+    display: 'grid',
   };
 
   const avatarStyle = {
@@ -77,7 +79,7 @@ function Login(props: any) {
         <h2>***</h2>
       </Box>
 
-      <Button variant="contained" onClick={(e) => props.handleChange(e, 1)}>
+      <Button size="small" onClick={(e) => props.handleChange(e, 1)}>
         Create an Account
       </Button>
     </Paper>

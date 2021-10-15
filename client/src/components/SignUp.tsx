@@ -8,6 +8,8 @@ function SignUp(props: any) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",
+    height: '600px',
+    display: 'grid',
   };
 
   const avatarStyle = {

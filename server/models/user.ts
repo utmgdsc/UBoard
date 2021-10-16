@@ -8,9 +8,9 @@ interface UserAttributes {
   userName: string;
   password: string; // hash
   email: string;
-  token: string;
   confirmed: boolean;
-  tokenExpires: Date;
+  confirmationToken: string;
+  confirmationTokenExpires: Date;
 
   /* Logs */
   lastLogin: Date;
@@ -25,8 +25,8 @@ export class User extends Model<UserAttributes> implements UserAttributes {
   password!: string;
   email!: string;
   confirmed!: boolean;
-  token!: string;
-  tokenExpires!: Date;
+  confirmationToken!: string;
+  confirmationTokenExpires!: Date;
 
   lastLogin!: Date;
   karma!: Number; // Should not be revealed to public
@@ -94,10 +94,10 @@ module.exports = (sequelize: any) => {
         type: DataTypes.INTEGER,
         defaultValue: 0,
       },
-      token: {
+      confirmationToken: {
         type: DataTypes.STRING,
       },
-      tokenExpires: {
+      confirmationTokenExpires: {
         type: DataTypes.DATE,
       },
     },

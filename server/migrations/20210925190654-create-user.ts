@@ -56,10 +56,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         defaultValue: 0,
       },
-      token: {
+      confirmationToken: {
         type: Sequelize.STRING,
       },
-      tokenExpires: {
+      confirmationTokenExpires: {
         type: Sequelize.DATE,
       },
       createdAt: {

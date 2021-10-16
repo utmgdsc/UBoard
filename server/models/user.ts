@@ -8,6 +8,7 @@ interface UserAttributes {
   userName: string;
   password: string; // hash
   email: string;
+  token: string;
   confirmed: boolean;
 
   /* Logs */
@@ -15,7 +16,6 @@ interface UserAttributes {
   karma: Number;
 }
 
-/* Useful for typescript definitions of Users */
 export class User extends Model<UserAttributes> implements UserAttributes {
   id!: string; // uuidv4
   firstName!: string;
@@ -24,6 +24,7 @@ export class User extends Model<UserAttributes> implements UserAttributes {
   password!: string;
   email!: string;
   confirmed!: boolean;
+  token!: string;
 
   lastLogin!: Date;
   karma!: Number; // Should not be revealed to public
@@ -90,6 +91,9 @@ module.exports = (sequelize: any) => {
       karma: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
+      },
+      token: {
+        type: DataTypes.STRING,
       },
     },
     {

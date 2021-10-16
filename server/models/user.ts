@@ -10,6 +10,7 @@ interface UserAttributes {
   email: string;
   token: string;
   confirmed: boolean;
+  tokenExpires: Date;
 
   /* Logs */
   lastLogin: Date;
@@ -25,6 +26,7 @@ export class User extends Model<UserAttributes> implements UserAttributes {
   email!: string;
   confirmed!: boolean;
   token!: string;
+  tokenExpires!: Date;
 
   lastLogin!: Date;
   karma!: Number; // Should not be revealed to public
@@ -94,6 +96,9 @@ module.exports = (sequelize: any) => {
       },
       token: {
         type: DataTypes.STRING,
+      },
+      tokenExpires: {
+        type: DataTypes.DATE,
       },
     },
     {

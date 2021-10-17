@@ -48,6 +48,13 @@ module.exports = {
         allowNull: false,
         type: DataTypes.DATE,
       },
+      UserId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
     });
   },
   down: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {

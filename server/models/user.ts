@@ -17,10 +17,21 @@ interface UserAttributes {
   karma: Number;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 
-  "id" | "confirmed" | "confirmationToken" | "confirmationTokenExpires" | "lastLogin" | "karma"> {}
+interface UserCreationAttributes
+  extends Optional<
+    UserAttributes,
+    | "id"
+    | "confirmed"
+    | "confirmationToken"
+    | "confirmationTokenExpires"
+    | "lastLogin"
+    | "karma"
+  > {}
 
-export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
+export class User
+  extends Model<UserAttributes, UserCreationAttributes>
+  implements UserAttributes
+{
   id!: string; // uuidv4
   firstName!: string;
   lastName!: string;
@@ -35,7 +46,9 @@ export class User extends Model<UserAttributes, UserCreationAttributes> implemen
   karma!: Number; // Should not be revealed to public
 
   static associate(model: any) {
-    User.hasMany(model.Post, { foreignKey: { allowNull: false } });
+    User.hasMany(model.Post, {
+      foreignKey: { name: "UserId", allowNull: false },
+    });
     User.hasMany(model.Comment, { foreignKey: { allowNull: false } });
     /* Userid is stored inside of respective Post, and Comment */
   }

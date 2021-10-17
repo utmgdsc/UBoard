@@ -12,10 +12,16 @@ interface PostAttributes {
   UserId: string;
 }
 
-interface PostCreationAttributes extends Optional<PostAttributes, 
-  "id" | "thumbnail" | "location" | "capacity" | "feedbackScore"> {}
+interface PostCreationAttributes
+  extends Optional<
+    PostAttributes,
+    "id" | "thumbnail" | "location" | "capacity" | "feedbackScore" | "UserId"
+  > {}
 
-export class Post extends Model<PostAttributes, PostCreationAttributes> implements PostAttributes {
+export class Post
+  extends Model<PostAttributes, PostCreationAttributes>
+  implements PostAttributes
+{
   id!: string;
   title!: string;
   body!: string;
@@ -74,7 +80,7 @@ module.exports = (sequelize: Sequelize) => {
         defaultValue: 1,
       },
       UserId: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false,
         validate: {
           notEmpty: true,

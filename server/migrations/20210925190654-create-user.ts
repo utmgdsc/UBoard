@@ -1,31 +1,31 @@
-import { UUIDV4 } from "sequelize";
+import { Sequelize, QueryInterface, DataTypes, UUIDV4 } from "sequelize";
 
 module.exports = {
-  up: async (queryInterface: any, Sequelize: any) => {
+  up: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
     await queryInterface.createTable("Users", {
       id: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         defaultValue: UUIDV4,
         allowNull: false,
         primaryKey: true,
         unique: true,
       },
       firstName: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
           isAlpha: true,
         },
       },
       lastName: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
           isAlpha: true,
         },
       },
       userName: {
-        type: Sequelize.STRING(32),
+        type: DataTypes.STRING(32),
         allowNull: false,
         unique: true,
         validate: {
@@ -33,11 +33,11 @@ module.exports = {
         },
       },
       password: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       email: {
-        type: Sequelize.STRING(64),
+        type: DataTypes.STRING(64),
         allowNull: false,
         unique: true /* In the controller, lets force email to lowercase */,
         validate: {
@@ -46,33 +46,33 @@ module.exports = {
         },
       },
       confirmed: {
-        /* Email Confirmed */ type: Sequelize.BOOLEAN,
+        /* Email Confirmed */ type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
       lastLogin: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       karma: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         defaultValue: 0,
       },
       confirmationToken: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
       },
       confirmationTokenExpires: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
     });
   },
-  down: async (queryInterface: any, Sequelize: any) => {
+  down: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
     await queryInterface.dropTable("Users");
   },
 };

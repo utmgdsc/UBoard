@@ -1,24 +1,29 @@
 import fs from "fs";
 import path from "path";
-import Sequelize from "sequelize";
-const config = require("../config/config");
+import { Sequelize, DataTypes } from "sequelize";
+
+import dotenv from "dotenv";
+dotenv.config({path: "../.env"});
+
 const basename = path.basename(__filename);
 const db: any = {};
 
-let sequelize: Sequelize.Sequelize;
+let sequelize: Sequelize;
 
-if (process.env.CI && process.env.CI.toLowerCase() === "true") {
-  /* For CI testing */
-  sequelize = new Sequelize.Sequelize("sqlite::memory");
-} else {
-  sequelize = new Sequelize.Sequelize(config.DB_URL, {
-    dialect: config.dialect,
+if ((!process.env.CI || process.env.CI.toLowerCase() === "false") && process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: "postgres",
+    protocol: "postgres",
     dialectOptions: {
       ssl: {
+        require: true,
         /* Required for our host */ rejectUnauthorized: false,
       },
     },
   });
+} else {
+  /* For CI testing */
+  sequelize = new Sequelize("sqlite::memory");
 }
 
 fs.readdirSync(__dirname)
@@ -32,7 +37,7 @@ fs.readdirSync(__dirname)
   .forEach((file: any) => {
     const model = require(path.join(__dirname, file))(
       sequelize,
-      Sequelize.DataTypes
+      DataTypes
     );
     db[model.name] = model;
   });

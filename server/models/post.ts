@@ -1,4 +1,4 @@
-import Sequelize, { Model, UUIDV4, DataTypes } from "sequelize";
+import { Sequelize, Model, UUIDV4, DataTypes, Optional } from "sequelize";
 
 interface PostAttributes {
   id: string;
@@ -8,9 +8,14 @@ interface PostAttributes {
   location: string;
   capacity: Number;
   feedbackScore: Number;
+
+  UserId: string;
 }
 
-export class Post extends Model<PostAttributes> implements PostAttributes {
+interface PostCreationAttributes extends Optional<PostAttributes, 
+  "id" | "thumbnail" | "location" | "capacity" | "feedbackScore"> {}
+
+export class Post extends Model<PostAttributes, PostCreationAttributes> implements PostAttributes {
   id!: string;
   title!: string;
   body!: string;
@@ -19,7 +24,7 @@ export class Post extends Model<PostAttributes> implements PostAttributes {
   capacity!: Number;
   feedbackScore!: Number;
 
-  UserId?: string; /* Foreign Key from UserId. Defined this way for TS */
+  UserId!: string; /* Foreign Key from UserId. Defined this way for TS */
 
   static associate(model: any) {
     Post.belongsToMany(model.Tag, {
@@ -28,7 +33,7 @@ export class Post extends Model<PostAttributes> implements PostAttributes {
   }
 }
 
-module.exports = (sequelize: Sequelize.Sequelize) => {
+module.exports = (sequelize: Sequelize) => {
   Post.init(
     {
       id: {
@@ -67,6 +72,13 @@ module.exports = (sequelize: Sequelize.Sequelize) => {
                           can increase if liked. Post with score too low is auto removed.*/
         type: DataTypes.INTEGER,
         defaultValue: 1,
+      },
+      UserId: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
       },
     },
     {

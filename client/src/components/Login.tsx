@@ -17,15 +17,29 @@ function Login(props: any) {
 
   // create hooks for username and password
   const [username, setUsername] = useState("");
+  const [usernameError, setUsernameError] = useState("");
+
   const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   // handle function for submitting username and password
   const handleSubmit = (e: any) => {
     e.preventDefault(); // no refresh; default
 
-    if (username && password) {
-      console.log(username, password);
+    // validate username
+    if (!/^[a-zA-Z0-9]+$/.test(username)) {
+      setUsernameError("Please enter a valid username");
+    } else {
+      setUsernameError("");
     }
+    // validate password
+    if (!/.{8,}/.test(password)) {
+      setPasswordError("Ensure password is 8 characters or long");
+    } else {
+      setPasswordError("");
+    }
+
+    // TODO api calls here after submit
   };
 
   return (
@@ -50,6 +64,8 @@ function Login(props: any) {
           fullWidth
           required
           style={{ paddingBottom: "15px" }}
+          error={usernameError !== ""}
+          helperText={usernameError}
         />
         <TextField
           label="Password"
@@ -60,6 +76,8 @@ function Login(props: any) {
           required
           type="password"
           style={{ paddingBottom: "20px" }}
+          error={passwordError !== ""}
+          helperText={passwordError}
         />
 
         <Button
@@ -77,7 +95,11 @@ function Login(props: any) {
         <h2>***</h2>
       </Box>
 
-      <Button variant="contained" onClick={(e) => props.handleChange(e, 1)}>
+      <Button
+        variant="outlined"
+        onClick={(e) => props.handleChange(e, 1)}
+        color="primary"
+      >
         Create an Account
       </Button>
     </Paper>

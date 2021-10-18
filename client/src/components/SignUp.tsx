@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import CircleOutlined from "@material-ui/icons/AddCircleOutlineOutlined";
-import { AlternateEmailTwoTone, RestorePageRounded } from "@material-ui/icons";
 
 function SignUp(props: any) {
   const paperStyle = {
@@ -38,7 +37,7 @@ function SignUp(props: any) {
   // handle function
   const handleSubmit = (e: any) => {
     e.preventDefault(); // no refresh; default
-    // TODO api calls here acter submit
+    // TODO api calls here after submit
   };
 
   const validateBlur = (
@@ -66,7 +65,10 @@ function SignUp(props: any) {
       <Grid container justifyContent="center">
         <Grid item>
           <Avatar style={avatarStyle}>
-            <CircleOutlined fontSize="large" />
+            <CircleOutlined
+              fontSize="large"
+              style={{ justifyContent: "center" }}
+            />
           </Avatar>
         </Grid>
       </Grid>
@@ -118,14 +120,14 @@ function SignUp(props: any) {
 
         <TextField
           label="Email"
-          placeholder="youremail@mail.utoronto.ca"
+          placeholder="john@mail.utoronto.ca"
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
           required
           type="email"
           onBlur={(e) =>
             validateBlur(
-              /.*@(mail\.|alum\.^$)utoronto.ca/,
+              /.*@(mail\.|alum\.){0,}utoronto.ca$/,
               email,
               setEmailError,
               "Invalid Email. Only utoronto emails allowed"
@@ -205,9 +207,13 @@ function SignUp(props: any) {
         </Box>
       </form>
 
-      <Box paddingTop="5px" textAlign="left">
+      <Box paddingTop="5px" textAlign="center">
         <p>Already have an account? </p>
-        <Button variant="outlined" onClick={(e) => props.handleChange(e, 0)}>
+        <Button
+          variant="outlined"
+          onClick={(e) => props.handleChange(e, 0)}
+          color="primary"
+        >
           Log In
         </Button>
       </Box>

@@ -16,7 +16,7 @@ FROM nginx:alpine as base
 # Default port exposure
 EXPOSE 80
 
-# Add npm
+# Add nodejs
 RUN apk add --update nodejs
 
 # Nginx config

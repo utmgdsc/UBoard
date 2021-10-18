@@ -30,7 +30,7 @@ export class Post
   capacity!: Number;
   feedbackScore!: Number;
 
-  UserId!: string; /* Foreign Key from UserId. Defined this way for TS */
+  UserId!: string; /* Foreign Key from UserId */
 
   static associate(model: any) {
     Post.belongsToMany(model.Tag, {

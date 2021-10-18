@@ -11,9 +11,12 @@ const db: any = {};
 let sequelize: Sequelize;
 
 if (
-  (!process.env.CI || process.env.CI.toLowerCase() === "false") &&
-  process.env.DATABASE_URL
+  (process.env.CI && process.env.CI.toLowerCase() === "true") ||
+  !process.env.DATABASE_URL
 ) {
+  /* For CI testing */
+  sequelize = new Sequelize("sqlite::memory");
+} else {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "postgres",
     protocol: "postgres",
@@ -24,9 +27,6 @@ if (
       },
     },
   });
-} else {
-  /* For CI testing */
-  sequelize = new Sequelize("sqlite::memory");
 }
 
 fs.readdirSync(__dirname)
@@ -37,7 +37,7 @@ fs.readdirSync(__dirname)
       (file.slice(-3) === ".ts" || file.slice(-3) === ".js")
     );
   })
-  .forEach((file: any) => {
+  .forEach((file: string) => {
     const model = require(path.join(__dirname, file))(sequelize, DataTypes);
     db[model.name] = model;
   });

@@ -1,21 +1,21 @@
-import { UUIDV4 } from "sequelize";
+import { Sequelize, QueryInterface, DataTypes, UUIDV4 } from "sequelize";
 
 module.exports = {
-  up: async (queryInterface: any, Sequelize: any) => {
+  up: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
     await queryInterface.createTable("Posts", {
       id: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         defaultValue: UUIDV4,
         allowNull: false,
         primaryKey: true,
         unique: true,
       },
       title: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       body: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
         allowNull: false,
         validate: {
           len: {
@@ -25,32 +25,39 @@ module.exports = {
         },
       },
       thumbnail: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
       },
       location: {
         // to use with maps API later
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
       },
       capacity: {
-        type: Sequelize.INTEGER /* Optional: An event ad can indicate maximum capacity of attendees */,
+        type: DataTypes.INTEGER /* Optional: An event ad can indicate maximum capacity of attendees */,
       },
       feedbackScore: {
         /* Post 'score' decreases if it is reported too many times, 
                           can increase if liked. Post with score too low is auto removed.*/
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
         defaultValue: 1,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
+      },
+      UserId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
       },
     });
   },
-  down: async (queryInterface: any, Sequelize: any) => {
+  down: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
     await queryInterface.dropTable("Posts");
   },
 };

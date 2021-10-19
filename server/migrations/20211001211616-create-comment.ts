@@ -1,14 +1,16 @@
+import { Sequelize, QueryInterface, DataTypes } from "sequelize";
+
 module.exports = {
-  up: async (queryInterface: any, Sequelize: any) => {
+  up: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
     await queryInterface.createTable("PostComments", {
       id: {
         allowNull: false,
         primaryKey: true,
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         unique: true,
       },
       body: {
-        type: Sequelize.STRING(200),
+        type: DataTypes.STRING(200),
         validate: {
           len: [25, 200],
           msg: "Length Validation Failed",
@@ -17,15 +19,15 @@ module.exports = {
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
       },
     });
   },
-  down: async (queryInterface: any, Sequelize: any) => {
+  down: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
     await queryInterface.dropTable("PostComments");
   },
 };

@@ -1,4 +1,4 @@
-import { Model, UUIDV4, DataTypes } from "sequelize";
+import { Sequelize, Model, UUIDV4, DataTypes, Optional } from "sequelize";
 
 interface UserAttributes {
   /* Login Specific */
@@ -17,7 +17,21 @@ interface UserAttributes {
   karma: Number;
 }
 
-export class User extends Model<UserAttributes> implements UserAttributes {
+interface UserCreationAttributes
+  extends Optional<
+    UserAttributes,
+    | "id"
+    | "confirmed"
+    | "confirmationToken"
+    | "confirmationTokenExpires"
+    | "lastLogin"
+    | "karma"
+  > {}
+
+export class User
+  extends Model<UserAttributes, UserCreationAttributes>
+  implements UserAttributes
+{
   id!: string; // uuidv4
   firstName!: string;
   lastName!: string;
@@ -32,13 +46,15 @@ export class User extends Model<UserAttributes> implements UserAttributes {
   karma!: Number; // Should not be revealed to public
 
   static associate(model: any) {
-    User.hasMany(model.Post, { foreignKey: { allowNull: false } });
+    User.hasMany(model.Post, {
+      foreignKey: { name: "UserId", allowNull: false },
+    });
     User.hasMany(model.Comment, { foreignKey: { allowNull: false } });
     /* Userid is stored inside of respective Post, and Comment */
   }
 }
 
-module.exports = (sequelize: any) => {
+module.exports = (sequelize: Sequelize) => {
   User.init(
     {
       id: {
@@ -106,7 +122,7 @@ module.exports = (sequelize: any) => {
         {
           unique: true,
           name: "unique_username", // validate case sensitive username
-          fields: [sequelize.fn("lower", sequelize.col("userName"))],
+          fields: [Sequelize.fn("lower", Sequelize.col("userName"))],
         },
       ],
       hooks: {

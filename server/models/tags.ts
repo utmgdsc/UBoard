@@ -1,4 +1,4 @@
-import Sequelize, { Model, DataTypes } from "sequelize";
+import { Sequelize, Model, DataTypes } from "sequelize";
 
 export interface TagAttribute {
   text: string;
@@ -13,7 +13,7 @@ export class Tag extends Model<TagAttribute> implements TagAttribute {
   }
 }
 
-module.exports = (sequelize: Sequelize.Sequelize) => {
+module.exports = (sequelize: Sequelize) => {
   Tag.init(
     {
       text: {

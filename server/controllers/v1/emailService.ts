@@ -145,9 +145,8 @@ export async function confirmEmail(
       },
       { where: { email: email.toLowerCase() } }
     );
-  } catch (err) {
-    throw err;
-    // return false;
+  } catch {
+    return false;
   }
   return true;
 }

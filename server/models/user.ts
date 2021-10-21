@@ -127,7 +127,7 @@ module.exports = (sequelize: Sequelize) => {
       ],
       hooks: {
         beforeValidate: (user, options) => {
-          user.email = user.email.toLowerCase();
+          if (user.email) user.email = user.email.toLowerCase();
         },
       },
       modelName: "User",

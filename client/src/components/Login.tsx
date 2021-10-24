@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 
-function Login(props: any) {
+interface LogInProps {
+  handleChange: Function;
+}
+
+function Login(props: LogInProps) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",
@@ -24,22 +28,24 @@ function Login(props: any) {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  // handle function for submitting username and password
-  const handleSubmit = (e: any) => {
-    e.preventDefault(); // no refresh; default
-
-    // validate username
-    if (!/^[a-zA-Z0-9]+$/.test(username)) {
+  const validateBlurUsername = (regexPattern: RegExp) => {
+    if (!regexPattern.test(username)) {
       setUsernameError("Please enter a valid username");
     } else {
       setUsernameError("");
     }
-    // validate password
-    if (!/.{8,}/.test(password)) {
+  };
+  const validateBlurPassword = (regexPattern: RegExp) => {
+    if (!regexPattern.test(password)) {
       setPasswordError("Ensure password is 8 characters or long");
     } else {
       setPasswordError("");
     }
+  };
+
+  // handle function for submitting username and password
+  const handleSubmit = (e: React.ChangeEvent<{}>) => {
+    e.preventDefault(); // no refresh; default
 
     // TODO api calls here after submit
   };
@@ -66,6 +72,7 @@ function Login(props: any) {
           fullWidth
           required
           style={{ paddingBottom: "15px" }}
+          onBlur={(e) => validateBlurUsername(/^[a-zA-Z0-9]+$/)}
           error={usernameError !== ""}
           helperText={usernameError}
         />
@@ -78,6 +85,7 @@ function Login(props: any) {
           required
           type="password"
           style={{ paddingBottom: "20px" }}
+          onBlur={(e) => validateBlurPassword(/.{8,}/)}
           error={passwordError !== ""}
           helperText={passwordError}
         />

@@ -3,12 +3,16 @@ import React, { useState } from "react";
 import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import CircleOutlined from "@material-ui/icons/AddCircleOutlineOutlined";
 
-function SignUp(props: any) {
+interface SignUpProps {
+  handleChange: Function;
+}
+
+function SignUp(props: SignUpProps) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",
-    height: '600px',
-    display: 'grid',
+    height: "600px",
+    display: "grid",
   };
 
   const avatarStyle = {
@@ -37,23 +41,29 @@ function SignUp(props: any) {
   const [confirmPassError, setConfirmPassError] = useState("");
 
   // handle function
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.ChangeEvent<{}>) => {
     e.preventDefault(); // no refresh; default
     // TODO api calls here after submit
   };
 
+  const valideConfirmPass = () => {
+    if (password !== confirmPass) {
+      setConfirmPassError("Passwords don't match!");
+      setPasswordError("Passwords don't match!");
+      return;
+    } else {
+      setConfirmPassError("");
+      setPasswordError("");
+    }
+  };
+
   const validateBlur = (
-    regexPattern: any,
-    checkString: String,
+    regexPattern: RegExp,
+    checkString: string,
     setHook: Function,
-    errorMessage: String,
-    confirmPassword = false
+    errorMessage: string
   ) => {
     // only check for the confirm password field
-    if (confirmPassword && password !== confirmPass) {
-      setHook("Passwords don't match!");
-      return;
-    }
 
     if (!regexPattern.test(checkString)) {
       setHook(errorMessage);
@@ -80,7 +90,7 @@ function SignUp(props: any) {
       </Box>
       <form noValidate autoComplete="off" onSubmit={handleSubmit}>
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <TextField
               label="First Name"
               placeholder="FirstName"
@@ -99,7 +109,7 @@ function SignUp(props: any) {
               helperText={firstNameError}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12} md={6}>
             <TextField
               label="Last Name"
               placeholder="LastName"
@@ -183,15 +193,7 @@ function SignUp(props: any) {
           fullWidth
           required
           type="password"
-          onBlur={(e) =>
-            validateBlur(
-              /.{8,}/,
-              confirmPass,
-              setConfirmPassError,
-              "Ensure password is 8 characters or long",
-              true
-            )
-          }
+          onBlur={(e) => valideConfirmPass()}
           error={confirmPassError !== ""}
           helperText={confirmPassError}
         />

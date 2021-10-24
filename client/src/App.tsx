@@ -5,8 +5,10 @@ import AuthContainer from "./containers";
 
 function App() {
   return (
-    <div className="App">
-      <AuthContainer />
+    <div>
+      <div className="AuthContainer">
+        <AuthContainer />
+      </div>
     </div>
   );
 }

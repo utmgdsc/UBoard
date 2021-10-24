@@ -1,7 +1,3 @@
-import AuthContainer from "../components/AuthContainer";
+import AuthContainer from "./AuthContainer";
 
-function Index() {
-  return <AuthContainer />;
-}
-
-export default Index;
+export default AuthContainer;

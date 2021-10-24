@@ -7,19 +7,24 @@ import Box from "@material-ui/core/Box";
 import Paper from "@material-ui/core/Paper";
 import Grid from "@material-ui/core/Grid";
 
+import useMediaQuery from "@material-ui/core/useMediaQuery";
+
 import Login from "../components/Login";
 import SignUp from "../components/SignUp";
 
-import useMediaQuery from "@material-ui/core/useMediaQuery";
-
-function TabPanel(props: any) {
+interface TabPanelProps {
+  children: JSX.Element;
+  value: number;
+  index: number;
+}
+function TabPanel(props: TabPanelProps) {
   const { children, value, index, ...rest } = props;
   return (
     <div
       role="tabpanel"
       hidden={value !== index}
       id={`full-width-tabpanel-${index}`}
-      aria-labelledby={`full-width-tab-${index}`}
+      aria-labelledby={`full-width-tab with index: ${index}`}
       {...rest}
     >
       {value === index && (
@@ -39,7 +44,7 @@ function AuthContainer() {
 
   const [tabIndex, setTabIndex] = useState(0);
 
-  const handleChange = (event: any, newValue: any) => {
+  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabIndex(newValue);
   };
 

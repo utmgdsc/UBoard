@@ -6,10 +6,10 @@ export enum EMAIL_TYPE {
 }
 
 export default class EmailService {
-  private _sender: string;
+  private sender: string;
 
   constructor(sender: string = "uboard-noreply@plausible.ca") {
-    this._sender = sender;
+    this.sender = sender;
     sgMail.setApiKey(<string>process.env.SENDGRID_API);
   }
 
@@ -24,14 +24,18 @@ export default class EmailService {
 
     const msg = {
       to: emailAddress,
-      from: this._sender,
+      from: this.sender,
       subject: subjectLine,
       text: body,
       html: html,
     };
-    sgMail.send(msg).catch((error: any) => {
+
+    try {
+      await sgMail.send(msg);
+    } catch (err) {
+      console.error(`Send email failed: ${err}`);
       status = false;
-    });
+    }
 
     return status;
   }
@@ -43,17 +47,17 @@ export default class EmailService {
     lastName: string,
     emailAddress: string
   ): Promise<boolean> {
-    const emailURL = `${process.env.WEBSITE}/c=${confToken}`; // this will be our route
+    const confirmURL = `${process.env.WEBSITE}/confirmation/c=${confToken}`; // this will be our route
     const subjectLine = "UBoard - Confirm your Email Address";
 
     const body = `Thank you for signing up to UBoard, ${firstName} ${lastName}.
     
     To continue with your account registration, please confirm your email address by visiting: 
     
-    ${emailURL}`;
+    ${confirmURL}`;
     const html = `Thank you for signing up to UBoard, ${firstName} ${lastName}. </br>
         
-    To continue with your account registration, please confirm your email address by <a href="${emailURL}">clicking here</a>
+    To continue with your account registration, please confirm your email address by <a href="${confirmURL}">clicking here</a>
         `;
 
     return await this.sendEmail(emailAddress, subjectLine, body, html);
@@ -67,14 +71,14 @@ export default class EmailService {
     userName: string,
     emailAddress: string
   ): Promise<boolean> {
-    const emailURL = `${process.env.WEBSITE}/r=${confToken}`;
+    const resetURL = `${process.env.WEBSITE}/password-reset/r=${confToken}`;
     const subjectLine = "UBoard - Password Reset Requested";
     const body = `Hello,  ${firstName} ${lastName}.
         A password reset has been requested for the account with username: ${userName}. To reset your password, click the link below. 
-        ${emailURL}
+        ${resetURL}
         `;
     const html = `Hello, ${firstName} ${lastName}.  </br>
-        A password reset has been requested for the account with username: ${userName}. To reset your password, <a href="${emailURL}">click here</a>
+        A password reset has been requested for the account with username: ${userName}. To reset your password, <a href="${resetURL}">click here</a>
         `;
 
     return await this.sendEmail(emailAddress, subjectLine, body, html);

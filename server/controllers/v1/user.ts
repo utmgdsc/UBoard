@@ -4,11 +4,11 @@ import { User } from "../../models/user";
 
 export default class UserController {
   protected secret: string;
-  protected UserModel: typeof User;
+  protected userRepo: typeof User;
   protected emailService: EmailService;
 
   constructor(model: typeof User, secret: string, emailService: EmailService) {
-    this.UserModel = model;
+    this.userRepo = model;
     this.secret = secret;
     this.emailService = emailService;
   }
@@ -29,12 +29,47 @@ export default class UserController {
     return str;
   }
 
-  /** Assign an emailing token to a user based on the provided type. If shouldEmail is true, the token is
-  sent to the user in a URL format. Returns the success status. */
-  async generateToken(
+  /** Send a preformatted email to the user based on the email type. */
+  protected async sendEmailHandler(
     user: User,
     type: EMAIL_TYPE,
-    shouldEmail: boolean
+    confToken: string
+  ) {
+    var status: boolean = true;
+    switch (type) {
+      case EMAIL_TYPE.RESET: {
+        status = await this.emailService.sendResetEmail(
+          confToken,
+          user.firstName,
+          user.lastName,
+          user.userName,
+          user.email
+        );
+        break;
+      }
+      case EMAIL_TYPE.CONF: {
+        status = await this.emailService.sendConfirmEmail(
+          confToken,
+          user.firstName,
+          user.lastName,
+          user.email
+        );
+        break;
+      }
+      default: {
+        // should never reach here
+        return false;
+      }
+    }
+
+    return status;
+  }
+
+  /** Assign an emailing token to a user based on the provided type and send them an email.
+    Returns the success status. */
+  protected async generateToken(
+    user: User,
+    type: EMAIL_TYPE
   ): Promise<boolean> {
     const confToken = this.generateRandom();
     var status: boolean = true;
@@ -48,44 +83,19 @@ export default class UserController {
         confirmationToken: `${type}:${confToken}`, // store the type so we can validate it later
         confirmationTokenExpires: dateExpires,
       });
-    } catch {
+    } catch (err) {
+      console.error(`generateToken failed: ${err}`);
       return false;
     }
 
-    if (shouldEmail) {
-      switch (type) {
-        case EMAIL_TYPE.RESET: {
-          status = await this.emailService.sendResetEmail(
-            confToken,
-            user.firstName,
-            user.lastName,
-            user.userName,
-            user.email
-          );
-          break;
-        }
-        case EMAIL_TYPE.CONF: {
-          status = await this.emailService.sendConfirmEmail(
-            confToken,
-            user.firstName,
-            user.lastName,
-            user.email
-          );
-          break;
-        }
-        default: {
-          // should never reach here
-          return false;
-        }
-      }
-    }
+    status = await this.sendEmailHandler(user, type, confToken);
 
     return status;
   }
 
   /** Check whether the provided token matches the requested confirmation type (reset or account) 
   for the provided user email, and that it is not expired. Returns true on success, or false on failure. */
-  async validateToken(
+  protected async validateToken(
     token: string,
     type: EMAIL_TYPE,
     email: string
@@ -93,15 +103,16 @@ export default class UserController {
     const dbTokenFormat = `${type}:${token}`;
 
     try {
-      const target = await this.UserModel.findOne({ where: { email: email } });
+      const user = await this.userRepo.findOne({ where: { email: email } });
       const currTime = new Date().getTime();
       if (
-        !target ||
-        target.confirmationToken !== dbTokenFormat ||
-        target.confirmationTokenExpires.getTime() <= currTime
+        !user ||
+        user.confirmationToken !== dbTokenFormat ||
+        user.confirmationTokenExpires.getTime() <= currTime
       )
         return false;
     } catch (err) {
+      console.error(`validateToken failed: ${err}`);
       return false;
     }
 
@@ -117,14 +128,16 @@ export default class UserController {
 
     /* Confirm the User account and consume the token */
     try {
-      await this.UserModel.update(
+      await this.userRepo.update(
         {
           confirmed: true,
           confirmationToken: "",
+          confirmationTokenExpires: undefined,
         },
         { where: { email: email.toLowerCase() } }
       );
-    } catch {
+    } catch (err) {
+      console.error(`confirmEmail failed: ${err}`);
       return false;
     }
     return true;
@@ -135,9 +148,13 @@ export default class UserController {
   async resetPassword(
     token: string,
     email: string,
-    newPass: string
+    newPass: string,
+    newPassConf: string
   ): Promise<boolean> {
-    if (!(await this.validateToken(token, EMAIL_TYPE.RESET, email))) {
+    if (
+      !(await this.validateToken(token, EMAIL_TYPE.RESET, email)) ||
+      newPass !== newPassConf
+    ) {
       return false;
     }
 
@@ -148,14 +165,16 @@ export default class UserController {
 
     /* Change their password & Consume token */
     try {
-      await this.UserModel.update(
+      await this.userRepo.update(
         {
           password: hashed,
           confirmationToken: "",
+          confirmationTokenExpires: undefined,
         },
         { where: { email: email } }
       );
-    } catch {
+    } catch (err) {
+      console.error(`resetPassword (update) failed: ${err}`);
       return false;
     }
 

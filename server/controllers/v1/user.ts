@@ -119,6 +119,20 @@ export default class UserController {
     return true;
   }
 
+  /** Generate and send the user an email to reset their password.
+      Returns the success status. */
+  async sendResetEmail(user: User) {
+    const status = await this.generateToken(user, EMAIL_TYPE.RESET);
+    return status;
+  }
+
+  /** Generate and send the user an email to confirm their account.
+      Returns the success status. */
+  async sendEmailConfirmation(user: User) {
+    const status = await this.generateToken(user, EMAIL_TYPE.CONF);
+    return status;
+  }
+
   /** Confirm the user account associated with user if the provided token is valid and return true. 
     Returns false if the token or email is invalid.*/
   async confirmEmail(token: string, email: string): Promise<boolean> {

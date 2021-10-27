@@ -1,6 +1,7 @@
 import argon2 from "argon2";
 import EmailService, { EMAIL_TYPE } from "../../services/emailService";
 import { User } from "../../models/user";
+import db from "../../models";
 
 export default class UserController {
   protected secret: string;
@@ -94,29 +95,31 @@ export default class UserController {
   }
 
   /** Check whether the provided token matches the requested confirmation type (reset or account) 
-  for the provided user email, and that it is not expired. Returns true on success, or false on failure. */
+    and that it is not expired. Returns the user it matches on success, or null on failure. */
   protected async validateToken(
     token: string,
-    type: EMAIL_TYPE,
-    email: string
-  ): Promise<boolean> {
+    type: EMAIL_TYPE
+  ): Promise<User | null> {
     const dbTokenFormat = `${type}:${token}`;
+    var user: User | null = null;
 
     try {
-      const user = await this.userRepo.findOne({ where: { email: email } });
+      user = await this.userRepo.findOne({
+        where: { confirmationToken: dbTokenFormat },
+      });
       const currTime = new Date().getTime();
       if (
         !user ||
         user.confirmationToken !== dbTokenFormat ||
         user.confirmationTokenExpires.getTime() <= currTime
       )
-        return false;
+        return null;
     } catch (err) {
       console.error(`validateToken failed: ${err}`);
-      return false;
+      return null;
     }
 
-    return true;
+    return user;
   }
 
   /** Generate and send the user an email to reset their password.
@@ -133,42 +136,39 @@ export default class UserController {
     return status;
   }
 
-  /** Confirm the user account associated with user if the provided token is valid and return true. 
-    Returns false if the token or email is invalid.*/
-  async confirmEmail(token: string, email: string): Promise<boolean> {
-    if (!(await this.validateToken(token, EMAIL_TYPE.CONF, email))) {
+  /** Confirm the user account associated with the token if it is valid. 
+    Returns false if the token is invalid or expired.*/
+  async confirmEmail(token: string): Promise<boolean> {
+    const user: User | null = await this.validateToken(token, EMAIL_TYPE.CONF);
+    if (!user) {
       return false;
     }
 
     /* Confirm the User account and consume the token */
     try {
-      await this.userRepo.update(
-        {
-          confirmed: true,
-          confirmationToken: "",
-          confirmationTokenExpires: undefined,
-        },
-        { where: { email: email.toLowerCase() } }
-      );
+      await user.update({
+        confirmed: true,
+        confirmationToken: "",
+        confirmationTokenExpires: null,
+      });
     } catch (err) {
       console.error(`confirmEmail failed: ${err}`);
       return false;
     }
+
     return true;
   }
 
-  /** Returns true and changes the password of the user associated to email with 
-    newPass if the provided token is valid. Returns false if token, or email is invalid. */
+  /** Returns true and changes the password of the user associated to the token, given that the token is valid.
+   If the token is expired, or invalid, return false. */
   async resetPassword(
     token: string,
-    email: string,
     newPass: string,
     newPassConf: string
   ): Promise<boolean> {
-    if (
-      !(await this.validateToken(token, EMAIL_TYPE.RESET, email)) ||
-      newPass !== newPassConf
-    ) {
+    const user: User | null = await this.validateToken(token, EMAIL_TYPE.RESET);
+
+    if (!user || newPass !== newPassConf) {
       return false;
     }
 
@@ -179,14 +179,11 @@ export default class UserController {
 
     /* Change their password & Consume token */
     try {
-      await this.userRepo.update(
-        {
-          password: hashed,
-          confirmationToken: "",
-          confirmationTokenExpires: undefined,
-        },
-        { where: { email: email } }
-      );
+      await user.update({
+        password: hashed,
+        confirmationToken: "",
+        confirmationTokenExpires: null,
+      });
     } catch (err) {
       console.error(`resetPassword (update) failed: ${err}`);
       return false;

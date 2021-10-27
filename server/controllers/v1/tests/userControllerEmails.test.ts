@@ -3,70 +3,57 @@ import { dbSync, makeUser } from "../../../models/tests/testHelpers";
 import { User } from "../../../models/user";
 import EmailService, { EMAIL_TYPE } from "../../../services/emailService";
 import UserController from "../user";
+jest.mock("../../../services/emailService"); // see __mock__/emailService
 
 let testPers1: User;
-let eServ: EmailService;
 let uContr: UserController;
+let eServ: EmailService;
 
 beforeAll(async () => {
   await dbSync().catch((err) => fail(err));
+
   eServ = new EmailService();
-  uContr = new UserController(db.User, "jwt_secret", eServ);
+  uContr = new UserController(db.User, "", eServ);
 });
 
 describe("Testing the token functions", () => {
   describe("Authorized token usage", () => {
     let rawToken: string;
-    test("Generating a token properly updates User entry", async () => {
+    test("Generating a CONF token properly updates User entry", async () => {
       testPers1 = await makeUser("constPers1", "lol@utoronto.ca"); // initial test user
       expect(testPers1).toBeDefined();
 
       if (!testPers1) fail("nullperson"); // required to appease TS
 
       expect(testPers1.confirmed).toBeFalsy();
-      const status = await uContr.generateToken(
-        testPers1,
-        EMAIL_TYPE.CONF,
-        false // do not send email
-      );
+      const status = await uContr.sendEmailConfirmation(testPers1);
+
       expect(status).toBeTruthy();
       expect(testPers1.confirmationToken).toContain(EMAIL_TYPE.CONF);
 
-      const curr = new Date().getTime();
+      const curr = new Date().getTime(); // check expiry
       expect(testPers1.confirmationTokenExpires.getTime()).toBeGreaterThan(
         curr
       );
-    }); /* End Test 1 */
 
-    test("validateToken on what was just made", async () => {
-      rawToken = testPers1.confirmationToken.substring(
-        // token in our DB is different from how it is shown to the user
-        testPers1.confirmationToken.indexOf(":") + 1
-      );
-      await expect(
-        uContr.validateToken(rawToken, EMAIL_TYPE.CONF, testPers1.email)
-      ).resolves.toBeTruthy();
+      rawToken = testPers1.confirmationToken;
+      rawToken = rawToken.substring(rawToken.indexOf(":") + 1); // ignore the type part of "type:<token>"
     });
 
     test("confirmEmail to validate our user. Ensure token is consumed", async () => {
-      const status: boolean = await uContr.confirmEmail(
-        rawToken,
-        testPers1.email
-      );
+      const status: boolean = await uContr.confirmEmail(rawToken);
       testPers1 = await db.User.findOne({ where: { email: testPers1.email } });
-
+      console.log(testPers1);
       expect(status).toBeTruthy();
       expect(testPers1.confirmed).toBeTruthy();
       expect(testPers1.confirmationToken).toHaveLength(0);
+      expect(testPers1.confirmationTokenExpires).toBeNull();
     });
 
     test("Attempt to use an invalid token", async () => {
-      await expect(
-        uContr.validateToken(rawToken, EMAIL_TYPE.CONF, testPers1.email)
-      ).resolves.toBeFalsy();
-      await expect(
-        uContr.confirmEmail(rawToken, testPers1.email)
-      ).resolves.toBeFalsy();
+      await expect(uContr.confirmEmail(rawToken)).resolves.toBeFalsy();
+
+      await expect(uContr.resetPassword(rawToken, "", "")).resolves.toBeFalsy();
     });
   });
 });

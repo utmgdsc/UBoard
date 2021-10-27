@@ -10,7 +10,7 @@ interface UserAttributes {
   email: string;
   confirmed: boolean;
   confirmationToken: string;
-  confirmationTokenExpires: Date;
+  confirmationTokenExpires: Date | null;
 
   /* Logs */
   lastLogin: Date;

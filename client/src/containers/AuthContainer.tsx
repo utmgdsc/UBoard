@@ -12,6 +12,8 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import Login from "../components/Login";
 import SignUp from "../components/SignUp";
 
+import "./AuthContainer.css";
+
 interface TabPanelProps {
   children: JSX.Element;
   value: number;
@@ -51,33 +53,35 @@ function AuthContainer() {
   const matches = useMediaQuery("(min-width: 1080px)");
 
   return (
-    <Grid
-      container
-      justifyContent={matches ? "flex-end" : "center"}
-      style={{ padding: matches ? "20px" : 0 }}
-    >
-      <Grid item xs={10} sm={6} md={4} lg={3} xl={3}>
-        <Paper elevation={5} style={paperStyle}>
-          <Tabs
-            value={tabIndex}
-            onChange={handleChange}
-            aria-label="Login and Signup tabs"
-            variant="fullWidth"
-            textColor="primary"
-          >
-            <Tab label="Login" />
-            <Tab label="Sign Up" />
-          </Tabs>
+    <div className="AuthContainer">
+      <Grid
+        container
+        justifyContent={matches ? "flex-end" : "center"}
+        style={{ padding: matches ? "20px" : 0 }}
+      >
+        <Grid item xs={10} sm={6} md={4} lg={3} xl={3}>
+          <Paper elevation={5} style={paperStyle}>
+            <Tabs
+              value={tabIndex}
+              onChange={handleChange}
+              aria-label="Login and Signup tabs"
+              variant="fullWidth"
+              textColor="primary"
+            >
+              <Tab label="Login" data-testid="LogInTabButton" />
+              <Tab label="Sign Up" data-testid="SignUpTabButton" />
+            </Tabs>
 
-          <TabPanel value={tabIndex} index={0}>
-            <Login handleChange={handleChange} />
-          </TabPanel>
-          <TabPanel value={tabIndex} index={1}>
-            <SignUp handleChange={handleChange} />
-          </TabPanel>
-        </Paper>
+            <TabPanel value={tabIndex} index={0}>
+              <Login handleChange={handleChange} />
+            </TabPanel>
+            <TabPanel value={tabIndex} index={1}>
+              <SignUp handleChange={handleChange} />
+            </TabPanel>
+          </Paper>
+        </Grid>
       </Grid>
-    </Grid>
+    </div>
   );
 }
 export default AuthContainer;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import CircleOutlined from "@material-ui/icons/AddCircleOutlineOutlined";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 interface SignUpProps {
   handleChange: Function;
@@ -71,9 +72,9 @@ function SignUp(props: SignUpProps) {
       setHook("");
     }
   };
-
+  const matches = useMediaQuery("(min-width: 1080px)");
   return (
-    <Paper style={paperStyle}>
+    <Paper style={paperStyle} data-testid="SignUpTab">
       <Grid container justifyContent="center">
         <Grid item>
           <Avatar style={avatarStyle}>
@@ -89,7 +90,7 @@ function SignUp(props: SignUpProps) {
         <h1>Sign Up</h1>
       </Box>
       <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-        <Grid container spacing={2}>
+        <Grid container spacing={matches ? 2 : 0}>
           <Grid item xs={12} md={6}>
             <TextField
               label="First Name"
@@ -136,6 +137,7 @@ function SignUp(props: SignUpProps) {
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
           required
+          data-testid="emailForm"
           type="email"
           onBlur={(e) =>
             validateBlur(
@@ -174,6 +176,7 @@ function SignUp(props: SignUpProps) {
           fullWidth
           required
           type="password"
+          data-testid="passwordForm"
           onBlur={(e) =>
             validateBlur(
               /.{8,}/,
@@ -205,6 +208,7 @@ function SignUp(props: SignUpProps) {
             color="primary"
             variant="contained"
             fullWidth
+            data-testid="submitButton"
           >
             Submit
           </Button>
@@ -217,6 +221,7 @@ function SignUp(props: SignUpProps) {
           variant="outlined"
           onClick={(e) => props.handleChange(e, 0)}
           color="primary"
+          data-testid="GoToLogIn"
         >
           Log In
         </Button>

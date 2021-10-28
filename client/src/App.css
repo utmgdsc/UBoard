@@ -1,26 +1,10 @@
 .App {
   text-align: center;
-  background: url("./background.jpg");
   position: fixed;
   min-width: 100%;
   min-height: 100%;
   background-size: cover;
   background-position: center;
-}
-
-.AuthContainer {
-  text-align: center;
-  background: url("./background.jpg");
-  position: fixed;
-  min-width: 100%;
-  min-height: 100%;
-  background-size: cover;
-  background-position: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {

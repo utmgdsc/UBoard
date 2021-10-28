@@ -51,7 +51,7 @@ function Login(props: LogInProps) {
   };
 
   return (
-    <Paper style={paperStyle}>
+    <Paper style={paperStyle} data-testid="LogInTab">
       <Grid container justifyContent="center">
         <Grid item>
           <Avatar style={avatarStyle}>
@@ -106,6 +106,7 @@ function Login(props: LogInProps) {
         onClick={(e) => props.handleChange(e, 1)}
         color="primary"
         size="small"
+        data-testid="CreateAccountButton"
       >
         Create an Account
       </Button>

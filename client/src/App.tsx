@@ -1,14 +1,12 @@
 import React from "react";
 import "./App.css";
 
-import AuthContainer from "./containers";
+import { AuthContainer } from "./containers";
 
 function App() {
   return (
     <div>
-      <div className="AuthContainer">
-        <AuthContainer />
-      </div>
+      <AuthContainer />
     </div>
   );
 }

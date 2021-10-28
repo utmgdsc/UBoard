@@ -1,7 +1,11 @@
 import argon2 from "argon2";
-import EmailService, { EMAIL_TYPE } from "../../services/emailService";
+import EmailService from "../../services/emailService";
 import { User } from "../../models/user";
-import db from "../../models";
+
+export enum EMAIL_TYPE {
+  RESET = "reset",
+  CONF = "conf",
+}
 
 export default class UserController {
   protected secret: string;

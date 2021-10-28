@@ -8,13 +8,11 @@ export enum TOKEN_TYPE {
 }
 
 export default class UserController {
-  protected secret: string;
   protected userRepo: typeof User;
   protected emailService: EmailService;
 
-  constructor(model: typeof User, secret: string, emailService: EmailService) {
+  constructor(model: typeof User, emailService: EmailService) {
     this.userRepo = model;
-    this.secret = secret;
     this.emailService = emailService;
   }
 

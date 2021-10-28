@@ -23,7 +23,7 @@ let uContr: UserController;
 
 beforeAll(async () => {
   await dbSync().catch((err) => fail(err));
-  uContr = new UserController(db.User, "", new EmailServiceMock());
+  uContr = new UserController(db.User, new EmailServiceMock());
 });
 
 beforeEach(async () => {

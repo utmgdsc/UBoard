@@ -2,7 +2,7 @@ import argon2 from "argon2";
 import db from "../../../models";
 import { dbSync, makeUser } from "../../../models/tests/testHelpers";
 import { User } from "../../../models/user";
-import UserController, { EMAIL_TYPE } from "../user";
+import UserController, { TOKEN_TYPE } from "../user";
 import EmailService from "../../../services/emailService";
 
 /* Setup mock email service */
@@ -32,19 +32,18 @@ beforeEach(async () => {
   fakeSendResetEmail.mockClear();
 });
 
-describe("Email-related tests", () => {
+describe("Test v1 - User Controller", () => {
   let rawToken: string;
   describe("Email Confirmations", () => {
     test("Generating CONF properly updates User entry", async () => {
       testPerson = await makeUser("constPers1", "lol@utoronto.ca"); // initial test user
-      expect(testPerson).toBeDefined();
 
       if (!testPerson) {
         fail("nullperson"); // required to appease TS
       }
       expect(testPerson.confirmed).toBeFalsy();
-      const status = await uContr.sendEmailConfirmation(testPerson);
-
+      const status = await uContr.sendEmailConfirmation(testPerson.email);
+      await testPerson.reload(); // refresh data from db
       rawToken = testPerson.confirmationToken;
       rawToken = rawToken.substring(rawToken.indexOf(":") + 1); // ignore the type part of "type:<token>"
 
@@ -59,7 +58,7 @@ describe("Email-related tests", () => {
       ]);
 
       expect(status).toBeTruthy();
-      expect(testPerson.confirmationToken).toContain(EMAIL_TYPE.CONF);
+      expect(testPerson.confirmationToken).toContain(TOKEN_TYPE.CONF);
       const curr = new Date().getTime(); // check expiry
       expect(testPerson.confirmationTokenExpires.getTime()).toBeGreaterThan(
         curr
@@ -73,9 +72,7 @@ describe("Email-related tests", () => {
     test("Consume token and confirm the user account", async () => {
       const status: boolean = await uContr.confirmEmail(rawToken);
       expect(status).toBeTruthy();
-      testPerson = await db.User.findOne({
-        where: { email: testPerson.email },
-      });
+      await testPerson.reload();
       expect(testPerson.confirmed).toBeTruthy();
       expect(testPerson.confirmationToken).toHaveLength(0);
       expect(testPerson.confirmationTokenExpires).toBeNull();
@@ -96,8 +93,8 @@ describe("Email-related tests", () => {
       }
 
       expect(testPerson.confirmed).toBeFalsy();
-      const status = await uContr.sendResetEmail(testPerson);
-
+      const status = await uContr.sendResetEmail(testPerson.email);
+      await testPerson.reload();
       rawToken = testPerson.confirmationToken;
       rawToken = rawToken.substring(rawToken.indexOf(":") + 1); // ignore the type part of "type:<token>"
 
@@ -112,7 +109,7 @@ describe("Email-related tests", () => {
       ]);
 
       expect(status).toBeTruthy();
-      expect(testPerson.confirmationToken).toContain(EMAIL_TYPE.RESET);
+      expect(testPerson.confirmationToken).toContain(TOKEN_TYPE.RESET);
 
       const curr = new Date().getTime(); // check expiry
       expect(testPerson.confirmationTokenExpires.getTime()).toBeGreaterThan(
@@ -128,10 +125,7 @@ describe("Email-related tests", () => {
       const pass = testPerson.password;
       const status: boolean = await uContr.resetPassword(rawToken, "abc", "vv");
       expect(status).toBeFalsy();
-      testPerson = await db.User.findOne({
-        where: { email: testPerson.email },
-      });
-
+      await testPerson.reload();
       expect(testPerson.password).toEqual(pass);
       expect(testPerson.confirmationToken).not.toHaveLength(0);
       expect(testPerson.confirmationTokenExpires).not.toBeNull();
@@ -144,11 +138,7 @@ describe("Email-related tests", () => {
         "newPassword"
       );
       expect(status).toBeTruthy();
-
-      testPerson = await db.User.findOne({
-        where: { email: testPerson.email },
-      });
-
+      await testPerson.reload();
       const check = await argon2.verify(testPerson.password, "newPassword");
 
       expect(check).toBeTruthy();

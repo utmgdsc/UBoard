@@ -2,7 +2,7 @@ import argon2 from "argon2";
 import EmailService from "../../services/emailService";
 import { User } from "../../models/user";
 
-export enum EMAIL_TYPE {
+export enum TOKEN_TYPE {
   RESET = "reset",
   CONF = "conf",
 }
@@ -37,12 +37,12 @@ export default class UserController {
   /** Send a preformatted email to the user based on the email type. */
   protected async sendEmailHandler(
     user: User,
-    type: EMAIL_TYPE,
+    type: TOKEN_TYPE,
     confToken: string
   ) {
     var status: boolean = true;
     switch (type) {
-      case EMAIL_TYPE.RESET: {
+      case TOKEN_TYPE.RESET: {
         status = await this.emailService.sendResetEmail(
           confToken,
           user.firstName,
@@ -52,7 +52,7 @@ export default class UserController {
         );
         break;
       }
-      case EMAIL_TYPE.CONF: {
+      case TOKEN_TYPE.CONF: {
         status = await this.emailService.sendConfirmEmail(
           confToken,
           user.firstName,
@@ -74,7 +74,7 @@ export default class UserController {
     Returns the success status. */
   protected async generateToken(
     user: User,
-    type: EMAIL_TYPE
+    type: TOKEN_TYPE
   ): Promise<boolean> {
     const confToken = this.generateRandom();
     var status: boolean = true;
@@ -102,7 +102,7 @@ export default class UserController {
     and that it is not expired. Returns the user it matches on success, or null on failure. */
   protected async validateToken(
     token: string,
-    type: EMAIL_TYPE
+    type: TOKEN_TYPE
   ): Promise<User | null> {
     const dbTokenFormat = `${type}:${token}`;
     var user: User | null = null;
@@ -128,22 +128,34 @@ export default class UserController {
 
   /** Generate and send the user an email to reset their password.
       Returns the success status. */
-  async sendResetEmail(user: User) {
-    const status = await this.generateToken(user, EMAIL_TYPE.RESET);
-    return status;
+  async sendResetEmail(emailAddress: string) {
+    const user: User | null = await this.userRepo.findOne({
+      where: { email: emailAddress.toLowerCase() },
+    });
+    if (!user) {
+      return false;
+    }
+
+    return await this.generateToken(user, TOKEN_TYPE.RESET);
   }
 
   /** Generate and send the user an email to confirm their account.
       Returns the success status. */
-  async sendEmailConfirmation(user: User) {
-    const status = await this.generateToken(user, EMAIL_TYPE.CONF);
-    return status;
+  async sendEmailConfirmation(emailAddress: string) {
+    // TODO: @Daniel add this to sign up
+    const user: User | null = await this.userRepo.findOne({
+      where: { email: emailAddress.toLowerCase() },
+    });
+    if (!user) {
+      return false;
+    }
+    return await this.generateToken(user, TOKEN_TYPE.CONF);
   }
 
   /** Confirm the user account associated with the token if it is valid. 
     Returns false if the token is invalid or expired.*/
   async confirmEmail(token: string): Promise<boolean> {
-    const user: User | null = await this.validateToken(token, EMAIL_TYPE.CONF);
+    const user: User | null = await this.validateToken(token, TOKEN_TYPE.CONF);
     if (!user) {
       return false;
     }
@@ -170,7 +182,7 @@ export default class UserController {
     newPass: string,
     newPassConf: string
   ): Promise<boolean> {
-    const user: User | null = await this.validateToken(token, EMAIL_TYPE.RESET);
+    const user: User | null = await this.validateToken(token, TOKEN_TYPE.RESET);
 
     if (!user || newPass !== newPassConf) {
       return false;

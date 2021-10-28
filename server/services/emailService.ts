@@ -1,7 +1,4 @@
 import sgMail from "@sendgrid/mail";
-import dotenv from "dotenv";
-dotenv.config();
-
 export default class EmailService {
   constructor() {
     sgMail.setApiKey(<string>process.env.SENDGRID_API);
@@ -14,8 +11,6 @@ export default class EmailService {
     body: string,
     html: string
   ) {
-    var status: boolean = true;
-
     const msg = {
       to: emailAddress,
       from: <string>process.env.FROM_EMAIL,
@@ -28,10 +23,10 @@ export default class EmailService {
       await sgMail.send(msg);
     } catch (err) {
       console.error(`Send email failed: ${err}`);
-      status = false;
+      return false;
     }
 
-    return status;
+    return true;
   }
 
   /** Sends an account confirmation email based on the provided parameters. Returns the success status. */

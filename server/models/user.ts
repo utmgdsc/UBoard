@@ -10,7 +10,7 @@ interface UserAttributes {
   email: string;
   confirmed: boolean;
   confirmationToken: string;
-  confirmationTokenExpires: Date;
+  confirmationTokenExpires: Date | null;
 
   /* Logs */
   lastLogin: Date;
@@ -127,7 +127,9 @@ module.exports = (sequelize: Sequelize) => {
       ],
       hooks: {
         beforeValidate: (user, options) => {
-          user.email = user.email.toLowerCase();
+          if (user.email) {
+            user.email = user.email.toLowerCase();
+          }
         },
       },
       modelName: "User",

@@ -37,35 +37,26 @@ export default class UserController {
     user: User,
     type: TOKEN_TYPE,
     confToken: string
-  ) {
-    var status: boolean = true;
+  ): Promise<boolean> {
     switch (type) {
       case TOKEN_TYPE.RESET: {
-        status = await this.emailService.sendResetEmail(
+        return await this.emailService.sendResetEmail(
           confToken,
           user.firstName,
           user.lastName,
           user.userName,
           user.email
         );
-        break;
       }
       case TOKEN_TYPE.CONF: {
-        status = await this.emailService.sendConfirmEmail(
+        return await this.emailService.sendConfirmEmail(
           confToken,
           user.firstName,
           user.lastName,
           user.email
         );
-        break;
-      }
-      default: {
-        // should never reach here
-        return false;
       }
     }
-
-    return status;
   }
 
   /** Assign an emailing token to a user based on the provided type and send them an email.
@@ -75,7 +66,6 @@ export default class UserController {
     type: TOKEN_TYPE
   ): Promise<boolean> {
     const confToken = this.generateRandom();
-    var status: boolean = true;
 
     var dateExpires: Date = new Date();
     dateExpires.setUTCHours(dateExpires.getUTCHours() + 12); // expires 12hrs from now
@@ -91,9 +81,7 @@ export default class UserController {
       return false;
     }
 
-    status = await this.sendEmailHandler(user, type, confToken);
-
-    return status;
+    return await this.sendEmailHandler(user, type, confToken);
   }
 
   /** Check whether the provided token matches the requested confirmation type (reset or account) 
@@ -126,7 +114,7 @@ export default class UserController {
 
   /** Generate and send the user an email to reset their password.
       Returns the success status. */
-  async sendResetEmail(emailAddress: string) {
+  async sendResetEmail(emailAddress: string): Promise<boolean> {
     const user: User | null = await this.userRepo.findOne({
       where: { email: emailAddress.toLowerCase() },
     });
@@ -139,7 +127,7 @@ export default class UserController {
 
   /** Generate and send the user an email to confirm their account.
       Returns the success status. */
-  async sendEmailConfirmation(emailAddress: string) {
+  async sendEmailConfirmation(emailAddress: string): Promise<boolean> {
     // TODO: @Daniel add this to sign up
     const user: User | null = await this.userRepo.findOne({
       where: { email: emailAddress.toLowerCase() },

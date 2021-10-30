@@ -5,7 +5,6 @@ import { unmountComponentAtNode } from "react-dom";
 import { act, Simulate } from "react-dom/test-utils";
 // import fireEvent from "@testing-library/react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { Mail } from "@material-ui/icons";
 
 // let container: HTMLElement = null;
 let container: any = null;

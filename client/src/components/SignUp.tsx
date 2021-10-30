@@ -49,8 +49,9 @@ function SignUp(props: SignUpProps) {
 
   const valideConfirmPass = () => {
     if (password !== confirmPass) {
-      setConfirmPassError("Passwords don't match!");
-      setPasswordError("Passwords don't match!");
+      const errMsg = "Passwords don't match!";
+      setConfirmPassError(errMsg);
+      setPasswordError(errMsg);
       return;
     } else {
       setConfirmPassError("");
@@ -58,6 +59,13 @@ function SignUp(props: SignUpProps) {
     }
   };
 
+  /**
+   * Validates all input forms except for `confirmPass` input
+   * @param regexPattern  pattern to match
+   * @param checkString   string to verify
+   * @param setHook       set function for the input's hook
+   * @param errorMessage  error message to display for that input field
+   */
   const validateBlur = (
     regexPattern: RegExp,
     checkString: string,
@@ -177,7 +185,7 @@ function SignUp(props: SignUpProps) {
           required
           type="password"
           data-testid="passwordForm"
-          onBlur={(e) =>
+          onBlur={() =>
             validateBlur(
               /.{8,}/,
               password,

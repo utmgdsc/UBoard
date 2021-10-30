@@ -5,7 +5,9 @@ import { unmountComponentAtNode } from "react-dom";
 import { act, Simulate } from "react-dom/test-utils";
 // import fireEvent from "@testing-library/react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { Mail } from "@material-ui/icons";
 
+// let container: HTMLElement = null;
 let container: any = null;
 beforeEach(() => {
   // setup a DOM element as a render target
@@ -27,7 +29,7 @@ describe("test Auth Pages", () => {
     });
 
     // test if auth container has been rendered
-    const inputLogin = screen.getByText("Login");
+    const inputLogin = screen.getByTestId("LogInTab");
     expect(inputLogin).toBeInTheDocument();
 
     // toggle to sign up
@@ -47,7 +49,7 @@ describe("test Auth Pages", () => {
     });
 
     // test if auth container has been rendered
-    const inputLogin = screen.getByText("Login");
+    const inputLogin = screen.getByTestId("LogInTab");
     expect(inputLogin).toBeInTheDocument();
 
     // toggle to sign up from in-form button
@@ -63,16 +65,35 @@ describe("test Auth Pages", () => {
 });
 
 describe("verifying valid input for login and sigup page", () => {
-  it("should check if email field is valid", () => {
+  it("only allow valid uToronto email addresse", () => {
     act(() => {
       render(<AuthContainer />);
     });
     screen.getByTestId("SignUpTabButton").click();
     const emailForm = screen.getByPlaceholderText("john@mail.utoronto.ca");
-    fireEvent.change(emailForm, { target: { value: "firstname@gmail.com" } });
-    fireEvent.blur(emailForm);
-    expect(
-      screen.getByText("Invalid Email. Only utoronto emails allowed")
-    ).toBeInTheDocument();
+
+    const testCases = [
+      ["firstname@gmail.com", false],
+      ["gurvir@utoronto.com", false],
+      ["bob@....utoronto.ca", false],
+      ["bob.vance@alum.utoronto.ca", true],
+      ["andy.c@mail.utoronto.ca", true],
+      ["bob@utoronto.ca", true],
+    ];
+
+    for (let i = 0; i < testCases.length; i++) {
+      const [emailToCheck, isValid] = testCases[i];
+      fireEvent.change(emailForm, { target: { value: emailToCheck } });
+      fireEvent.blur(emailForm);
+      if (isValid) {
+        expect(
+          screen.queryByText("Invalid Email. Only utoronto emails allowed")
+        ).toBeNull();
+      } else {
+        expect(
+          screen.getByText("Invalid Email. Only utoronto emails allowed")
+        ).toBeInTheDocument();
+      }
+    }
   });
 });

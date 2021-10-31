@@ -11,16 +11,9 @@ server {
     location = /50x.html {
         root   /usr/share/nginx/html;
     }
-}
 
-server {
-    listen $PORT;
-    server_name api.localhost;
-
-    location / {
-        proxy_pass  http://localhost:8080/v1/;
+    location /api/ {
+        proxy_pass  http://localhost:8080;
         proxy_set_header Host $host;
     }
-
-
 }

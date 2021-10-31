@@ -72,7 +72,7 @@ describe("User Model ", () => {
         makeUser("personabc", "emails@utoronto.ca")
       ).resolves.toBeDefined();
       await expect(
-        makeUser("personabc", "lo22l@utoronto.ca")
+        makeUser("personABC", "lo22l@utoronto.ca")
       ).rejects.toThrowError("Validation error");
     });
   });

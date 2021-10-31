@@ -6,8 +6,11 @@ import { User } from "../user";
 Create a User entry in our database with the given user and email string. Returns
 the entry that was created on success, or throws an error on failure.
 */
+const UserModel: typeof User = db.User;
+const PostModel: typeof Post = db.Post;
+
 export async function makeUser(user: string, email: string): Promise<User> {
-  const testUser: User = await db.User.create({
+  const testUser: User = await UserModel.create({
     firstName: "test",
     lastName: "test",
     userName: user,
@@ -24,11 +27,11 @@ export async function makeUser(user: string, email: string): Promise<User> {
 title, and body. Return the post on success, or throw an error on failure. 
 */
 export async function makePost(
-  authorid: string | null,
+  authorid: string,
   title: string,
   body: string
 ): Promise<Post> {
-  const testUser = await db.Post.create({
+  const testUser = await PostModel.create({
     title: title,
     body: body,
     UserId: authorid,

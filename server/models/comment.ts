@@ -1,4 +1,4 @@
-import Sequelize, { Model, DataTypes, UUIDV4 } from "sequelize";
+import { Sequelize, Model, DataTypes, UUIDV4 } from "sequelize";
 
 interface CommentAttribute {
   id: string;
@@ -21,7 +21,7 @@ export class Comment
   }
 }
 
-module.exports = (sequelize: Sequelize.Sequelize) => {
+module.exports = (sequelize: Sequelize) => {
   Comment.init(
     {
       id: {

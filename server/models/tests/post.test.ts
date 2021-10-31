@@ -28,8 +28,10 @@ describe("Post Model", () => {
 
   describe("Post Validation", () => {
     test("Attempt to make posts with invalid or empty author", async () => {
-      await expect(makePost(null, "asd", "aaaaaaaaa")).rejects.toThrowError(
-        "notNull Violation"
+      await expect(
+        makePost("", "asd", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+      ).rejects.toThrowError(
+        "Validation error: Validation notEmpty on UserId failed"
       ); // NULL author
 
       await expect(

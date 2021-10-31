@@ -14,11 +14,11 @@ userRouter.get(
 
     if (status) {
       res.status(200).send("Your email address has been confirmed. ");
+    } else {
+      res
+        .status(401)
+        .send("An error occurred. The link is either invalid or expired. ");
     }
-
-    res
-      .status(401)
-      .send("An error occurred. The link is either invalid or expired. ");
   }
 );
 
@@ -33,9 +33,9 @@ userRouter.get(
 
     if (status) {
       res.status(200).send("Your password has been changed!");
+    } else {
+      res.status(401).send("An error occurred.");
     }
-
-    res.status(401).send("An error occurred.");
   }
 );
 

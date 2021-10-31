@@ -17,9 +17,22 @@ jest.mock("../../../services/emailService", () => {
   });
 });
 
-const EmailServiceMock = EmailService as jest.MockedClass<any>;
+const userRepo: typeof User = db.User;
+const EmailServiceMock = EmailService as jest.MockedClass<typeof EmailService>;
 let testPerson: User;
 let uContr: UserController;
+let createdUser: User;
+let signedInUser: User;
+let createUserResponse: {
+  status: number;
+  data: any;
+};
+let signInResponse: {
+  status: number;
+  data: any;
+};
+let createUserDate: Date;
+let signInDate: Date;
 
 beforeAll(async () => {
   await dbSync().catch((err) => fail(err));
@@ -32,7 +45,105 @@ beforeEach(async () => {
   fakeSendResetEmail.mockClear();
 });
 
-describe("Test v1 - User Controller", () => {
+describe("v1 - User Controller", () => {
+  beforeAll(async () => {
+    createUserDate = new Date();
+    createUserResponse = await uContr.createUser(
+      "email@mail.utoronto.ca",
+      "userName",
+      "password",
+      "firstName",
+      "lastName"
+    );
+    createdUser = (await userRepo.findOne({
+      where: {
+        userName: "userName",
+      },
+    })) as User;
+  });
+  describe("createUser method", () => {
+    describe("On success", () => {
+      test("Status code 201 should be returned", () => {
+        expect(createUserResponse.status).toBe(201);
+      })
+
+      test("User Model should contain user", () => {
+        expect(createdUser).toBeDefined();
+      });
+
+      test("jwt should be generated", () => {
+        expect(createUserResponse.data.token).toBeDefined();
+      });
+
+      test("Last login date should be updated", () => {
+        expect(createdUser.lastLogin.getTime()).toBeGreaterThan(createUserDate.getTime());
+      });
+
+      test("Email token should be generated", () => {
+        expect(createdUser.confirmationToken).toContain(TOKEN_TYPE.CONF);
+        expect(createdUser.confirmationTokenExpires.getTime()).toBeGreaterThan(
+          createUserDate.getTime()
+        );
+      });
+    });
+
+    test("If user already exists, should return status 400", async () => {
+      createUserResponse = await uContr.createUser(
+        "email@mail.utoronto.ca",
+        "userName",
+        "password",
+        "firstName",
+        "lastName"
+      );
+      expect(createUserResponse.status).toBe(400);
+    });
+  });
+
+  beforeAll(async () => {
+    signInDate = new Date();
+    signInResponse = await uContr.signIn(
+      "userName",
+      "password",
+    );
+    signedInUser = (await userRepo.findOne({
+      where: {
+        userName: "userName",
+      },
+    })) as User;
+  });
+
+  describe("signIn method", () => {
+    describe("On success", () => {
+      test("Status code 200 should be returned", () => {
+        expect(signInResponse.status).toBe(200);
+      })
+
+      test("jwt should be generated", async () => {
+        expect(signInResponse.data.token).toBeDefined();
+      });
+  
+      test("Last login date should be updated", () => {
+        expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(signInDate.getTime());
+      });
+    });
+
+    test("If user does not exist, should return status 404", async () => {
+      const invalidResponse = await uContr.signIn(
+        "whoDis",
+        "password",
+      );
+      expect(invalidResponse.status).toBe(404);
+    });
+
+    test("If password is incorrect, should return status 400", async () => {
+      const invalidResponse = await uContr.signIn(
+        "userName",
+        "wrongPassword",
+      );
+      expect(invalidResponse.status).toBe(400);
+    });
+  });
+
   let rawToken: string;
   describe("Email Confirmations", () => {
     test("Generating CONF properly updates User entry", async () => {

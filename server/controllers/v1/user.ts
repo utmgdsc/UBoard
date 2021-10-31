@@ -1,6 +1,8 @@
 import argon2 from "argon2";
-import EmailService from "../../services/emailService";
+import jwt from "jsonwebtoken";
+
 import { User } from "../../models/user";
+import EmailService from "../../services/emailService";
 
 export enum TOKEN_TYPE {
   RESET = "reset",
@@ -9,13 +11,117 @@ export enum TOKEN_TYPE {
 
 export default class UserController {
   protected userRepo: typeof User;
+  secret: string;
   protected emailService: EmailService;
 
   constructor(model: typeof User, emailService: EmailService) {
     this.userRepo = model;
+    this.secret = process.env.SECRET ? process.env.SECRET : "secret";
     this.emailService = emailService;
   }
 
+  /**
+   * Update the last login time of user to the current date.
+   */
+  private updateLastLogin = async (user: User): Promise<void> => {
+    user.lastLogin = new Date();
+    await user.save();
+  };
+
+  /**
+   * Sign in the user with the given credentials if the user exists.
+   * Generate auth token and update last login date.
+   * @returns status code and data payload
+   */
+  async signIn(
+    userName: string,
+    password: string
+  ): Promise<{ status: number; data: any }> {
+    try {
+      const oldUser = await this.userRepo.findOne({
+        where: {
+          userName: userName,
+        },
+      });
+      if (!oldUser) {
+        return { status: 404, data: { message: "User doesn't exist" } };
+      }
+
+      const isPasswordCorrect = await argon2.verify(
+        oldUser.password,
+        password,
+        {
+          type: argon2.argon2id,
+        }
+      );
+      if (!isPasswordCorrect) {
+        return { status: 400, data: { message: "Invalid credentials" } };
+      }
+
+      const token = jwt.sign(
+        { username: oldUser.userName, id: oldUser.id },
+        this.secret,
+        { expiresIn: "1h" }
+      );
+
+      await this.updateLastLogin(oldUser);
+
+      return { status: 200, data: { result: oldUser, token: token } };
+    } catch (error) {
+      console.log(error);
+      return { status: 500, data: { message: "Something went wrong" } };
+    }
+  }
+
+  /**
+   * Create a new user if the user does not already exist.
+   * Generate auth token, update last login date, and send confirmation email.
+   * @returns status code and data payload
+   */
+  async createUser(
+    email: string,
+    userName: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ): Promise<{ status: number; data: any }> {
+    try {
+      const oldUser = await this.userRepo.findOne({
+        where: {
+          userName: userName,
+        },
+      });
+      if (oldUser) {
+        return { status: 400, data: { message: "User already exists" } };
+      }
+
+      const hashedPassword = await argon2.hash(password, {
+        type: argon2.argon2id,
+      });
+
+      const result: User = await this.userRepo.create({
+        email: email,
+        userName: userName,
+        password: hashedPassword,
+        firstName: firstName,
+        lastName: lastName,
+      });
+
+      const token = jwt.sign(
+        { userName: result.userName, id: result.id },
+        this.secret,
+        { expiresIn: "1h" }
+      );
+
+      await this.updateLastLogin(result);
+      await this.sendEmailConfirmation(result.email);
+
+      return { status: 201, data: { result: result, token: token } };
+    } catch (error) {
+      console.log(error);
+      return { status: 500, data: { message: "Something went wrong" } };
+    }
+  }
   /* Email Related */
 
   /** Generates and returns a random alphanumeric string. Used in validating
@@ -128,7 +234,6 @@ export default class UserController {
   /** Generate and send the user an email to confirm their account.
       Returns the success status. */
   async sendEmailConfirmation(emailAddress: string): Promise<boolean> {
-    // TODO: @Daniel add this to sign up
     const user: User | null = await this.userRepo.findOne({
       where: { email: emailAddress.toLowerCase() },
     });

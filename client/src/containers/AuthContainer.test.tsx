@@ -1,13 +1,12 @@
 import React from "react";
-// import { render, screen } from "@testing-library/react";
+
 import AuthContainer from "./AuthContainer";
 import { unmountComponentAtNode } from "react-dom";
 import { act, Simulate } from "react-dom/test-utils";
-// import fireEvent from "@testing-library/react";
+
 import { render, screen, fireEvent } from "@testing-library/react";
 
-// let container: HTMLElement = null;
-let container: any = null;
+let container: HTMLElement | null = null;
 beforeEach(() => {
   // setup a DOM element as a render target
   container = document.createElement("div");
@@ -16,9 +15,11 @@ beforeEach(() => {
 
 afterEach(() => {
   // cleanup on exiting
-  unmountComponentAtNode(container);
-  container.remove();
-  container = null;
+  if (container != null) {
+    unmountComponentAtNode(container);
+    container.remove();
+    container = null;
+  }
 });
 
 describe("test Auth Pages", () => {
@@ -63,7 +64,7 @@ describe("test Auth Pages", () => {
   });
 });
 
-describe("verifying valid input for login and sigup page", () => {
+describe("verifying valid input for sigup page", () => {
   it("only allow valid uToronto email addresse", () => {
     act(() => {
       render(<AuthContainer />);

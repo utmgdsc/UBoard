@@ -64,7 +64,7 @@ describe("test Auth Pages", () => {
   });
 });
 
-describe("verifying valid input for sigup page", () => {
+describe("verifying valid input for signup page", () => {
   it("only allows valid uToronto email addresses", () => {
     act(() => {
       render(<AuthContainer />);

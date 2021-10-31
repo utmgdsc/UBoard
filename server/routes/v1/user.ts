@@ -10,14 +10,21 @@ const uContr = new UserController(db.User, eServ);
 userRouter.get(
   "/confirmation/c=:token",
   async (req: Request, res: Response) => {
-    const status: boolean = await uContr.confirmEmail(req.params.token);
+    const token = req.params.token;
+
+    if (!token) {
+      res.status(400).send({ code: 400, message: "Missing token." });
+      return;
+    }
+
+    const status = await uContr.confirmEmail(token);
 
     if (status) {
-      res.status(200).send("Your email address has been confirmed. ");
+      res.status(204);
     } else {
       res
-        .status(401)
-        .send("An error occurred. The link is either invalid or expired. ");
+        .status(400)
+        .send({ code: 400, message: "Token is invalid or expired." });
     }
   }
 );
@@ -25,16 +32,26 @@ userRouter.get(
 userRouter.get(
   "/reset-password/r=:token",
   async (req: Request, res: Response) => {
-    const status: boolean = await uContr.resetPassword(
+    if (!req.params.token || !req.body.pass || !req.body.confpw) {
+      res.status(400).send({
+        code: 400,
+        message: "Missing token or password.",
+      });
+      return;
+    }
+
+    const status = await uContr.resetPassword(
       req.params.token,
       req.body.pass,
       req.body.confpw
     );
 
     if (status) {
-      res.status(200).send("Your password has been changed!");
+      res.status(204);
     } else {
-      res.status(401).send("An error occurred.");
+      res
+        .status(400)
+        .send({ code: 400, message: "Token is invalid or expired." });
     }
   }
 );

@@ -1,6 +1,6 @@
 import express from "express";
 import db from "./models/index";
-import allRoutes from "./routes/v1";
+import v1Routes from "./routes/v1";
 
 const app = express();
 const port = 8080;
@@ -8,7 +8,7 @@ const port = 8080;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/v1/", allRoutes);
+app.use("api/v1/", v1Routes);
 
 db.sequelize.sync().then(() => {
   app.listen(port, () => {

@@ -4,11 +4,7 @@ import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import CircleOutlined from "@material-ui/icons/AddCircleOutlineOutlined";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 
-interface SignUpProps {
-  handleChange: Function;
-}
-
-function SignUp(props: SignUpProps) {
+function SignUp(props: { handleChange: Function }) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",

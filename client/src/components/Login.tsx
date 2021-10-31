@@ -3,11 +3,7 @@ import React, { useState } from "react";
 import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 
-interface LogInProps {
-  handleChange: Function;
-}
-
-function Login(props: LogInProps) {
+function Login(props: { handleChange: Function }) {
   const paperStyle = {
     padding: 18,
     borderRadius: "20px",

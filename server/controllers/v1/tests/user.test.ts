@@ -65,18 +65,10 @@ describe("v1 - User Controller", () => {
     describe("On success", () => {
       test("Status code 201 should be returned", () => {
         expect(createUserResponse.status).toBe(201);
-      })
+      });
 
       test("User Model should contain user", () => {
         expect(createdUser).toBeDefined();
-      });
-
-      test("jwt should be generated", () => {
-        expect(createUserResponse.data.token).toBeDefined();
-      });
-
-      test("Last login date should be updated", () => {
-        expect(createdUser.lastLogin.getTime()).toBeGreaterThan(createUserDate.getTime());
       });
 
       test("Email token should be generated", () => {
@@ -101,10 +93,7 @@ describe("v1 - User Controller", () => {
 
   beforeAll(async () => {
     signInDate = new Date();
-    signInResponse = await uContr.signIn(
-      "userName",
-      "password",
-    );
+    signInResponse = await uContr.signIn("userName", "password");
     signedInUser = (await userRepo.findOne({
       where: {
         userName: "userName",
@@ -116,30 +105,22 @@ describe("v1 - User Controller", () => {
     describe("On success", () => {
       test("Status code 200 should be returned", () => {
         expect(signInResponse.status).toBe(200);
-      })
-
-      test("jwt should be generated", async () => {
-        expect(signInResponse.data.token).toBeDefined();
       });
-  
+
       test("Last login date should be updated", () => {
-        expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(signInDate.getTime());
+        expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(
+          signInDate.getTime()
+        );
       });
     });
 
     test("If user does not exist, should return status 404", async () => {
-      const invalidResponse = await uContr.signIn(
-        "whoDis",
-        "password",
-      );
+      const invalidResponse = await uContr.signIn("whoDis", "password");
       expect(invalidResponse.status).toBe(404);
     });
 
     test("If password is incorrect, should return status 400", async () => {
-      const invalidResponse = await uContr.signIn(
-        "userName",
-        "wrongPassword",
-      );
+      const invalidResponse = await uContr.signIn("userName", "wrongPassword");
       expect(invalidResponse.status).toBe(400);
     });
   });

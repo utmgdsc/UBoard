@@ -1,5 +1,4 @@
 import argon2 from "argon2";
-import jwt from "jsonwebtoken";
 
 import { User } from "../../models/user";
 import EmailService from "../../services/emailService";
@@ -11,12 +10,10 @@ export enum TOKEN_TYPE {
 
 export default class UserController {
   protected userRepo: typeof User;
-  secret: string;
   protected emailService: EmailService;
 
   constructor(model: typeof User, emailService: EmailService) {
     this.userRepo = model;
-    this.secret = process.env.SECRET ? process.env.SECRET : "secret";
     this.emailService = emailService;
   }
 
@@ -36,7 +33,7 @@ export default class UserController {
   async signIn(
     userName: string,
     password: string
-  ): Promise<{ status: number; data: any }> {
+  ): Promise<{ status: number; data: { result?: User; message?: string } }> {
     try {
       const oldUser = await this.userRepo.findOne({
         where: {
@@ -58,17 +55,11 @@ export default class UserController {
         return { status: 400, data: { message: "Invalid credentials" } };
       }
 
-      const token = jwt.sign(
-        { username: oldUser.userName, id: oldUser.id },
-        this.secret,
-        { expiresIn: "1h" }
-      );
+      this.updateLastLogin(oldUser);
 
-      await this.updateLastLogin(oldUser);
-
-      return { status: 200, data: { result: oldUser, token: token } };
+      return { status: 200, data: { result: oldUser } };
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return { status: 500, data: { message: "Something went wrong" } };
     }
   }
@@ -84,7 +75,7 @@ export default class UserController {
     password: string,
     firstName: string,
     lastName: string
-  ): Promise<{ status: number; data: any }> {
+  ): Promise<{ status: number; data: { message: string } }> {
     try {
       const oldUser = await this.userRepo.findOne({
         where: {
@@ -107,18 +98,11 @@ export default class UserController {
         lastName: lastName,
       });
 
-      const token = jwt.sign(
-        { userName: result.userName, id: result.id },
-        this.secret,
-        { expiresIn: "1h" }
-      );
-
-      await this.updateLastLogin(result);
       await this.sendEmailConfirmation(result.email);
 
-      return { status: 201, data: { result: result, token: token } };
+      return { status: 201, data: { message: "Confirmation email sent" } };
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return { status: 500, data: { message: "Something went wrong" } };
     }
   }

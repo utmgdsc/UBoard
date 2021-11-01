@@ -25,7 +25,7 @@ afterAll(async () => {
 
 describe("v1 - User Routes", () => {
   describe("/signup endpoint", () => {
-    test("If successful signup, returns 201 and creates cookie", async () => {
+    test("If successful signup, returns 201", async () => {
       const data = {
         email: "email@mail.utoronto.ca",
         userName: "userName",
@@ -38,10 +38,9 @@ describe("v1 - User Routes", () => {
       await signUpHandler(req, res);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalled();
-      expect(res.cookie).toHaveBeenCalledTimes(1);
     });
 
-    test("If unsuccessful signup, returns error status and does not create cookie", async () => {
+    test("If unsuccessful signup, returns error status", async () => {
       const data = {
         email: "email@mail.yahoo.ca",
         userName: "userName",
@@ -54,31 +53,32 @@ describe("v1 - User Routes", () => {
       await signUpHandler(req, res);
       expect(res.status).not.toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalled();
-      expect(res.cookie).toHaveBeenCalledTimes(0);
     });
   });
 
   describe("/signin endpoint", () => {
-    test("If successful signup, returns 200 and creates cookie", async () => {
+    test("If successful signin, returns 200 and creates cookie", async () => {
       const data = {
         userName: "userName",
         password: "password",
       };
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
+      process.env.SECRET = "test";
       await signInHandler(req, res);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalled();
       expect(res.cookie).toHaveBeenCalledTimes(1);
     });
 
-    test("If successful signup, returns error code and does not create cookie", async () => {
+    test("If unsuccessful signin, returns error code and does not create cookie", async () => {
       const data = {
         userName: "userName",
         password: "wrongPassword",
       };
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
+      process.env.SECRET = "test";
       await signInHandler(req, res);
       expect(res.status).not.toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalled();

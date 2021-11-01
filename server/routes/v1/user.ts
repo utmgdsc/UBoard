@@ -15,7 +15,7 @@ export const uContr: UserController = new UserController(
 );
 
 let response;
-let user: User;
+let user: User | undefined;
 
 export async function signInHandler(req: Request, res: Response) {
   const { userName, password } = req.body;
@@ -23,22 +23,27 @@ export async function signInHandler(req: Request, res: Response) {
   user = response.data.result;
 
   if (user) {
-    if (!process.env.secret) {
-      res.status(500).json({ message: "Undefined secret" });
-      return;
+    if (!process.env.SECRET) {
+      throw "Undefined secret";
     }
 
-    const token = jwt.sign(
-      { username: user.userName, id: user.id },
-      process.env.secret,
-      { expiresIn: "1h" }
-    );
+    try {
+      const token = jwt.sign(
+        { username: user.userName, id: user.id },
+        process.env.SECRET,
+        { expiresIn: "1h" }
+      );
 
-    res.cookie("token", JSON.stringify(token), {
-      httpOnly: true,
-      expires: moment().add(1, "hour").toDate(),
-      signed: true,
-    });
+      res.cookie("token", JSON.stringify(token), {
+        httpOnly: true,
+        expires: moment().add(1, "hour").toDate(),
+        signed: true,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Something went wrong" });
+      return;
+    }
   }
 
   res.status(response.status).json(response.data);
@@ -61,7 +66,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   const token = req.params.token;
 
   if (!token) {
-    res.status(400).send({ code: 400, message: "Missing token." });
+    res.status(400).json({ code: 400, message: "Missing token." });
     return;
   }
 
@@ -72,13 +77,13 @@ async function confirmEmailHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .send({ code: 400, message: "Token is invalid or expired." });
+      .json({ code: 400, message: "Token is invalid or expired." });
   }
 }
 
 async function resetPassHandler(req: Request, res: Response) {
   if (!req.params.token || !req.body.pass || !req.body.confpw) {
-    res.status(400).send({
+    res.status(400).json({
       code: 400,
       message: "Missing token or password.",
     });
@@ -96,7 +101,7 @@ async function resetPassHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .send({ code: 400, message: "Token is invalid or expired." });
+      .json({ code: 400, message: "Token is invalid or expired." });
   }
 }
 

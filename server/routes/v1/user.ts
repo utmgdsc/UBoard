@@ -17,36 +17,48 @@ export const uContr: UserController = new UserController(
 let response;
 let user: User | undefined;
 
+async function signOutHandler(req: Request, res: Response) {
+  res
+    .clearCookie("token", {
+      httpOnly: true,
+      signed: true,
+    })
+    .status(200)
+    .json({ message: "Signed out successfully" });
+}
+
 export async function signInHandler(req: Request, res: Response) {
-  const { userName, password } = req.body;
-  response = await uContr.signIn(userName, password);
-  user = response.data.result;
+  try {
+    const { userName, password } = req.body;
+    response = await uContr.signIn(userName, password);
+    user = response.data.result;
 
-  if (user) {
-    if (!process.env.SECRET) {
-      throw "Undefined secret";
-    }
+    if (user) {
+      if (!process.env.SECRET) {
+        throw "Undefined secret";
+      }
 
-    try {
       const token = jwt.sign(
         { username: user.userName, id: user.id },
         process.env.SECRET,
         { expiresIn: "1h" }
       );
 
-      res.cookie("token", JSON.stringify(token), {
-        httpOnly: true,
-        expires: moment().add(1, "hour").toDate(),
-        signed: true,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Something went wrong" });
-      return;
+      res
+        .cookie("token", JSON.stringify(token), {
+          httpOnly: true,
+          expires: moment().add(1, "hour").toDate(),
+          signed: true,
+        })
+        .status(response.status)
+        .json(response.data);
+    } else {
+      res.status(response.status).json(response.data);
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Something went wrong" });
   }
-
-  res.status(response.status).json(response.data);
 }
 
 export async function signUpHandler(req: Request, res: Response) {
@@ -108,6 +120,7 @@ async function resetPassHandler(req: Request, res: Response) {
 if (process.env.CI && process.env.CI == "false") {
   userRouter.post("/signin", signInHandler);
   userRouter.post("/signup", signUpHandler);
+  userRouter.post("/signout", signOutHandler);
 
   userRouter.get("/confirmation/c=:token", confirmEmailHandler);
   userRouter.get("/reset-password/r=:token", resetPassHandler);

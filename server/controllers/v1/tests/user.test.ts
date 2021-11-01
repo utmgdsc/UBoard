@@ -91,27 +91,10 @@ describe("v1 - User Controller", () => {
     });
   });
 
-  beforeAll(async () => {
-    signInDate = new Date();
-    signInResponse = await uContr.signIn("userName", "password");
-    signedInUser = (await userRepo.findOne({
-      where: {
-        userName: "userName",
-      },
-    })) as User;
-  });
-
   describe("signIn method", () => {
-    describe("On success", () => {
-      test("Status code 200 should be returned", () => {
-        expect(signInResponse.status).toBe(200);
-      });
-
-      test("Last login date should be updated", () => {
-        expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(
-          signInDate.getTime()
-        );
-      });
+    test("If email has not been confirmed, should return status 403", async () => {
+      signInResponse = await uContr.signIn("userName", "password");
+      expect(signInResponse.status).toBe(403);
     });
 
     test("If user does not exist, should return status 404", async () => {
@@ -122,6 +105,35 @@ describe("v1 - User Controller", () => {
     test("If password is incorrect, should return status 400", async () => {
       const invalidResponse = await uContr.signIn("userName", "wrongPassword");
       expect(invalidResponse.status).toBe(400);
+    });
+
+    describe("On success", () => {
+      beforeAll(async () => {
+        signedInUser = (await userRepo.findOne({
+          where: {
+            userName: "userName",
+          },
+        })) as User;
+        signedInUser.confirmed = true;
+        signedInUser.save();
+        signInDate = new Date();
+        signInResponse = await uContr.signIn("userName", "password");
+      });
+
+      test("Status code 200 should be returned", async () => {
+        expect(signInResponse.status).toBe(200);
+      });
+
+      test("Last login date should be updated", async () => {
+        signedInUser = (await userRepo.findOne({
+          where: {
+            userName: "userName",
+          },
+        })) as User;
+        expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(
+          signInDate.getTime()
+        );
+      });
     });
   });
 

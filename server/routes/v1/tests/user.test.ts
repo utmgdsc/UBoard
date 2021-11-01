@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 
 import db from "../../../models/index";
+import { User } from "../../../models/user";
 import { signUpHandler, signInHandler } from "../user";
 
 function mockRequest(data: any) {
@@ -65,6 +66,14 @@ describe("v1 - User Routes", () => {
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
       process.env.SECRET = "test";
+      const userRepo: typeof User = db.User;
+      const signedInUser = (await userRepo.findOne({
+        where: {
+          userName: "userName",
+        },
+      })) as User;
+      signedInUser.confirmed = true;
+      signedInUser.save();
       await signInHandler(req, res);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalled();

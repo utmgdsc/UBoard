@@ -55,6 +55,10 @@ export default class UserController {
         return { status: 400, data: { message: "Invalid credentials" } };
       }
 
+      if (!oldUser.confirmed) {
+        return { status: 403, data: { message: "Email has not been confirmed" }}
+      }
+
       this.updateLastLogin(oldUser);
 
       return { status: 200, data: { result: oldUser } };

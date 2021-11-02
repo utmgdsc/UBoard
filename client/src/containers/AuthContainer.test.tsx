@@ -1,8 +1,6 @@
-import React from "react";
-
 import AuthContainer from "./AuthContainer";
 import { unmountComponentAtNode } from "react-dom";
-import { act, Simulate } from "react-dom/test-utils";
+import { act } from "react-dom/test-utils";
 
 import { render, screen, fireEvent } from "@testing-library/react";
 

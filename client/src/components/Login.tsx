@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 
-import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
+
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Avatar from "@mui/material/Avatar";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+
+
+import LockOutlined from "@mui/icons-material/LockOutlined";
 
 function Login(props: { handleChange: Function }) {
   const paperStyle = {
@@ -51,7 +59,7 @@ function Login(props: { handleChange: Function }) {
       <Grid container justifyContent="center">
         <Grid item>
           <Avatar style={avatarStyle}>
-            <LockOutlinedIcon fontSize="large" />
+            <LockOutlined fontSize="large" />
           </Avatar>
         </Grid>
       </Grid>

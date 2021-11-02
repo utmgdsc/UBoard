@@ -1,6 +1,6 @@
 import sgMail from "@sendgrid/mail";
 export default class EmailService {
-  apiRoute: string;
+  private apiRoute: string;
 
   constructor(apiRoute: string = `${process.env.PAGE_URL}api/v1/user`) {
     this.apiRoute = apiRoute;

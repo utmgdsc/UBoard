@@ -65,7 +65,7 @@ describe("v1 - User Routes", () => {
       };
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
-      process.env.SECRET = "test";
+      process.env.JWT_SECRET = "test";
       const userRepo: typeof User = db.User;
       const signedInUser = (await userRepo.findOne({
         where: {
@@ -87,7 +87,7 @@ describe("v1 - User Routes", () => {
       };
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
-      process.env.SECRET = "test";
+      process.env.JWT_SECRET = "test";
       await signInHandler(req, res);
       expect(res.status).not.toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalled();

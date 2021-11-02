@@ -9,7 +9,7 @@ import { User } from "../../models/user";
 
 const userRouter = express.Router();
 
-export const uContr: UserController = new UserController(
+const uContr: UserController = new UserController(
   db.User,
   new EmailService()
 );
@@ -30,17 +30,23 @@ async function signOutHandler(req: Request, res: Response) {
 export async function signInHandler(req: Request, res: Response) {
   try {
     const { userName, password } = req.body;
+
+    if (!userName || !password) {
+      res.status(400).json({ message: "Username or password is undefined" });
+      return;
+    }
+
     response = await uContr.signIn(userName, password);
     user = response.data.result;
 
     if (user) {
-      if (!process.env.SECRET) {
+      if (!process.env.JWT_SECRET) {
         throw "Undefined secret";
       }
 
       const token = jwt.sign(
         { username: user.userName, id: user.id },
-        process.env.SECRET,
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );
 
@@ -63,6 +69,11 @@ export async function signInHandler(req: Request, res: Response) {
 
 export async function signUpHandler(req: Request, res: Response) {
   const { email, userName, password, firstName, lastName } = req.body;
+
+  if (!email || !userName || !password || !firstName || !lastName) {
+    res.status(400).json({ message: "Missing values in request body" });
+  }
+
   response = await uContr.createUser(
     email,
     userName,
@@ -85,7 +96,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   const status = await uContr.confirmEmail(token);
 
   if (status) {
-    res.status(204);
+    res.status(200).json({ message: "Email successfully confirmed" });
   } else {
     res
       .status(400)

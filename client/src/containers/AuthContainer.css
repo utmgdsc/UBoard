@@ -1,5 +1,6 @@
 .AuthContainer {
-  background: url("../assets/background.jpg");
+  /* background: url("../assets/background.jpg"); */
+  background-color: #488fe0;
   width: 100vw;
   height: 100vh;
 }

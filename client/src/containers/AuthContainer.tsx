@@ -1,13 +1,14 @@
 import React, { useState } from "react";
+ 
+import Tabs from "@mui/material/Tabs";
+import Tab from "@mui/material/Tab";
 
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Grid";
 
-import Box from "@material-ui/core/Box";
-import Paper from "@material-ui/core/Paper";
-import Grid from "@material-ui/core/Grid";
 
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import Login from "../components/Login";
 import SignUp from "../components/SignUp";

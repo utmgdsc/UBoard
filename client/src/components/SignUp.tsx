@@ -1,8 +1,12 @@
 import React, { useState } from "react";
-
-import { Grid, Paper, Avatar, TextField, Button, Box } from "@material-ui/core";
-import CircleOutlined from "@material-ui/icons/AddCircleOutlineOutlined";
-import useMediaQuery from "@material-ui/core/useMediaQuery";
+import Grid from "@mui/material/Grid";
+import Paper from "@mui/material/Paper";
+import Avatar from "@mui/material/Avatar";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 function SignUp(props: { handleChange: Function }) {
   const paperStyle = {

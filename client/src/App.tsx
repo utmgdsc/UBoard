@@ -1,11 +1,13 @@
 import "./App.css";
+import PostDashboard from "./components/PostDashboard";
 
 import { AuthContainer } from "./containers";
 
 function App() {
   return (
     <div>
-      <AuthContainer />
+      {/* <AuthContainer /> */}
+      <PostDashboard/>
     </div>
   );
 }

@@ -35,17 +35,17 @@ export default class UserController {
     password: string
   ): Promise<{ status: number; data: { result?: User; message?: string } }> {
     try {
-      const oldUser = await this.userRepo.findOne({
+      const user = await this.userRepo.findOne({
         where: {
           userName: userName,
         },
       });
-      if (!oldUser) {
+      if (!user) {
         return { status: 404, data: { message: "User doesn't exist" } };
       }
 
       const isPasswordCorrect = await argon2.verify(
-        oldUser.password,
+        user.password,
         password,
         {
           type: argon2.argon2id,
@@ -55,16 +55,16 @@ export default class UserController {
         return { status: 400, data: { message: "Invalid credentials" } };
       }
 
-      if (!oldUser.confirmed) {
+      if (!user.confirmed) {
         return { status: 403, data: { message: "Email has not been confirmed" }}
       }
 
-      this.updateLastLogin(oldUser);
+      this.updateLastLogin(user);
 
-      return { status: 200, data: { result: oldUser } };
+      return { status: 204, data: { result: user } };
     } catch (error) {
       console.error(error);
-      return { status: 500, data: { message: "Something went wrong" } };
+      return { status: 500, data: { message: "Internal server error" } };
     }
   }
 
@@ -79,14 +79,14 @@ export default class UserController {
     password: string,
     firstName: string,
     lastName: string
-  ): Promise<{ status: number; data: { message: string } }> {
+  ): Promise<{ status: number; data: { message?: string } }> {
     try {
-      const oldUser = await this.userRepo.findOne({
+      const user = await this.userRepo.findOne({
         where: {
           userName: userName,
         },
       });
-      if (oldUser) {
+      if (user) {
         return { status: 400, data: { message: "User already exists" } };
       }
 
@@ -104,10 +104,10 @@ export default class UserController {
 
       await this.sendEmailConfirmation(result.email);
 
-      return { status: 201, data: { message: "Confirmation email sent" } };
+      return { status: 204, data: {} };
     } catch (error) {
       console.error(error);
-      return { status: 500, data: { message: "Something went wrong" } };
+      return { status: 500, data: { message: "Internal server error" } };
     }
   }
   /* Email Related */

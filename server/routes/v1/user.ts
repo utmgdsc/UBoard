@@ -1,30 +1,25 @@
 import express, { Request, Response } from "express";
-import moment from "moment";
 import jwt from "jsonwebtoken";
 
 import EmailService from "../../services/emailService";
 import db from "../../models";
 import UserController from "../../controllers/v1/user";
-import { User } from "../../models/user";
 
 const userRouter = express.Router();
+const apiRoute = `${process.env.PAGE_URL}api/v1`;
+const cookie_key = "token";
 
 const uContr: UserController = new UserController(
   db.User,
-  new EmailService()
+  new EmailService(apiRoute)
 );
 
-let response;
-let user: User | undefined;
-
-async function signOutHandler(req: Request, res: Response) {
+async function signOut(req: Request, res: Response) {
   res
-    .clearCookie("token", {
+    .clearCookie(cookie_key, {
       httpOnly: true,
-      signed: true,
     })
-    .status(200)
-    .json({ message: "Signed out successfully" });
+    .status(204).json();
 }
 
 export async function signInHandler(req: Request, res: Response) {
@@ -32,29 +27,36 @@ export async function signInHandler(req: Request, res: Response) {
     const { userName, password } = req.body;
 
     if (!userName || !password) {
-      res.status(400).json({ message: "Username or password is undefined" });
+      res.status(400).json({
+        message: !userName
+          ? !password
+            ? "Username and password"
+            : "Username"
+          : "Password" + " is undefined",
+      });
       return;
     }
 
-    response = await uContr.signIn(userName, password);
-    user = response.data.result;
+    const response = await uContr.signIn(userName, password);
+    const user = response.data.result;
 
     if (user) {
-      if (!process.env.JWT_SECRET) {
-        throw "Undefined secret";
-      }
-
       const token = jwt.sign(
         { username: user.userName, id: user.id },
-        process.env.JWT_SECRET,
+        process.env.JWT_SECRET as string,
         { expiresIn: "1h" }
       );
 
+      const getDateOffset = (hours: number) => {
+        const today = new Date();
+        today.setHours(today.getHours() + hours);
+        return today;
+      };
+
       res
-        .cookie("token", JSON.stringify(token), {
+        .cookie(cookie_key, JSON.stringify(token), {
           httpOnly: true,
-          expires: moment().add(1, "hour").toDate(),
-          signed: true,
+          expires: getDateOffset(1),
         })
         .status(response.status)
         .json(response.data);
@@ -63,7 +65,7 @@ export async function signInHandler(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "Internal server error" });
   }
 }
 
@@ -72,9 +74,10 @@ export async function signUpHandler(req: Request, res: Response) {
 
   if (!email || !userName || !password || !firstName || !lastName) {
     res.status(400).json({ message: "Missing values in request body" });
+    return;
   }
 
-  response = await uContr.createUser(
+  const response = await uContr.createUser(
     email,
     userName,
     password,
@@ -93,10 +96,8 @@ async function confirmEmailHandler(req: Request, res: Response) {
     return;
   }
 
-  const status = await uContr.confirmEmail(token);
-
-  if (status) {
-    res.status(200).json({ message: "Email successfully confirmed" });
+  if (await uContr.confirmEmail(token)) {
+    res.status(204).json();
   } else {
     res
       .status(400)
@@ -105,7 +106,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
 }
 
 async function resetPassHandler(req: Request, res: Response) {
-  if (!req.params.token || !req.body.pass || !req.body.confpw) {
+  if (!req.params.token || !req.body.password || !req.body.confpw) {
     res.status(400).json({
       code: 400,
       message: "Missing token or password.",
@@ -115,12 +116,12 @@ async function resetPassHandler(req: Request, res: Response) {
 
   const status = await uContr.resetPassword(
     req.params.token,
-    req.body.pass,
+    req.body.password,
     req.body.confpw
   );
 
   if (status) {
-    res.status(204);
+    res.status(204).json();
   } else {
     res
       .status(400)
@@ -128,13 +129,11 @@ async function resetPassHandler(req: Request, res: Response) {
   }
 }
 
-if (process.env.CI && process.env.CI == "false") {
-  userRouter.post("/signin", signInHandler);
-  userRouter.post("/signup", signUpHandler);
-  userRouter.post("/signout", signOutHandler);
+userRouter.post("/signin", signInHandler);
+userRouter.post("/signup", signUpHandler);
+userRouter.post("/signout", signOut);
 
-  userRouter.get("/confirmation/c=:token", confirmEmailHandler);
-  userRouter.get("/reset-password/r=:token", resetPassHandler);
-}
+userRouter.get("/confirmation/c=:token", confirmEmailHandler);
+userRouter.get("/reset-password/r=:token", resetPassHandler);
 
 export default userRouter;

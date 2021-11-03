@@ -26,7 +26,7 @@ afterAll(async () => {
 
 describe("v1 - User Routes", () => {
   describe("/signup endpoint", () => {
-    test("If successful signup, returns 201", async () => {
+    test("If successful signup, returns 204", async () => {
       const data = {
         email: "email@mail.utoronto.ca",
         userName: "userName",
@@ -37,7 +37,7 @@ describe("v1 - User Routes", () => {
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
       await signUpHandler(req, res);
-      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.status).toHaveBeenCalledWith(204);
       expect(res.json).toHaveBeenCalled();
     });
 
@@ -52,7 +52,7 @@ describe("v1 - User Routes", () => {
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
       await signUpHandler(req, res);
-      expect(res.status).not.toHaveBeenCalledWith(201);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalled();
     });
   });
@@ -65,7 +65,6 @@ describe("v1 - User Routes", () => {
       };
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
-      process.env.JWT_SECRET = "test";
       const userRepo: typeof User = db.User;
       const signedInUser = (await userRepo.findOne({
         where: {
@@ -75,7 +74,7 @@ describe("v1 - User Routes", () => {
       signedInUser.confirmed = true;
       signedInUser.save();
       await signInHandler(req, res);
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(204);
       expect(res.json).toHaveBeenCalled();
       expect(res.cookie).toHaveBeenCalledTimes(1);
     });
@@ -87,9 +86,8 @@ describe("v1 - User Routes", () => {
       };
       const req = mockRequest(data) as Request;
       const res = mockResponse() as Response;
-      process.env.JWT_SECRET = "test";
       await signInHandler(req, res);
-      expect(res.status).not.toHaveBeenCalledWith(200);
+      expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalled();
       expect(res.cookie).toHaveBeenCalledTimes(0);
     });

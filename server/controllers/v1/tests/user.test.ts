@@ -16,6 +16,7 @@ jest.mock("../../../services/emailService", () => {
     };
   });
 });
+const apiRoute = `${process.env.PAGE_URL}api/v1`;
 
 const userRepo: typeof User = db.User;
 const EmailServiceMock = EmailService as jest.MockedClass<typeof EmailService>;
@@ -36,7 +37,7 @@ let signInDate: Date;
 
 beforeAll(async () => {
   await dbSync().catch((err) => fail(err));
-  uContr = new UserController(db.User, new EmailServiceMock());
+  uContr = new UserController(db.User, new EmailServiceMock(apiRoute));
 });
 
 beforeEach(async () => {
@@ -63,8 +64,8 @@ describe("v1 - User Controller", () => {
   });
   describe("createUser method", () => {
     describe("On success", () => {
-      test("Status code 201 should be returned", () => {
-        expect(createUserResponse.status).toBe(201);
+      test("Status code 204 should be returned", () => {
+        expect(createUserResponse.status).toBe(204);
       });
 
       test("User Model should contain user", () => {
@@ -120,8 +121,8 @@ describe("v1 - User Controller", () => {
         signInResponse = await uContr.signIn("userName", "password");
       });
 
-      test("Status code 200 should be returned", async () => {
-        expect(signInResponse.status).toBe(200);
+      test("Status code 204 should be returned", async () => {
+        expect(signInResponse.status).toBe(204);
       });
 
       test("Last login date should be updated", async () => {

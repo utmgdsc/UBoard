@@ -6,7 +6,6 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
-import useMediaQuery from "@mui/material/useMediaQuery";
 
 function SignUp(props: { handleChange: Function }) {
   const paperStyle = {
@@ -80,7 +79,7 @@ function SignUp(props: { handleChange: Function }) {
       setHook("");
     }
   };
-  const matches = useMediaQuery("(min-width: 1080px)");
+
   return (
     <Paper style={paperStyle} data-testid="SignUpTab">
       <Grid container justifyContent="center">
@@ -98,7 +97,7 @@ function SignUp(props: { handleChange: Function }) {
         <h1>Sign Up</h1>
       </Box>
       <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-        <Grid container spacing={matches ? 2 : 0}>
+        <Grid container spacing={0}>
           <Grid item xs={12} md={6}>
             <TextField
               label="First Name"

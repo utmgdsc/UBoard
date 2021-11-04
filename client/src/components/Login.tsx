@@ -1,27 +1,20 @@
 import React, { useState } from "react";
 
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Typography from "@mui/material/Typography";
 
-import LockOutlined from "@mui/icons-material/LockOutlined";
+import useWindowDimensions from "../hooks/window";
 
 function Login(props: { handleChange: Function }) {
-  const paperStyle = {
-    padding: 18,
-    borderRadius: "20px",
-    height: "600px",
-    display: "grid",
-  };
-
-  const avatarStyle = {
-    backgroundColor: "#f4003d",
-    width: 50,
-    height: 50,
-  };
+  const { height } = useWindowDimensions();
 
   // create hooks for username and password
   const [username, setUsername] = useState("");
@@ -39,80 +32,97 @@ function Login(props: { handleChange: Function }) {
   };
   const validateBlurPassword = (regexPattern: RegExp) => {
     if (!regexPattern.test(password)) {
-      setPasswordError("Ensure password is 8 characters or long");
+      setPasswordError("Ensure password is 8 characters or longer");
     } else {
       setPasswordError("");
     }
   };
 
   // handle function for submitting username and password
-  const handleSubmit = (e: React.ChangeEvent<{}>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
     // TODO api calls here after submit
   };
 
   return (
-    <Paper style={paperStyle} data-testid="LogInTab">
-      <Grid container justifyContent="center">
-        <Grid item>
-          <Avatar style={avatarStyle}>
-            <LockOutlined fontSize="large" />
-          </Avatar>
-        </Grid>
-      </Grid>
-
-      <Box textAlign="center">
-        <h1>Log In</h1>
-      </Box>
-      <form noValidate autoComplete="off" onSubmit={handleSubmit}>
+    <Box
+      data-testid="LogInTab"
+      sx={{
+        mx: 2,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+      overflow="auto"
+      maxHeight={height - 200 > 0 ? height - 200 : 0}
+    >
+      <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+        <LockOutlinedIcon />
+      </Avatar>
+      <Typography component="h1" variant="h5">
+        Sign in
+      </Typography>
+      <Box
+        component="form"
+        noValidate
+        autoComplete="off"
+        onSubmit={handleSubmit}
+        sx={{ mt: 1 }}
+      >
         <TextField
+          margin="normal"
           label="Username"
-          placeholder="Enter Username"
           onChange={(e) => setUsername(e.target.value)}
-          variant="outlined"
           fullWidth
           required
-          style={{ paddingBottom: "15px" }}
           onBlur={(e) => validateBlurUsername(/^[a-zA-Z0-9]+$/)}
           error={usernameError !== ""}
           helperText={usernameError}
         />
         <TextField
+          margin="normal"
           label="Password"
-          placeholder="Enter Password"
           onChange={(e) => setPassword(e.target.value)}
-          variant="outlined"
           fullWidth
           required
           type="password"
-          style={{ paddingBottom: "20px" }}
           onBlur={(e) => validateBlurPassword(/.{8,}/)}
           error={passwordError !== ""}
           helperText={passwordError}
         />
-
+        <FormControlLabel
+          control={<Checkbox value="remember" color="primary" />}
+          label="Remember me"
+        />
         <Button
           type="submit"
-          size="large"
-          color="primary"
           variant="contained"
           fullWidth
+          sx={{ mt: 3, mb: 2 }}
         >
-          Submit
+          Sign In
         </Button>
-      </form>
-
-      <Button
-        variant="outlined"
-        onClick={(e) => props.handleChange(e, 1)}
-        color="primary"
-        size="small"
-        data-testid="CreateAccountButton"
-      >
-        Create an Account
-      </Button>
-    </Paper>
+        <Grid container>
+          <Grid item xs>
+            <Link href="#" variant="body2">
+              Forgot password?
+            </Link>
+          </Grid>
+          <Grid item>
+            <Link
+              href="#"
+              variant="body2"
+              onClick={(e) => props.handleChange(e, 1)}
+              data-testid="CreateAccountButton"
+            >
+              Don't have an account? Sign Up
+            </Link>
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
   );
 }
+
 export default Login;

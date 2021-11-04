@@ -1,5 +1,8 @@
 .AuthContainer {
-  background-color: #488fe0;
+  background: url("https://cdn.skyrisecities.com/sites/default/files/images/projects/6977/6977-78314.jpeg");
   width: 100vw;
   height: 100vh;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }

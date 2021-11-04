@@ -6,8 +6,10 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 import Login from "../components/Login";
 import SignUp from "../components/SignUp";
@@ -29,70 +31,79 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`full-width-tab with index: ${index}`}
       {...rest}
     >
-      {value === index && (
-        <Box>
-          <div>{children}</div>
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
 
 function AuthContainer() {
-  const paperStyle = {
-    height: "100%",
-    borderRadius: "20px",
-  };
+  const theme = useTheme();
 
   const [tabIndex, setTabIndex] = useState(0);
 
-  const handleChange = (event: React.ChangeEvent<{}>, newValue: number) => {
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabIndex(newValue);
   };
 
-  const matches = useMediaQuery("(min-width: 1080px)");
+  const matches = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
     <div className="AuthContainer">
       <Grid
         container
-        justifyContent={matches ? "flex-end" : "center"}
-        style={{ padding: matches ? "20px" : 0 }}
+        component="main"
+        justifyContent="flex-end"
+        alignItems="center"
+        sx={{ height: "100vh", px: "40px" }}
       >
-        <Grid item md={7} lg={8} xl={9}>
+        <Grid item hidden={matches} xs={false} md={8}>
           <Box
-            style={{
+            sx={{
+              display: "flex",
+              flexDirection: "column",
               textAlign: "center",
-              paddingTop: matches ? "100px" : "0px",
+              alignItems: "center",
             }}
-            fontFamily="Verdana"
-            color="white"
           >
-            <h1 style={{ fontSize: matches ? "500%" : "200%" }}>UOFTBOARD</h1>
-            <h1>A place to connect</h1>
+            <Box bgcolor="rgba(83, 102, 133, 0.6)" p="40px" px="80px">
+              <Typography color="white" fontFamily="Verdana" variant="h2">
+                UBoard
+              </Typography>
+              <Typography color="white" fontFamily="Verdana" variant="h4">
+                A place to connect
+              </Typography>
+            </Box>
+            
           </Box>
         </Grid>
-
-        <Grid item md={5} lg={4} xl={3}>
-          <Paper elevation={5} style={paperStyle}>
-            <Tabs
-              value={tabIndex}
-              onChange={handleChange}
-              aria-label="Login and Signup tabs"
-              variant="fullWidth"
-              textColor="primary"
-            >
-              <Tab label="Login" data-testid="LogInTabButton" />
-              <Tab label="Sign Up" data-testid="SignUpTabButton" />
-            </Tabs>
-
+        <Grid
+          item
+          xs={12}
+          md={4}
+          component={Paper}
+          elevation={24}
+          sx={{ borderRadius: "30px" }}
+          overflow="hidden"
+        >
+          <Box sx={{ width: "100%" }}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={tabIndex}
+                onChange={handleChange}
+                aria-label="Login and Signup tabs"
+                variant="fullWidth"
+              >
+                <Tab label="Sign In" data-testid="LogInTabButton" />
+                <Tab label="Sign Up" data-testid="SignUpTabButton" />
+              </Tabs>
+            </Box>
             <TabPanel value={tabIndex} index={0}>
               <Login handleChange={handleChange} />
             </TabPanel>
             <TabPanel value={tabIndex} index={1}>
               <SignUp handleChange={handleChange} />
             </TabPanel>
-          </Paper>
+          </Box>
         </Grid>
       </Grid>
     </div>

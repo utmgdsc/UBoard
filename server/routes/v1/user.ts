@@ -32,7 +32,7 @@ export async function signInHandler(req: Request, res: Response) {
           ? !password
             ? "Username and password"
             : "Username"
-          : "Password" + " is undefined",
+          : "Password" + " not provided",
       });
       return;
     }
@@ -89,7 +89,7 @@ export async function signUpHandler(req: Request, res: Response) {
 }
 
 async function confirmEmailHandler(req: Request, res: Response) {
-  const token = req.params.token;
+  const token = req.query.c as string;
 
   if (!token) {
     res.status(400).json({ code: 400, message: "Missing token." });
@@ -106,7 +106,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
 }
 
 async function resetPassHandler(req: Request, res: Response) {
-  if (!req.params.token || !req.body.password || !req.body.confpw) {
+  if (!req.query.r || !req.body.password || !req.body.password_confirmation) {
     res.status(400).json({
       code: 400,
       message: "Missing token or password.",
@@ -115,9 +115,9 @@ async function resetPassHandler(req: Request, res: Response) {
   }
 
   const status = await uContr.resetPassword(
-    req.params.token,
+    req.query.r as string,
     req.body.password,
-    req.body.confpw
+    req.body.password_confirmation
   );
 
   if (status) {
@@ -133,7 +133,7 @@ userRouter.post("/signin", signInHandler);
 userRouter.post("/signup", signUpHandler);
 userRouter.post("/signout", signOut);
 
-userRouter.get("/confirmation/c=:token", confirmEmailHandler);
-userRouter.get("/reset-password/r=:token", resetPassHandler);
+userRouter.get("/confirm", confirmEmailHandler);
+userRouter.get("/reset", resetPassHandler);
 
 export default userRouter;

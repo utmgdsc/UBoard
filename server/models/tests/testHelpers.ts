@@ -2,15 +2,34 @@ import db from "../index";
 import { Post } from "../post";
 import { User } from "../user";
 
+const UserModel: typeof User = db.User;
+const PostModel: typeof Post = db.Post;
+
 /* 
 Create a User entry in our database with the given user and email string. Returns
 the entry that was created on success, or throws an error on failure.
 */
-const UserModel: typeof User = db.User;
-const PostModel: typeof Post = db.Post;
-
 export async function makeUser(user: string, email: string): Promise<User> {
   const testUser: User = await UserModel.create({
+    firstName: "test",
+    lastName: "test",
+    userName: user,
+    password: "pass",
+    email: email,
+  }).catch((err: Error) => {
+    throw err;
+  });
+
+  return testUser;
+}
+
+/* 
+Create a User entry in our database with the given user and email string
+with the password as part of the serialized object. Returns
+the entry that was created on success, or throws an error on failure.
+*/
+export async function makeUserWithPass(user: string, email: string): Promise<User> {
+  const testUser: User = await UserModel.scope("withPassword").create({
     firstName: "test",
     lastName: "test",
     userName: user,

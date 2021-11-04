@@ -35,7 +35,7 @@ export default class UserController {
     password: string
   ): Promise<{ status: number; data: { result?: User; message?: string } }> {
     try {
-      const user = await this.userRepo.findOne({
+      let user = await this.userRepo.scope("withPassword").findOne({
         where: {
           userName: userName,
         },
@@ -60,6 +60,16 @@ export default class UserController {
       }
 
       this.updateLastLogin(user);
+
+      user = await this.userRepo.findOne({
+        where: {
+          userName: userName,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User could not be found");
+      }
 
       return { status: 204, data: { result: user } };
     } catch (error) {

@@ -4,6 +4,15 @@ import { User } from "../models/user";
 
 const secret = process.env.JWT_SECRET as string;
 
+function getAuthUser(res: Response): User | undefined {
+  if (!res.locals.user) {
+    res.status(401).json({ message: "User is not authorized to perform this request" })
+    return;
+  } 
+
+  return res.locals.user;
+}
+
 function auth(userRepo: typeof User) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -22,7 +31,7 @@ function auth(userRepo: typeof User) {
       }
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Internal server error" });
+      res.status(401).json({ message: "Bad session" });
     }
   };
 }

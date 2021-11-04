@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import db from "../../../models";
-import { dbSync, makeUser } from "../../../models/tests/testHelpers";
+import { dbSync, makeUser, makeUserWithPass } from "../../../models/tests/testHelpers";
 import { User } from "../../../models/user";
 import UserController, { TOKEN_TYPE } from "../user";
 import EmailService from "../../../services/emailService";
@@ -135,6 +135,10 @@ describe("v1 - User Controller", () => {
           signInDate.getTime()
         );
       });
+
+      test("Password should not be included in serialized result", () => {
+        expect(signInResponse.data.result.password).not.toBeDefined();
+      });
     });
   });
 
@@ -190,7 +194,7 @@ describe("v1 - User Controller", () => {
 
   describe("Password Resets", () => {
     test("Generating password reset updates the user entry", async () => {
-      testPerson = await makeUser("constPers2", "lol2@utoronto.ca");
+      testPerson = await makeUserWithPass("constPers2", "lol2@utoronto.ca");
       expect(testPerson).toBeDefined();
 
       if (!testPerson) {

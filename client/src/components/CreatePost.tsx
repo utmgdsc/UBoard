@@ -9,19 +9,13 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-import DialogActions from "@mui/material/DialogActions";
-
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardActionArea from "@mui/material/CardActionArea";
-import CardContent from "@mui/material/CardContent";
-import CardMedia from "@mui/material/CardMedia";
 
 import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
 
 import PreviewPopUp from "./PreviewPopUp";
+import { DialogTitle } from "@mui/material";
 
 const theme = createTheme();
 
@@ -33,10 +27,25 @@ function CreatePost() {
   const [tags, setTags] = useState("");
   const [eventCapacity, setEventCapacity] = useState("");
   const [eventLocation, setEventLocation] = useState("");
-  const [openPopup, setOpenPopup] = useState(false);
 
+  const [openPopup, setOpenPopup] = useState(false);
+  const [openPopupError, setOpenPopupError] = useState(false);
+
+  const allFields = [title, body, file];
+
+  // handle functions
   const handleClickOpen = () => {
-    setOpenPopup(true);
+    let noEmptyFields = true;
+    allFields.map((inputField) => {
+      if (inputField === "") {
+        noEmptyFields = false;
+      }
+    });
+    if (noEmptyFields) {
+      setOpenPopup(true);
+    } else {
+      setOpenPopupError(true);
+    }
   };
 
   const handleClose = () => {
@@ -93,6 +102,7 @@ function CreatePost() {
 
               <Grid item xs={12}>
                 <TextField
+                  required
                   label="Upload Thumbnail"
                   type="file"
                   fullWidth
@@ -104,7 +114,6 @@ function CreatePost() {
 
               <Grid item xs={12}>
                 <TextField
-                  required
                   fullWidth
                   label="Tags (Separate tags by a comma)"
                   placeholder="Clubs, Math, MCS"
@@ -115,7 +124,6 @@ function CreatePost() {
 
               <Grid item xs={12}>
                 <TextField
-                  fullWidth
                   label="Event Capacity"
                   placeholder="40"
                   size="small"
@@ -175,6 +183,37 @@ function CreatePost() {
             openPopup={openPopup}
             handleClose={handleClose}
           ></PreviewPopUp>
+
+          {/* Display Error */}
+
+          <Dialog open={openPopupError}>
+            <DialogTitle>
+              <Typography
+                variant="h5"
+                component="h2"
+                fontWeight="bold"
+                color="red"
+              >
+                Missing Fields *
+              </Typography>
+            </DialogTitle>
+            <DialogContent>
+              <Typography color="red">
+                Ensure all required fields are filled
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                variant="contained"
+                onClick={() => setOpenPopupError(false)}
+                color="secondary"
+              >
+                Back
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/*  */}
         </Box>
       </Container>
     </ThemeProvider>

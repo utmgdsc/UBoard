@@ -2,6 +2,7 @@ import express, {Request, Response} from 'express';
 import db from '../../models';
 import PostController from '../../controllers/v1/post';
 import {User} from '../../models/user';
+import {getAuthUser} from '../../middleware/auth';
 
 const postRouter = express.Router();
 const postController = new PostController(db.User);
@@ -38,16 +39,18 @@ postRouter.put('/:postid/report', async (req: Request, res: Response) => {
 });
 
 postRouter.post('/', async (req: Request, res: Response) => {
-  const result = await postController.createPost(
-    // TODO use the helper function.
-    (res.locals.user as User).id,
-    req.body.title,
-    req.body.body,
-    req.body.location,
-    req.body.capacity
-  );
-
-  res.status(result.status).send(result);
+  try {
+    const result = await postController.createPost(
+      getAuthUser(res).id,
+      req.body.title,
+      req.body.body,
+      req.body.location,
+      req.body.capacity
+    );
+    res.status(result.status).send(result);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.put('/:postid', async (req: Request, res: Response) => {

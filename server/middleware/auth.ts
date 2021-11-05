@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { User } from "../models/user";
+import {Request, Response, NextFunction} from 'express';
+import jwt from 'jsonwebtoken';
+import {User} from '../models/user';
 
 const secret = process.env.JWT_SECRET as string;
 
@@ -12,17 +12,15 @@ class UnauthorizedError extends Error {
       Error.captureStackTrace(this, UnauthorizedError);
     }
 
-    this.name = "UnauthorizedError";
+    this.name = 'UnauthorizedError';
     this.message = message;
   }
 }
 
-export function getAuthUser(res: Response): User | undefined {
+export function getAuthUser(res: Response): User {
   if (!res.locals.user) {
-    const err = "User is not authorized to perform this request"
-    res
-      .status(401)
-      .json({ message: err });
+    const err = 'User is not authorized to perform this request';
+    res.status(401).json({message: err});
     throw new UnauthorizedError(err);
   }
 
@@ -43,11 +41,11 @@ function auth(userRepo: typeof User) {
         });
         next();
       } else {
-        res.status(401).json({ message: "Missing token in cookie" });
+        res.status(401).json({message: 'Missing token in cookie'});
       }
     } catch (error) {
       console.error(error);
-      res.status(401).json({ message: "Bad session" });
+      res.status(401).json({message: 'Bad session'});
     }
   };
 }

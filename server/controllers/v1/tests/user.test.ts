@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 import db from "../../../models";
-import { dbSync, makeUser } from "../../../models/tests/testHelpers";
+import { dbSync, makeUser, makeUserWithPass } from "../../../models/tests/testHelpers";
 import { User } from "../../../models/user";
 import UserController, { TOKEN_TYPE } from "../user";
 import EmailService from "../../../services/emailService";
@@ -16,14 +16,28 @@ jest.mock("../../../services/emailService", () => {
     };
   });
 });
+const apiRoute = `${process.env.PAGE_URL}api/v1`;
 
-const EmailServiceMock = EmailService as jest.MockedClass<any>;
+const userRepo: typeof User = db.User;
+const EmailServiceMock = EmailService as jest.MockedClass<typeof EmailService>;
 let testPerson: User;
 let uContr: UserController;
+let createdUser: User;
+let signedInUser: User;
+let createUserResponse: {
+  status: number;
+  data: any;
+};
+let signInResponse: {
+  status: number;
+  data: any;
+};
+let createUserDate: Date;
+let signInDate: Date;
 
 beforeAll(async () => {
   await dbSync().catch((err) => fail(err));
-  uContr = new UserController(db.User, new EmailServiceMock());
+  uContr = new UserController(db.User, new EmailServiceMock(apiRoute));
 });
 
 beforeEach(async () => {
@@ -32,7 +46,102 @@ beforeEach(async () => {
   fakeSendResetEmail.mockClear();
 });
 
-describe("Test v1 - User Controller", () => {
+describe("v1 - User Controller", () => {
+  beforeAll(async () => {
+    createUserDate = new Date();
+    createUserResponse = await uContr.createUser(
+      "email@mail.utoronto.ca",
+      "userName",
+      "password",
+      "firstName",
+      "lastName"
+    );
+    createdUser = (await userRepo.findOne({
+      where: {
+        userName: "userName",
+      },
+    })) as User;
+  });
+  describe("createUser method", () => {
+    describe("On success", () => {
+      test("Status code 204 should be returned", () => {
+        expect(createUserResponse.status).toBe(204);
+      });
+
+      test("User Model should contain user", () => {
+        expect(createdUser).toBeDefined();
+      });
+
+      test("Email token should be generated", () => {
+        expect(createdUser.confirmationToken).toContain(TOKEN_TYPE.CONF);
+        expect(createdUser.confirmationTokenExpires.getTime()).toBeGreaterThan(
+          createUserDate.getTime()
+        );
+      });
+    });
+
+    test("If user already exists, should return status 400", async () => {
+      createUserResponse = await uContr.createUser(
+        "email@mail.utoronto.ca",
+        "userName",
+        "password",
+        "firstName",
+        "lastName"
+      );
+      expect(createUserResponse.status).toBe(400);
+    });
+  });
+
+  describe("signIn method", () => {
+    test("If email has not been confirmed, should return status 403", async () => {
+      signInResponse = await uContr.signIn("userName", "password");
+      expect(signInResponse.status).toBe(403);
+    });
+
+    test("If user does not exist, should return status 404", async () => {
+      const invalidResponse = await uContr.signIn("whoDis", "password");
+      expect(invalidResponse.status).toBe(404);
+    });
+
+    test("If password is incorrect, should return status 400", async () => {
+      const invalidResponse = await uContr.signIn("userName", "wrongPassword");
+      expect(invalidResponse.status).toBe(400);
+    });
+
+    describe("On success", () => {
+      beforeAll(async () => {
+        signedInUser = (await userRepo.findOne({
+          where: {
+            userName: "userName",
+          },
+        })) as User;
+        signedInUser.confirmed = true;
+        signedInUser.save();
+        signInDate = new Date();
+        signInResponse = await uContr.signIn("userName", "password");
+      });
+
+      test("Status code 204 should be returned", async () => {
+        expect(signInResponse.status).toBe(204);
+      });
+
+      test("Last login date should be updated", async () => {
+        signedInUser = (await userRepo.findOne({
+          where: {
+            userName: "userName",
+          },
+        })) as User;
+        expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(
+          signInDate.getTime()
+        );
+      });
+
+      test("Password should not be included in serialized result", () => {
+        expect(signInResponse.data.result.password).not.toBeDefined();
+      });
+    });
+  });
+
   let rawToken: string;
   describe("Email Confirmations", () => {
     test("Generating CONF properly updates User entry", async () => {
@@ -85,7 +194,7 @@ describe("Test v1 - User Controller", () => {
 
   describe("Password Resets", () => {
     test("Generating password reset updates the user entry", async () => {
-      testPerson = await makeUser("constPers2", "lol2@utoronto.ca");
+      testPerson = await makeUserWithPass("constPers2", "lol2@utoronto.ca");
       expect(testPerson).toBeDefined();
 
       if (!testPerson) {
@@ -139,7 +248,7 @@ describe("Test v1 - User Controller", () => {
       );
       expect(status).toBeTruthy();
       await testPerson.reload();
-      const check = await argon2.verify(testPerson.password, "newPassword");
+      const check = await argon2.verify(testPerson.password as string, "newPassword");
 
       expect(check).toBeTruthy();
       expect(testPerson.confirmationToken).toHaveLength(0);

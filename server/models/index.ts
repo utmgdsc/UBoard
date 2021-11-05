@@ -1,9 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { Sequelize, DataTypes } from "sequelize";
-
-import dotenv from "dotenv";
-dotenv.config({ path: "../.env" });
+import { Sequelize } from "sequelize";
 
 const basename = path.basename(__filename);
 const db: any = {};
@@ -38,7 +35,7 @@ fs.readdirSync(__dirname)
     );
   })
   .forEach((file: string) => {
-    const model = require(path.join(__dirname, file))(sequelize, DataTypes);
+    const model = require(path.join(__dirname, file))(sequelize);
     db[model.name] = model;
   });
 

@@ -1,6 +1,7 @@
 import argon2 from "argon2";
-import EmailService from "../../services/emailService";
+
 import { User } from "../../models/user";
+import EmailService from "../../services/emailService";
 
 export enum TOKEN_TYPE {
   RESET = "reset",
@@ -16,6 +17,103 @@ export default class UserController {
     this.emailService = emailService;
   }
 
+  /**
+   * Update the last login time of user to the current date.
+   */
+  private updateLastLogin = async (user: User): Promise<void> => {
+    user.lastLogin = new Date();
+    await user.save();
+  };
+
+  /**
+   * Sign in the user with the given credentials if the user exists.
+   * Generate auth token and update last login date.
+   * @returns status code and data payload
+   */
+  async signIn(
+    userName: string,
+    password: string
+  ): Promise<{ status: number; data: { result?: User; message?: string } }> {
+    try {
+      let userWithPass = await this.userRepo.scope("withPassword").findOne({
+        where: {
+          userName: userName,
+        },
+      });
+      if (!userWithPass) {
+        return { status: 404, data: { message: "User doesn't exist" } };
+      }
+
+      const isPasswordCorrect = await argon2.verify(
+        userWithPass.password as string,
+        password,
+        {
+          type: argon2.argon2id,
+        }
+      );
+      if (!isPasswordCorrect) {
+        return { status: 400, data: { message: "Invalid credentials" } };
+      }
+
+      if (!userWithPass.confirmed) {
+        return { status: 403, data: { message: "Email has not been confirmed" }}
+      }
+
+      this.updateLastLogin(userWithPass);
+
+      const user = Object.assign({}, userWithPass);
+
+      delete user.password;
+
+      return { status: 204, data: { result: user } };
+    } catch (error) {
+      console.error(error);
+      return { status: 500, data: { message: "Internal server error" } };
+    }
+  }
+
+  /**
+   * Create a new user if the user does not already exist.
+   * Generate auth token, update last login date, and send confirmation email.
+   * @returns status code and data payload
+   */
+  async createUser(
+    email: string,
+    userName: string,
+    password: string,
+    firstName: string,
+    lastName: string
+  ): Promise<{ status: number; data: { message?: string } }> {
+    try {
+      const user = await this.userRepo.findOne({
+        where: {
+          userName: userName,
+        },
+      });
+      if (user) {
+        return { status: 400, data: { message: "User already exists" } };
+      }
+
+      const hashedPassword = await argon2.hash(password, {
+        type: argon2.argon2id,
+      });
+
+      const result: User = await this.userRepo.create({
+        email: email,
+        userName: userName,
+        password: hashedPassword,
+        firstName: firstName,
+        lastName: lastName,
+      });
+
+      await this.sendEmailConfirmation(result.email);
+
+      return { status: 204, data: {} };
+    } catch (error) {
+      console.error(error);
+      return { status: 500, data: { message: "Internal server error" } };
+    }
+  }
   /* Email Related */
 
   /** Generates and returns a random alphanumeric string. Used in validating
@@ -128,7 +226,6 @@ export default class UserController {
   /** Generate and send the user an email to confirm their account.
       Returns the success status. */
   async sendEmailConfirmation(emailAddress: string): Promise<boolean> {
-    // TODO: @Daniel add this to sign up
     const user: User | null = await this.userRepo.findOne({
       where: { email: emailAddress.toLowerCase() },
     });

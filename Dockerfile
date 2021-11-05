@@ -18,6 +18,7 @@ EXPOSE 80
 
 # Add nodejs
 RUN apk add --update nodejs
+RUN apk add --update sqlite
 
 # Nginx config
 COPY nginx/nginx.conf /etc/nginx/nginx.conf

@@ -3,3 +3,5 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
 };
+
+require("dotenv").config();

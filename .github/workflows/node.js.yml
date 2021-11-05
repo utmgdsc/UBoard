@@ -26,6 +26,7 @@ jobs:
     - run: yarn test
       env:
           CI: true
+          JWT_SECRET: test
     
     - name: Tests ✅
       if: ${{ success() }}

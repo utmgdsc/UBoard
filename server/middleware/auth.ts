@@ -4,11 +4,27 @@ import { User } from "../models/user";
 
 const secret = process.env.JWT_SECRET as string;
 
-function getAuthUser(res: Response): User | undefined {
+class UnauthorizedError extends Error {
+  constructor(message: string, ...params: any[]) {
+    super(...params);
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, UnauthorizedError);
+    }
+
+    this.name = "UnauthorizedError";
+    this.message = message;
+  }
+}
+
+export function getAuthUser(res: Response): User | undefined {
   if (!res.locals.user) {
-    res.status(401).json({ message: "User is not authorized to perform this request" })
-    return;
-  } 
+    const err = "User is not authorized to perform this request"
+    res
+      .status(401)
+      .json({ message: err });
+    throw new UnauthorizedError(err);
+  }
 
   return res.locals.user;
 }

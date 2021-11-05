@@ -35,17 +35,17 @@ export default class UserController {
     password: string
   ): Promise<{ status: number; data: { result?: User; message?: string } }> {
     try {
-      let user = await this.userRepo.scope("withPassword").findOne({
+      let userWithPass = await this.userRepo.scope("withPassword").findOne({
         where: {
           userName: userName,
         },
       });
-      if (!user) {
+      if (!userWithPass) {
         return { status: 404, data: { message: "User doesn't exist" } };
       }
 
       const isPasswordCorrect = await argon2.verify(
-        user.password,
+        userWithPass.password as string,
         password,
         {
           type: argon2.argon2id,
@@ -55,21 +55,15 @@ export default class UserController {
         return { status: 400, data: { message: "Invalid credentials" } };
       }
 
-      if (!user.confirmed) {
+      if (!userWithPass.confirmed) {
         return { status: 403, data: { message: "Email has not been confirmed" }}
       }
 
-      this.updateLastLogin(user);
+      this.updateLastLogin(userWithPass);
 
-      user = await this.userRepo.findOne({
-        where: {
-          userName: userName,
-        },
-      });
+      const user = Object.assign({}, userWithPass);
 
-      if (!user) {
-        throw new Error("User could not be found");
-      }
+      delete user.password;
 
       return { status: 204, data: { result: user } };
     } catch (error) {

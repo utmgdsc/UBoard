@@ -6,7 +6,7 @@ interface UserAttributes {
   firstName: string;
   lastName: string;
   userName: string;
-  password: string; // hash
+  password?: string; // hash
   email: string;
   confirmed: boolean;
   confirmationToken: string;
@@ -36,7 +36,7 @@ export class User
   firstName!: string;
   lastName!: string;
   userName!: string;
-  password!: string;
+  password?: string;
   email!: string;
   confirmed!: boolean;
   confirmationToken!: string;

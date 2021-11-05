@@ -248,7 +248,7 @@ describe("v1 - User Controller", () => {
       );
       expect(status).toBeTruthy();
       await testPerson.reload();
-      const check = await argon2.verify(testPerson.password, "newPassword");
+      const check = await argon2.verify(testPerson.password as string, "newPassword");
 
       expect(check).toBeTruthy();
       expect(testPerson.confirmationToken).toHaveLength(0);

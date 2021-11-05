@@ -1,5 +1,5 @@
 import db from '../../../models';
-import {dbSync, makeValidPost, makeValidUser} from '../../../models/tests/testHelpers';
+import {dbSync, makeUser, makeValidPost, makeValidUser} from '../../../models/tests/testHelpers';
 import PostController from '../post';
 
 const postController = new PostController(db.Post);
@@ -73,25 +73,50 @@ describe('Test v1 - Post Controller', () => {
       const post = await makeValidPost(author.id);
       const newTitle = 'A different post title!';
 
-      const result = await postController.updatePost(post.id, newTitle);
+      const result = await postController.updatePost(author.id, post.id, newTitle);
 
       expect(result.status).toBe(200);
       expect(result.data!.result!.title).toBe(newTitle);
+    });
+    it('should not update the post for invalid user', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+      const oldTitle = post.title;
+      const newTitle = 'A different post title!';
+
+      const badUser = await makeUser('bad', 'bad@mail.utoronto.ca');
+
+      const result = await postController.updatePost(badUser.id, post.id, newTitle);
+
+      expect(result.status).toBe(401);
     });
 
     it('should delete an existing post', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
 
-      const result = await postController.deletePost(post.id);
+      const result = await postController.deletePost(author.id, post.id);
       expect(result.status).toBe(204);
 
       const findResult = await postController.getPost(post.id);
       expect(findResult.status).toBe(404);
     });
 
+    it('should not delete a different post', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+      const badUser = await makeUser('bad', 'bad@mail.utoronto.ca');
+
+      const result = await postController.deletePost(badUser.id, post.id);
+      expect(result.status).toBe(401);
+
+      const findResult = await postController.getPost(post.id);
+      expect(findResult.status).toBe(200);
+    });
+
     it('should error deleting an invalid post', async () => {
-      const result = await postController.deletePost('123-123-123');
+      const author = await makeValidUser();
+      const result = await postController.deletePost(author.id, '123-123-123');
       expect(result.status).toBe(404);
     });
 

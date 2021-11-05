@@ -24,8 +24,12 @@ postRouter.get('/:postid', async (req: Request, res: Response) => {
 });
 
 postRouter.delete('/:postid', async (req: Request, res: Response) => {
-  const result = await postController.deletePost(req.params.postid);
-  res.status(result.status).send(result);
+  try {
+    const result = await postController.deletePost(getAuthUser(res).id, req.params.postid);
+    res.status(result.status).send(result);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.put('/:postid/upvote', async (req: Request, res: Response) => {
@@ -54,15 +58,20 @@ postRouter.post('/', async (req: Request, res: Response) => {
 });
 
 postRouter.put('/:postid', async (req: Request, res: Response) => {
-  const result = await postController.updatePost(
-    req.params.postid,
-    req.body.title,
-    req.body.body,
-    req.body.location,
-    req.body.capacity
-  );
+  try {
+    const result = await postController.updatePost(
+      getAuthUser(res).id,
+      req.params.postid,
+      req.body.title,
+      req.body.body,
+      req.body.location,
+      req.body.capacity
+    );
 
-  res.status(result.status).send(result);
+    res.status(result.status).send(result);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 export default postRouter;

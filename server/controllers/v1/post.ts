@@ -62,12 +62,18 @@ export default class PostController {
    * @param postID - The identifier of the post to destroy.
    * @returns A status object indicating the results of the action.
    */
-  async deletePost(postID: string): Promise<{status: number; data?: {message?: string}}> {
-    const result = await this.postsRepo.destroy({where: {id: postID}});
+  async deletePost(
+    userId: string,
+    postID: string
+  ): Promise<{status: number; data?: {message?: string}}> {
+    const result = await this.postsRepo.findOne({where: {id: postID}});
 
-    if (result != 1) {
+    if (!result) {
       return {status: 404, data: {message: `Post ${postID} could not be deleted.`}};
+    } else if (result.UserId != userId) {
+      return {status: 401, data: {message: 'Unauthorized to delete the post.'}};
     }
+    await result.destroy();
     return {status: 204};
   }
 
@@ -160,6 +166,7 @@ export default class PostController {
    * it was updated.
    */
   async updatePost(
+    currentUserId: string,
     postID: string,
     title?: string,
     body?: string,
@@ -168,7 +175,7 @@ export default class PostController {
   ): Promise<{status: number; data?: {message?: string; result?: Post}}> {
     const post = (await this.getPost(postID)).data.result;
 
-    if (post) {
+    if (post && post.UserId == currentUserId) {
       try {
         post.title = title || post.title;
         post.body = body || post.body;
@@ -180,6 +187,8 @@ export default class PostController {
         console.error(`Could not update post ${postID}\n`, err);
         return {status: 500, data: {message: 'Could not update the post.'}};
       }
+    } else if (post) {
+      return {status: 401, data: {message: 'Not authorized to edit this post.'}};
     }
     return {status: 404, data: {message: 'Could not find post.'}};
   }

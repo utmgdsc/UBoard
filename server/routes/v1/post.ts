@@ -1,0 +1,65 @@
+import express, {Request, Response} from 'express';
+import db from '../../models';
+import PostController from '../../controllers/v1/post';
+import {User} from '../../models/user';
+
+const postRouter = express.Router();
+const postController = new PostController(db.User);
+
+postRouter.get('', async (req: Request, res: Response) => {
+  const limit = req.body.limit;
+  const offset = req.body.offset;
+  if (!limit || !offset) {
+    return res.status(400).send({code: 400, message: 'Missing limit or offset'});
+  }
+
+  const result = await postController.getPosts(limit, offset);
+  return res.status(result.status).send(result);
+});
+
+postRouter.get('/:postid', async (req: Request, res: Response) => {
+  const result = await postController.getPost(req.params.postid);
+  res.status(result.status).send(result);
+});
+
+postRouter.delete('/:postid', async (req: Request, res: Response) => {
+  const result = await postController.deletePost(req.params.postid);
+  res.status(result.status).send(result);
+});
+
+postRouter.put('/:postid/upvote', async (req: Request, res: Response) => {
+  const result = await postController.upVote(req.params.postid);
+  res.status(result.status);
+});
+
+postRouter.put('/:postid/report', async (req: Request, res: Response) => {
+  const result = await postController.report(req.params.postid);
+  res.status(result.status);
+});
+
+postRouter.post('/', async (req: Request, res: Response) => {
+  const result = await postController.createPost(
+    // TODO use the helper function.
+    (res.locals.user as User).id,
+    req.body.title,
+    req.body.body,
+    req.body.location,
+    req.body.capacity
+  );
+
+  res.status(result.status).send(result);
+});
+
+postRouter.put('/:postid', async (req: Request, res: Response) => {
+  const result = await postController.updatePost(
+    req.params.postid,
+    req.body.title,
+    req.body.body,
+    req.body.location,
+    req.body.capacity
+  );
+
+  res.status(result.status).send(result);
+});
+
+export default postRouter;

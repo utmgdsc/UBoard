@@ -36,7 +36,7 @@ function CreatePost() {
   // handle functions
   const handleClickOpen = () => {
     let noEmptyFields = true;
-    allFields.map((inputField) => {
+    allFields.forEach((inputField) => {
       if (inputField === "") {
         noEmptyFields = false;
       }
@@ -46,6 +46,7 @@ function CreatePost() {
     } else {
       setOpenPopupError(true);
     }
+    return;
   };
 
   const handleClose = () => {
@@ -100,7 +101,7 @@ function CreatePost() {
                 />
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid item xs={12} md={4}>
                 <TextField
                   required
                   label="Upload Thumbnail"
@@ -109,6 +110,26 @@ function CreatePost() {
                   InputLabelProps={{ shrink: true }}
                   size="small"
                   onChange={(e) => handleImageUpload(e)}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={3}>
+                <TextField
+                  label="Event Capacity"
+                  placeholder="40"
+                  fullWidth
+                  size="small"
+                  onChange={(e) => setEventCapacity(e.target.value)}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={5}>
+                <TextField
+                  fullWidth
+                  label="Location"
+                  placeholder="Zoom: https://utoronto.zoom.us/j/7227206933#success"
+                  size="small"
+                  onChange={(e) => setEventLocation(e.target.value)}
                 />
               </Grid>
 
@@ -121,25 +142,6 @@ function CreatePost() {
                   onChange={(e) => setTags(e.target.value)}
                 />
               </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  label="Event Capacity"
-                  placeholder="40"
-                  size="small"
-                  onChange={(e) => setEventCapacity(e.target.value)}
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Location"
-                  placeholder="Zoom: https://utoronto.zoom.us/j/7227206933#success"
-                  size="small"
-                  onChange={(e) => setEventLocation(e.target.value)}
-                />
-              </Grid>
             </Grid>
 
             {/* form  done */}
@@ -148,7 +150,7 @@ function CreatePost() {
             </Box>
 
             <Grid container spacing={2} justifyContent="center">
-              <Grid item xs={3}>
+              <Grid item xs={5} md={3}>
                 <Button
                   fullWidth
                   variant="contained"
@@ -160,7 +162,7 @@ function CreatePost() {
                   Preview
                 </Button>
               </Grid>
-              <Grid item xs={5}>
+              <Grid item xs={7} md={5}>
                 <Button
                   fullWidth
                   variant="contained"

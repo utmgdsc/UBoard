@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -37,7 +37,7 @@ export default function PreviewPopUp(props: any) {
             component="img"
             image={img}
             alt="placeholder"
-            sx={{ maxWidth: "700px", maxHeight: "200px" }}
+            sx={{ minWidth: "250px", maxWidth: "700px", maxHeight: "200px" }}
           />
           <CardContent sx={{ py: 1 }}>
             <Typography variant="h5" component="h5" fontWeight="bold">
@@ -61,7 +61,7 @@ export default function PreviewPopUp(props: any) {
                 <Typography>Location: {location}</Typography>
               </Grid>
               <Grid item xs={12}>
-                <Typography>Tags: {location}</Typography>
+                <Typography>Tags: {tags}</Typography>
               </Grid>
             </Grid>
           </CardContent>

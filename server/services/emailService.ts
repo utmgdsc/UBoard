@@ -63,7 +63,7 @@ export default class EmailService {
     userName: string,
     emailAddress: string
   ): Promise<boolean> {
-    const resetURL = `${this.apiRoute}/users/reset/?r=${confToken}`;
+    const resetURL = `${this.apiRoute}/users/password-reset?r=${confToken}`;
     const subjectLine = "UBoard - Password Reset Requested";
     const body = `Hello,  ${firstName} ${lastName}.
         A password reset has been requested for the account with username: ${userName}. To reset your password, click the link below. 

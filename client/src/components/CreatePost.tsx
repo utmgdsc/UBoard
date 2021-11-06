@@ -9,13 +9,9 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
-
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import Tooltip from "@mui/material/Tooltip";
 
 import PreviewPopUp from "./PreviewPopUp";
-import { DialogTitle } from "@mui/material";
 
 const theme = createTheme();
 
@@ -29,24 +25,12 @@ function CreatePost() {
   const [eventLocation, setEventLocation] = useState("");
 
   const [openPopup, setOpenPopup] = useState(false);
-  const [openPopupError, setOpenPopupError] = useState(false);
 
   const allFields = [title, body, file];
 
   // handle functions
   const handleClickOpen = () => {
-    let noEmptyFields = true;
-    allFields.forEach((inputField) => {
-      if (inputField === "") {
-        noEmptyFields = false;
-      }
-    });
-    if (noEmptyFields) {
-      setOpenPopup(true);
-    } else {
-      setOpenPopupError(true);
-    }
-    return;
+    setOpenPopup(true);
   };
 
   const handleClose = () => {
@@ -151,16 +135,21 @@ function CreatePost() {
 
             <Grid container spacing={2} justifyContent="center">
               <Grid item xs={5} md={3}>
-                <Button
-                  fullWidth
-                  variant="contained"
-                  sx={{ mt: 3, mb: 2 }}
-                  color="secondary"
-                  onClick={() => handleClickOpen()}
-                  size="large"
-                >
-                  Preview
-                </Button>
+                <Tooltip title="Enter all required fields!">
+                  <Box>
+                    <Button
+                      fullWidth
+                      variant="contained"
+                      sx={{ mt: 3, mb: 2 }}
+                      color="secondary"
+                      onClick={() => handleClickOpen()}
+                      size="large"
+                      disabled={!(title !== "" && body !== "" && file !== "")}
+                    >
+                      Preview
+                    </Button>
+                  </Box>
+                </Tooltip>
               </Grid>
               <Grid item xs={7} md={5}>
                 <Button
@@ -185,37 +174,6 @@ function CreatePost() {
             openPopup={openPopup}
             handleClose={handleClose}
           ></PreviewPopUp>
-
-          {/* Display Error */}
-
-          <Dialog open={openPopupError}>
-            <DialogTitle>
-              <Typography
-                variant="h5"
-                component="h2"
-                fontWeight="bold"
-                color="red"
-              >
-                Missing Fields *
-              </Typography>
-            </DialogTitle>
-            <DialogContent>
-              <Typography color="red">
-                Ensure all required fields are filled
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                variant="contained"
-                onClick={() => setOpenPopupError(false)}
-                color="secondary"
-              >
-                Back
-              </Button>
-            </DialogActions>
-          </Dialog>
-
-          {/*  */}
         </Box>
       </Container>
     </ThemeProvider>

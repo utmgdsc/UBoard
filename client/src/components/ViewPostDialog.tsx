@@ -110,12 +110,11 @@ function CapacityBar() {
     capacity < maxCapacity ? (
       checkedIn ? (
         <Button onClick={handleUndo} variant="contained">
-          {" "}
-          Undo{" "}
+          Undo
         </Button>
       ) : (
         <Button onClick={handleCheckIn} variant="outlined">
-          Check In{" "}
+          Check In
         </Button>
       )
     ) : (

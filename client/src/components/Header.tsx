@@ -10,18 +10,20 @@ import React from "react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import IconButton from "@mui/material/IconButton/IconButton";
 
+/* Styling outer box of the search area */
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
-  borderRadius: theme.shape.borderRadius,
+  borderRadius: 100,
   backgroundColor: alpha(theme.palette.common.white, 0.15),
   "&:hover": {
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
   marginLeft: "auto",
   marginRight: "auto",
-  width: "auto%",
+  width: "auto",
 }));
 
+/* Styling the icon of the search box */
 const SearchIconWrapper = styled("div")(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: "100%",
@@ -32,6 +34,7 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   justifyContent: "center",
 }));
 
+/* Style of the search input text, adjusts based on screen size. */
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
@@ -53,34 +56,35 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function AccountMenu() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    setAnchorEl(event.currentTarget);
+  const [isOpen, openMenu] = React.useState(false);
+
+  const handleClick = () => {
+    openMenu(true);
   };
+
   const handleClose = () => {
-    setAnchorEl(null);
+    openMenu(false);
   };
 
   return (
     <div>
       <IconButton
-        id="basic-button"
+        id="menu-btn"
         color="inherit"
         aria-controls="basic-menu"
         aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
+        aria-expanded={isOpen}
         onClick={handleClick}
       >
         <AccountCircle />
       </IconButton>
       <Menu
         id="acc-menu"
-        anchorEl={anchorEl}
-        open={open}
+        anchorEl={document.getElementById("menu-btn")}
+        open={isOpen}
         onClose={handleClose}
         MenuListProps={{
-          "aria-labelledby": "basic-button",
+          "aria-labelledby": "menu-btn",
         }}
       >
         <MenuItem onClick={handleClose}>My Posts</MenuItem>
@@ -96,7 +100,6 @@ export default function Header() {
     <AppBar position="static">
       <Toolbar sx={{ alignItems: "center" }}>
         <Link variant="h6" color="#FFFF" href="" underline="none">
-          {" "}
           UBoard
         </Link>
         <Search>

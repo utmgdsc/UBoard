@@ -134,6 +134,6 @@ userRouter.post("/signup", signUpHandler);
 userRouter.post("/signout", signOut);
 
 userRouter.get("/confirm", confirmEmailHandler);
-userRouter.get("/reset", resetPassHandler);
+userRouter.get("/password-reset", resetPassHandler);
 
 export default userRouter;

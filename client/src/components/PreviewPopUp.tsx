@@ -12,7 +12,16 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 
-export default function PreviewPopUp(props: any) {
+export default function PreviewPopUp(props: {
+  title: string;
+  body: string;
+  img: string;
+  tags: string;
+  eventCapacity: string;
+  location: string;
+  openPopup: boolean;
+  handleClose: any;
+}) {
   const {
     title,
     body,
@@ -24,7 +33,7 @@ export default function PreviewPopUp(props: any) {
     handleClose,
   } = props;
   return (
-    <Dialog open={openPopup} scroll="paper">
+    <Dialog open={openPopup} scroll="paper" data-testid="PreviewPopUpComponent">
       <DialogContent>
         <Card
           sx={{
@@ -39,7 +48,7 @@ export default function PreviewPopUp(props: any) {
             alt="placeholder"
             sx={{ minWidth: "250px", maxWidth: "700px", maxHeight: "200px" }}
           />
-          <CardContent sx={{ py: 1 }}>
+          <CardContent sx={{ py: 1 }} data-testid="previewCard">
             <Typography variant="h5" component="h5" fontWeight="bold">
               {title}
             </Typography>

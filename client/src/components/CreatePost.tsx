@@ -26,8 +26,6 @@ function CreatePost() {
 
   const [openPopup, setOpenPopup] = useState(false);
 
-  const allFields = [title, body, file];
-
   // handle functions
   const handleClickOpen = () => {
     setOpenPopup(true);
@@ -69,7 +67,9 @@ function CreatePost() {
                   required
                   fullWidth
                   label="Title"
+                  placeholder="title"
                   size="small"
+                  data-testid="titleTextField"
                   onChange={(e) => setTitle(e.target.value)}
                 />
               </Grid>
@@ -79,6 +79,8 @@ function CreatePost() {
                   required
                   fullWidth
                   label="Body"
+                  data-testid="bodyTextField"
+                  placeholder="description"
                   multiline
                   rows={6}
                   onChange={(e) => setBody(e.target.value)}
@@ -91,6 +93,7 @@ function CreatePost() {
                   label="Upload Thumbnail"
                   type="file"
                   fullWidth
+                  data-testid="fileField"
                   InputLabelProps={{ shrink: true }}
                   size="small"
                   onChange={(e) => handleImageUpload(e)}
@@ -143,8 +146,9 @@ function CreatePost() {
                       sx={{ mt: 3, mb: 2 }}
                       color="secondary"
                       onClick={() => handleClickOpen()}
+                      data-testid="previewButton"
                       size="large"
-                      disabled={!(title !== "" && body !== "" && file !== "")}
+                      disabled={!(title !== "" && body !== "")}
                     >
                       Preview
                     </Button>

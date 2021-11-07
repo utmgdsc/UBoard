@@ -31,10 +31,6 @@ function CreatePost() {
     setOpenPopup(true);
   };
 
-  const handleClose = () => {
-    setOpenPopup(false);
-  };
-
   // handle functions
   const handleImageUpload = (event: React.ChangeEvent<{}>) => {
     const target = event.target as HTMLInputElement;
@@ -114,7 +110,7 @@ function CreatePost() {
                 <TextField
                   fullWidth
                   label="Location"
-                  placeholder="Zoom: https://utoronto.zoom.us/j/7227206933#success"
+                  placeholder="Deerfield Hall"
                   size="small"
                   onChange={(e) => setEventLocation(e.target.value)}
                 />
@@ -176,7 +172,7 @@ function CreatePost() {
             eventCapacity={eventCapacity}
             location={eventLocation}
             openPopup={openPopup}
-            handleClose={handleClose}
+            handleClose={() => setOpenPopup(false)}
           ></PreviewPopUp>
         </Box>
       </Container>

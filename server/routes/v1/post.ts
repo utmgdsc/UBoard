@@ -1,7 +1,6 @@
 import express, {Request, Response} from 'express';
 import db from '../../models';
 import PostController from '../../controllers/v1/post';
-import {User} from '../../models/user';
 import {getAuthUser} from '../../middleware/auth';
 
 const postRouter = express.Router();
@@ -11,22 +10,27 @@ postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.body.limit;
   const offset = req.body.offset;
   if (!limit || !offset) {
-    return res.status(400).send({code: 400, message: 'Missing limit or offset'});
+    return res.status(400).json({
+      code: 400,
+      message: `Missing ${!limit ? 'limit' : ''} ${!limit && !offset ? 'and' : ''} ${
+        !offset ? 'offset' : ''
+      }`,
+    });
   }
 
   const result = await postController.getPosts(limit, offset);
-  return res.status(result.status).send(result);
+  return res.status(result.status).json(result);
 });
 
 postRouter.get('/:postid', async (req: Request, res: Response) => {
   const result = await postController.getPost(req.params.postid);
-  res.status(result.status).send(result);
+  res.status(result.status).json(result);
 });
 
 postRouter.delete('/:postid', async (req: Request, res: Response) => {
   try {
     const result = await postController.deletePost(getAuthUser(res).id, req.params.postid);
-    res.status(result.status).send(result);
+    res.status(result.status).json(result);
   } catch (err) {
     console.error(err);
   }
@@ -51,7 +55,7 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.location,
       req.body.capacity
     );
-    res.status(result.status).send(result);
+    res.status(result.status).json(result);
   } catch (err) {
     console.error(err);
   }
@@ -68,7 +72,7 @@ postRouter.put('/:postid', async (req: Request, res: Response) => {
       req.body.capacity
     );
 
-    res.status(result.status).send(result);
+    res.status(result.status).json(result);
   } catch (err) {
     console.error(err);
   }

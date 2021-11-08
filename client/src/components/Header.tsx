@@ -4,11 +4,11 @@ import InputBase from "@mui/material/InputBase";
 import SearchIcon from "@mui/icons-material/Search";
 import { styled, alpha } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
-import MenuItem from "@mui/material/MenuItem/MenuItem";
+import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import React from "react";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import IconButton from "@mui/material/IconButton/IconButton";
+import IconButton from "@mui/material/IconButton";
 
 /* Styling outer box of the search area */
 const Search = styled("div")(({ theme }) => ({
@@ -69,7 +69,8 @@ function AccountMenu() {
   return (
     <div>
       <IconButton
-        id="menu-btn"
+        id="acc-menu-icon"
+        data-testid="test-acc-menu-icon"
         color="inherit"
         aria-controls="basic-menu"
         aria-haspopup="true"
@@ -80,7 +81,8 @@ function AccountMenu() {
       </IconButton>
       <Menu
         id="acc-menu"
-        anchorEl={document.getElementById("menu-btn")}
+        data-testid="test-acc-menu"
+        anchorEl={document.getElementById("acc-menu-icon")}
         open={isOpen}
         onClose={handleClose}
         MenuListProps={{

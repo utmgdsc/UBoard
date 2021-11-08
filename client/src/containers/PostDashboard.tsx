@@ -6,8 +6,8 @@ import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
-import Header from "./Header";
-import PostPreview from "./PostPreview";
+import Header from "../components/Header";
+import PostPreview from "../components/PostPreview";
 
 const theme = createTheme();
 
@@ -17,7 +17,7 @@ export default function PostDashboard() {
       <CssBaseline />
       <Header />
       <main>
-        <Container sx={{ py: 5 }} maxWidth="xl">
+        <Container sx={{ py: 5 }} maxWidth="xl" data-testid="test-post-container">
           <Grid container spacing={7}>
             <Grid
               item

@@ -1,14 +1,14 @@
 
 import { styled } from "@mui/material/styles";
-import Paper from "@mui/material/Paper/Paper";
-import Stack from "@mui/material/Stack/Stack";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 
 /* Generate pre-formatted TagItems based on an array of provided tags */
 export default function GenerateTags(tags: Array<string>) {
   return (
     <Stack direction="row" spacing={2} style={{ alignItems: "center" }}>
       {tags.map((tag: string) => (
-        <TagItem>{tag}</TagItem>
+        <TagItem key={tag}>{tag}</TagItem>
       ))}
     </Stack>
   );

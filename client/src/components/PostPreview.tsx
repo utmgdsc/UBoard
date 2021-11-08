@@ -5,12 +5,13 @@ import CardMedia from "@mui/material/CardMedia";
 import ViewPostDialog from "./ViewPostDialog";
 import GenerateTags from "./Tags";
 import Stack from "@mui/material/Stack";
-import Grid from "@mui/material/Grid/Grid";
-import Typography from "@mui/material/Typography/Typography";
+import Grid from "@mui/material/Grid";
+import Typography from "@mui/material/Typography";
 
 export default function PostPreview() {
+  // TODO: Integrate with post API, each grid ID should be unique as well.
   return (
-        <Grid item xs={12} sm={6} md={4} lg={4}>
+        <Grid data-testid="test-postpreview" item xs={12} sm={6} md={4} lg={4}>
           <Card
             sx={{
               display: "flex",

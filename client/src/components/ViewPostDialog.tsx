@@ -9,8 +9,8 @@ import Slide from "@mui/material/Slide";
 import { TransitionProps } from "@mui/material/transitions";
 import MoreVert from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem/MenuItem";
-import Stack from "@mui/material/Stack/Stack";
+import MenuItem from "@mui/material/MenuItem";
+import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import TextField from "@mui/material/TextField";
@@ -18,15 +18,14 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 import GenerateTags from "./Tags";
 
-const Transition = React.forwardRef(
-  (
-    props: TransitionProps & {
-      children: React.ReactElement;
-    }
-  ) => {
-    return <Slide direction="up" {...props} />;
-  }
-);
+const Transition = React.forwardRef((
+  props: TransitionProps & {
+    children: React.ReactElement;
+  },
+  ref: React.Ref<unknown>
+) => {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
@@ -44,6 +43,7 @@ function MoreOptions() {
     <>
       <IconButton
         id="post-settings"
+        data-testid="test-post-settings"
         color="inherit"
         aria-controls="settings-menu"
         aria-haspopup="true"
@@ -53,7 +53,8 @@ function MoreOptions() {
         <MoreVert />
       </IconButton>
       <Menu
-        id="acc-menu"
+        id="post-settings-menu"
+        data-testid="test-post-settings-menu"
         anchorEl={document.getElementById("post-settings")}
         open={isOpen}
         onClose={handleClose}
@@ -149,7 +150,9 @@ export default function ViewPostDialog() {
 
   return (
     <div>
-      <Button variant="outlined" onClick={handleClickOpen} sx={{ mb: 3 }}>
+    {/* TODO:  change ID after integrating with API*/}
+
+      <Button data-testid="test-btn-prev" variant="outlined" onClick={handleClickOpen} sx={{ mb: 3 }}>
         Read More
       </Button>
       <Dialog
@@ -160,6 +163,7 @@ export default function ViewPostDialog() {
       >
         <AppBar sx={{ position: "relative" }}>
           <IconButton
+            data-testid="test-btn-close"
             edge="start"
             color="inherit"
             onClick={handleClose}

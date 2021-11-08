@@ -45,7 +45,7 @@ export default function PreviewPopUp(props: {
           <CardMedia
             component="img"
             image={img}
-            alt="placeholder"
+            alt="Image Not Found"
             sx={{ minWidth: "250px", maxWidth: "700px", maxHeight: "200px" }}
           />
           <CardContent sx={{ py: 1 }} data-testid="previewCard">

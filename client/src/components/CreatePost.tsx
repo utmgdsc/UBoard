@@ -158,7 +158,7 @@ function CreatePost() {
                   sx={{ mt: 3, mb: 2 }}
                   size="large"
                 >
-                  Post
+                  Create
                 </Button>
               </Grid>
             </Grid>

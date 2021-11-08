@@ -1,12 +1,11 @@
 import React, { useState } from "react";
- 
+
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
-
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 
@@ -60,7 +59,21 @@ function AuthContainer() {
         justifyContent={matches ? "flex-end" : "center"}
         style={{ padding: matches ? "20px" : 0 }}
       >
-        <Grid item xs={10} sm={6} md={4} lg={3} xl={3}>
+        <Grid item md={7} lg={8} xl={9}>
+          <Box
+            style={{
+              textAlign: "center",
+              paddingTop: matches ? "100px" : "0px",
+            }}
+            fontFamily="Verdana"
+            color="white"
+          >
+            <h1 style={{ fontSize: matches ? "500%" : "200%" }}>UOFTBOARD</h1>
+            <h1>A place to connect</h1>
+          </Box>
+        </Grid>
+
+        <Grid item md={5} lg={4} xl={3}>
           <Paper elevation={5} style={paperStyle}>
             <Tabs
               value={tabIndex}

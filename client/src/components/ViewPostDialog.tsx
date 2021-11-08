@@ -152,7 +152,7 @@ export default function ViewPostDialog() {
     <div>
     {/* TODO:  change ID after integrating with API*/}
 
-      <Button data-testid="test-btn-prev" variant="outlined" onClick={handleClickOpen} sx={{ mb: 3 }}>
+      <Button data-testid="test-btn-preview" variant="outlined" onClick={handleClickOpen} sx={{ mb: 3 }}>
         Read More
       </Button>
       <Dialog
@@ -160,6 +160,8 @@ export default function ViewPostDialog() {
         open={isOpen}
         onClose={handleClose}
         TransitionComponent={Transition}
+        data-testid="test-post-dialog"
+        aria-label="post-dialog"
       >
         <AppBar sx={{ position: "relative" }}>
           <IconButton

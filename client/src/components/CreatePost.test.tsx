@@ -41,4 +41,18 @@ describe("verifying launch of create post component", () => {
     fireEvent.blur(bodyTextField);
     expect(screen.getByTestId("previewButton")).not.toBeDisabled();
   });
+
+  it("renders `previewPopUp component upon clicking Preview", () => {
+    // input title
+    fireEvent.change(screen.getByPlaceholderText("title"), {
+      target: { value: "Test Club" },
+    });
+    // input body
+    const bodyTextField = screen.getByPlaceholderText("description");
+    fireEvent.change(bodyTextField, { target: { value: "body" } });
+    fireEvent.blur(bodyTextField);
+    // pop up should render
+    screen.getByTestId("previewButton").click();
+    expect(screen.getByTestId("PreviewPopUpComponent")).toBeInTheDocument();
+  });
 });

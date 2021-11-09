@@ -16,6 +16,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import TextField from "@mui/material/TextField";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
+
 import GenerateTags from "./Tags";
 
 const Transition = React.forwardRef((
@@ -30,13 +31,10 @@ const Transition = React.forwardRef((
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
 function MoreOptions() {
-  const [isOpen, openOptions] = React.useState(false);
+  const [isOpen, toggleSettings] = React.useState(false);
 
-  const handleClick = () => {
-    openOptions(true);
-  };
-  const handleClose = () => {
-    openOptions(false);
+  const closeMenu = () => {
+    toggleSettings(false);
   };
 
   return (
@@ -48,7 +46,7 @@ function MoreOptions() {
         aria-controls="settings-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}
-        onClick={handleClick}
+        onClick={() => {toggleSettings(true)}}
       >
         <MoreVert />
       </IconButton>
@@ -57,14 +55,15 @@ function MoreOptions() {
         data-testid="test-post-settings-menu"
         anchorEl={document.getElementById("post-settings")}
         open={isOpen}
-        onClose={handleClose}
+        onClose={closeMenu}
         MenuListProps={{
           "aria-labelledby": "post-settings",
         }}
       >
-        <MenuItem onClick={handleClose}>Edit</MenuItem>
-        <MenuItem onClick={handleClose}>Delete</MenuItem>
-        <MenuItem onClick={handleClose}>Report</MenuItem>
+        {/* TODO: Edit and Delete should only be visible to post author */}
+        <MenuItem onClick={closeMenu}>Edit</MenuItem>
+        <MenuItem onClick={closeMenu}>Delete</MenuItem>
+        <MenuItem onClick={closeMenu}>Report</MenuItem>
       </Menu>
     </>
   );
@@ -73,10 +72,10 @@ function MoreOptions() {
 /* Like button. Handles liking/unliking a post */
 function LikeButton() {
   // TODO: update/get data from db
-  const [isLiked, likePost] = React.useState(false);
+  const [isLiked, toggleLiked] = React.useState(false);
 
   const handleClick = () => {
-    likePost((prevLike) => !prevLike);
+    toggleLiked((prevLike) => !prevLike);
   };
 
   const likeButton = isLiked ? (
@@ -94,23 +93,29 @@ function LikeButton() {
 }
 
 function CapacityBar() {
+  // TODO: This data should be synced with db
   const [capacity, setCapacity] = React.useState(0);
-  const [checkedIn, setCheckIn] = React.useState(false);
-  const maxCapacity = 10; // TODO: Get from db
+  const [isCheckedin, toggleCheckin] = React.useState(false);
+  const maxCapacity = 10; 
 
   const handleCheckIn = () => {
-    setCapacity((prevCapacity) => prevCapacity + 1);
-    setCheckIn(true);
+    toggleCheckin((prev) => !prev);
   };
 
-  const handleUndo = () => {
-    setCapacity((prevCapacity) => prevCapacity - 1);
-    setCheckIn(false);
-  };
+  React.useEffect(() => {
+    if (isCheckedin)
+    {
+      setCapacity((prev) => prev + 1);
+    } else {
+      setCapacity((prev) => prev > 0 ? prev - 1: prev);
+    }
+  }, [isCheckedin])
+
+  
   const buttonHandler =
     capacity < maxCapacity ? (
-      checkedIn ? (
-        <Button onClick={handleUndo} variant="contained">
+      isCheckedin ? (
+        <Button onClick={handleCheckIn} variant="contained">
           Undo
         </Button>
       ) : (
@@ -138,27 +143,23 @@ function CapacityBar() {
 
 /* Opens a full screen dialog containing a post. */
 export default function ViewPostDialog() {
-  const [isOpen, openDialog] = React.useState(false);
+  const [isOpen, toggleDialog] = React.useState(false);
 
-  const handleClickOpen = () => {
-    openDialog(true);
-  };
-
-  const handleClose = () => {
-    openDialog(false);
+  const closeDialog = () => {
+    toggleDialog(false);
   };
 
   return (
     <div>
     {/* TODO:  change ID after integrating with API*/}
 
-      <Button data-testid="test-btn-preview" variant="outlined" onClick={handleClickOpen} sx={{ mb: 3 }}>
+      <Button data-testid="test-btn-preview" variant="outlined" onClick={() => {toggleDialog(true)}} sx={{ mb: 3 }}>
         Read More
       </Button>
       <Dialog
         fullScreen
         open={isOpen}
-        onClose={handleClose}
+        onClose={closeDialog}
         TransitionComponent={Transition}
         data-testid="test-post-dialog"
         aria-label="post-dialog"
@@ -168,7 +169,7 @@ export default function ViewPostDialog() {
             data-testid="test-btn-close"
             edge="start"
             color="inherit"
-            onClick={handleClose}
+            onClick={closeDialog}
             aria-label="close"
           >
             <ArrowBack />

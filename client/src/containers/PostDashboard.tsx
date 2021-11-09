@@ -1,23 +1,24 @@
+import React from "react";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import Pagination from "@mui/material/Pagination";
+
 import Header from "../components/Header";
 import PostPreview from "../components/PostPreview";
 
-const theme = createTheme();
-
 export default function PostDashboard() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <>
       <Header />
       <main>
-        <Container sx={{ py: 5 }} maxWidth="xl" data-testid="test-post-container">
+        <Container
+          sx={{ py: 5 }}
+          maxWidth="xl"
+          data-testid="test-post-container"
+        >
           <Grid container spacing={7}>
             <Grid
               item
@@ -34,7 +35,8 @@ export default function PostDashboard() {
           </Grid>
         </Container>
       </main>
-      {/* Footer */}
+      
+      <footer>
       <Grid
         item
         style={{
@@ -62,7 +64,7 @@ export default function PostDashboard() {
           You're all up to date!
         </Typography>
       </Box>
-      {/* End footer */}
-    </ThemeProvider>
+      </footer>
+    </>
   );
-}
+} 

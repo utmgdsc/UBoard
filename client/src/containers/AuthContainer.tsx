@@ -9,22 +9,12 @@ import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 
 import Login from "../components/Login";
 import SignUp from "../components/SignUp";
 
 import "./AuthContainer.css";
-
-import CssBaseline from "@mui/material/CssBaseline";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-const theme = createTheme({
-  palette: {
-    secondary: {
-      main: "#f4003d",
-    },
-  },
-});
 
 interface TabPanelProps {
   children: JSX.Element;
@@ -47,6 +37,8 @@ function TabPanel(props: TabPanelProps) {
 }
 
 function AuthContainer() {
+  const theme = useTheme();
+
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -57,66 +49,62 @@ function AuthContainer() {
 
   return (
     <div className="AuthContainer">
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Grid
-          container
-          component="main"
-          justifyContent="flex-end"
-          alignItems="center"
-          sx={{ height: "100vh", px: "40px" }}
-        >
-          <Grid item hidden={matches} xs={false} md={8}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                textAlign: "center",
-                alignItems: "center",
-              }}
-            >
-              <Box bgcolor="rgba(83, 102, 133, 0.6)" p="40px" px="80px">
-                <Typography color="white" fontFamily="Verdana" variant="h2">
-                  UBoard
-                </Typography>
-                <Typography color="white" fontFamily="Verdana" variant="h4">
-                  A place to connect
-                </Typography>
-              </Box>
-              
-            </Box>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            md={4}
-            component={Paper}
-            elevation={24}
-            sx={{ borderRadius: "30px" }}
-            overflow="hidden"
+      <Grid
+        container
+        component="main"
+        justifyContent="flex-end"
+        alignItems="center"
+        sx={{ height: "100vh", px: "40px" }}
+      >
+        <Grid item hidden={matches} xs={false} md={8}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              textAlign: "center",
+              alignItems: "center",
+            }}
           >
-            <Box sx={{ width: "100%" }}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <Tabs
-                  value={tabIndex}
-                  onChange={handleChange}
-                  aria-label="Login and Signup tabs"
-                  variant="fullWidth"
-                >
-                  <Tab label="Sign In" data-testid="LogInTabButton" />
-                  <Tab label="Sign Up" data-testid="SignUpTabButton" />
-                </Tabs>
-              </Box>
-              <TabPanel value={tabIndex} index={0}>
-                <Login handleChange={handleChange} />
-              </TabPanel>
-              <TabPanel value={tabIndex} index={1}>
-                <SignUp handleChange={handleChange} />
-              </TabPanel>
+            <Box className="glass" p="40px" px="80px">
+              <Typography color="white" variant="h2">
+                UBoard
+              </Typography>
+              <Typography color="white" variant="h4">
+                A place to connect
+              </Typography>
             </Box>
-          </Grid>
+          </Box>
         </Grid>
-      </ThemeProvider>
+        <Grid
+          item
+          xs={12}
+          md={4}
+          component={Paper}
+          elevation={24}
+          sx={{ borderRadius: "30px" }}
+          overflow="hidden"
+        >
+          <Box sx={{ width: "100%" }}>
+            <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+              <Tabs
+                value={tabIndex}
+                onChange={handleChange}
+                aria-label="Login and Signup tabs"
+                variant="fullWidth"
+              >
+                <Tab label="Sign In" data-testid="LogInTabButton" />
+                <Tab label="Sign Up" data-testid="SignUpTabButton" />
+              </Tabs>
+            </Box>
+            <TabPanel value={tabIndex} index={0}>
+              <Login handleChange={handleChange} />
+            </TabPanel>
+            <TabPanel value={tabIndex} index={1}>
+              <SignUp handleChange={handleChange} />
+            </TabPanel>
+          </Box>
+        </Grid>
+      </Grid>
     </div>
   );
 }

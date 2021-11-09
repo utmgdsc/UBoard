@@ -3,21 +3,27 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import { AuthContainer } from "./containers";
 
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    secondary: {
+      main: "#f4003d",
+    },
+  },
+});
+
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AuthContainer />} />
-        <Route
-          path="*"
-          element={
-            <main style={{ padding: "1rem" }}>
-              <p>There's nothing here!</p>
-            </main>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AuthContainer />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

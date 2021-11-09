@@ -11,11 +11,7 @@ import Link from "@mui/material/Link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 
-import useWindowDimensions from "../hooks/window";
-
 function Login(props: { handleChange: Function }) {
-  const { height } = useWindowDimensions();
-
   // create hooks for username and password
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
@@ -55,7 +51,7 @@ function Login(props: { handleChange: Function }) {
         alignItems: "center",
       }}
       overflow="auto"
-      maxHeight={height - 200 > 0 ? height - 200 : 0}
+      maxHeight="70vh"
     >
       <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
         <LockOutlinedIcon />

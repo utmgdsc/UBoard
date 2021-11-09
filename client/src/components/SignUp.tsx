@@ -8,11 +8,7 @@ import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
-import useWindowDimensions from "../hooks/window";
-
 function SignUp(props: { handleChange: Function }) {
-  const { height } = useWindowDimensions();
-
   // create hooks for inputs and errors associated
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState("");
@@ -80,7 +76,7 @@ function SignUp(props: { handleChange: Function }) {
         alignItems: "center",
       }}
       overflow="auto"
-      maxHeight={height - 200 > 0 ? height - 200 : 0}
+      maxHeight="70vh"
     >
       <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
         <CircleOutlined />
@@ -196,7 +192,6 @@ function SignUp(props: { handleChange: Function }) {
                   setPasswordError,
                   "Ensure password is 8 characters or longer"
                 );
-                validateConfirmPass();
               }}
               error={passwordError !== ""}
               helperText={passwordError}

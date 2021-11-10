@@ -38,10 +38,7 @@ const SearchIconWrapper = styled("div")(() => ({
 const StyledInputBase = styled(InputBase)(({theme}) => ({
   color: "inherit",
   "& .MuiInputBase-input": {
-    paddingTop: 8,
-    paddingRight: 8,
-    paddingBottom: 8,
-    paddingLeft: 64,
+    padding: "8px 8px 8px 64px",
     width: "50ch",
 
     /* Resize searchbar based on screen size */

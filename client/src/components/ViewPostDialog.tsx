@@ -31,10 +31,10 @@ const Transition = React.forwardRef((
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
 function MoreOptions() {
-  const [isOpen, toggleSettings] = React.useState(false);
+  const [isOpen, toggleMenu] = React.useState(false);
 
   const closeMenu = () => {
-    toggleSettings(false);
+    toggleMenu(false);
   };
 
   return (
@@ -46,7 +46,7 @@ function MoreOptions() {
         aria-controls="settings-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}
-        onClick={() => {toggleSettings(true)}}
+        onClick={() => {toggleMenu(true)}}
       >
         <MoreVert />
       </IconButton>

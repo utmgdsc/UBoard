@@ -17,10 +17,7 @@ export default function GenerateTags(tags: Array<string>) {
 /* Structure for each tag item -- colored "bubble" */
 const TagItem = styled(Paper)(({ theme }) => ({
   ...theme.typography.caption,
-  paddingLeft: 8,
-  paddingRight: 8,
-  paddingTop: 4,
-  paddingBottom: 4,
+  padding: "4px 8px 4px 8px",
   textAlign: "center",
   color: theme.palette.text.primary,
   background: "#ef9a9a",

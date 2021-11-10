@@ -31,7 +31,7 @@ describe("verifying launch of create post component", () => {
     expect(screen.getByTestId("previewButton")).toBeDisabled();
   });
 
-  it("should undisable the preview button after providing required fields", () => {
+  it("should enable the preview button after providing required fields", () => {
     // input title
     const titleTextField = screen.getByPlaceholderText("title");
     fireEvent.change(titleTextField, { target: { value: "Test Club" } });
@@ -42,7 +42,7 @@ describe("verifying launch of create post component", () => {
     expect(screen.getByTestId("previewButton")).not.toBeDisabled();
   });
 
-  it("renders `previewPopUp component upon clicking Preview", () => {
+  it("renders `previewPopUp` component upon clicking Preview", () => {
     // input title
     fireEvent.change(screen.getByPlaceholderText("title"), {
       target: { value: "Test Club" },

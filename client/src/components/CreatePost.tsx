@@ -17,12 +17,14 @@ const theme = createTheme();
 
 function CreatePost() {
   // create hooks for input fields
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [file, setFile] = useState("");
-  const [tags, setTags] = useState("");
-  const [eventCapacity, setEventCapacity] = useState("");
-  const [eventLocation, setEventLocation] = useState("");
+  const [form, setForm] = useState({
+    title: "",
+    body: "",
+    file: "",
+    tags: "",
+    eventCapacity: "",
+    eventLocation: "",
+  });
 
   const [openPopup, setOpenPopup] = useState(false);
 
@@ -36,8 +38,7 @@ function CreatePost() {
     const target = event.target as HTMLInputElement;
     /** do something with the file **/
     let url = URL.createObjectURL((target.files as FileList)[0]);
-    setFile(url);
-    console.log(url);
+    setForm({ ...form, file: url });
   };
 
   return (
@@ -66,7 +67,7 @@ function CreatePost() {
                   placeholder="title"
                   size="small"
                   data-testid="titleTextField"
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
               </Grid>
 
@@ -79,7 +80,7 @@ function CreatePost() {
                   placeholder="description"
                   multiline
                   rows={6}
-                  onChange={(e) => setBody(e.target.value)}
+                  onChange={(e) => setForm({ ...form, body: e.target.value })}
                 />
               </Grid>
 
@@ -102,7 +103,9 @@ function CreatePost() {
                   placeholder="40"
                   fullWidth
                   size="small"
-                  onChange={(e) => setEventCapacity(e.target.value)}
+                  onChange={(e) =>
+                    setForm({ ...form, eventCapacity: e.target.value })
+                  }
                 />
               </Grid>
 
@@ -112,7 +115,9 @@ function CreatePost() {
                   label="Location"
                   placeholder="Deerfield Hall"
                   size="small"
-                  onChange={(e) => setEventLocation(e.target.value)}
+                  onChange={(e) =>
+                    setForm({ ...form, eventLocation: e.target.value })
+                  }
                 />
               </Grid>
 
@@ -122,7 +127,7 @@ function CreatePost() {
                   label="Tags (Separate tags by a comma)"
                   placeholder="Clubs, Math, MCS"
                   size="small"
-                  onChange={(e) => setTags(e.target.value)}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
                 />
               </Grid>
             </Grid>
@@ -144,7 +149,7 @@ function CreatePost() {
                       onClick={() => handleClickOpen()}
                       data-testid="previewButton"
                       size="large"
-                      disabled={!(title !== "" && body !== "")}
+                      disabled={!(form.title !== "" && form.body !== "")}
                     >
                       Preview
                     </Button>
@@ -165,12 +170,12 @@ function CreatePost() {
           </Box>
 
           <PreviewPopUp
-            title={title}
-            body={body}
-            img={file}
-            tags={tags}
-            eventCapacity={eventCapacity}
-            location={eventLocation}
+            title={form.title}
+            body={form.body}
+            img={form.file}
+            tags={form.tags}
+            eventCapacity={form.eventCapacity}
+            location={form.eventLocation}
             openPopup={openPopup}
             handleClose={() => setOpenPopup(false)}
           ></PreviewPopUp>

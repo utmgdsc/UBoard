@@ -1,11 +1,12 @@
 import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import "./App.css";
-import { AuthContainer } from "./containers";
-import PostDashboard from "./containers/PostDashboard";
 
 import CssBaseline from "@mui/material/CssBaseline";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+import PostDashboard from "./containers/PostDashboard";
+import { AuthContainer } from "./containers";
+import "./App.css";
 
 const theme = createTheme({
   palette: {

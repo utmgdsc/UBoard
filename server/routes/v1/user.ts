@@ -54,7 +54,7 @@ export async function signInHandler(req: Request, res: Response) {
       };
 
       res
-        .cookie(cookie_key, JSON.stringify(token), {
+        .cookie(cookie_key, token, {
           httpOnly: true,
           expires: getDateOffset(1),
         })

@@ -9,12 +9,12 @@ const postController = new PostController(db.User);
 postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.body.limit;
   const offset = req.body.offset;
-  if (!limit || !offset) {
+  if (!limit || (!offset && offset != 0)) {
     return res.status(400).json({
       code: 400,
-      message: `Missing ${!limit ? 'limit' : ''} ${!limit && !offset ? 'and' : ''} ${
-        !offset ? 'offset' : ''
-      }`,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
     });
   }
 

@@ -33,7 +33,10 @@ export default class UserController {
   async signIn(
     userName: string,
     password: string
-  ): Promise<{ status: number; data: { result?: User; message?: string } }> {
+  ): Promise<{
+    status: number;
+    data: {result?: { userName: string; id: string }; message?: string };
+  }> {
     try {
       let userWithPass = await this.userRepo.scope("withPassword").findOne({
         where: {
@@ -56,14 +59,15 @@ export default class UserController {
       }
 
       if (!userWithPass.confirmed) {
-        return { status: 403, data: { message: "Email has not been confirmed" }}
+        return {
+          status: 403,
+          data: { message: "Email has not been confirmed" },
+        };
       }
 
       this.updateLastLogin(userWithPass);
 
-      const user = Object.assign({}, userWithPass);
-
-      delete user.password;
+      const user = { userName: userWithPass.userName, id: userWithPass.id };
 
       return { status: 204, data: { result: user } };
     } catch (error) {

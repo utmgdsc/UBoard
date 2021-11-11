@@ -6,13 +6,15 @@ import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import newImage from "../assets/background.jpg";
 
 let container: HTMLElement | null = null;
-beforeEach(() => {
+beforeEach(async () => {
   // setup a DOM element as a render target
   container = document.createElement("div");
   document.body.appendChild(container);
   act(() => {
     render(<CreatePost />);
   });
+  const newPostButton = screen.findByTestId("newPostButton");
+  (await newPostButton).click();
 });
 
 afterEach(() => {
@@ -54,5 +56,10 @@ describe("verifying launch of create post component", () => {
     // pop up should render
     screen.getByTestId("previewButton").click();
     expect(screen.getByTestId("PreviewPopUpComponent")).toBeInTheDocument();
+  });
+
+  it("closes the dialog when clicked on `Back` button", () => {
+    screen.getByTestId("backButton").click();
+    expect(screen.getByTestId("newPostButton")).toBeInTheDocument();
   });
 });

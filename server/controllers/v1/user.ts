@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 
-import { User } from "../../models/user";
+import { User, UserAttributes } from "../../models/user";
 import EmailService from "../../services/emailService";
 
 export enum TOKEN_TYPE {
@@ -33,7 +33,7 @@ export default class UserController {
   async signIn(
     userName: string,
     password: string
-  ): Promise<{ status: number; data: { result?: User; message?: string } }> {
+  ): Promise<{ status: number; data: { result?: UserAttributes; message?: string } }> {
     try {
       let userWithPass = await this.userRepo.scope("withPassword").findOne({
         where: {
@@ -61,7 +61,7 @@ export default class UserController {
 
       this.updateLastLogin(userWithPass);
 
-      const user = Object.assign({}, userWithPass);
+      const user = Object.assign({}, userWithPass.get());
 
       delete user.password;
 

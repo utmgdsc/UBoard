@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import CssBaseline from "@mui/material/CssBaseline";
 
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Grid from "@mui/material/Grid";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -41,7 +39,6 @@ function CreatePost() {
 
   return (
     <Container component="main" maxWidth="md">
-      <CssBaseline />
       <Box
         sx={{
           marginTop: 8,
@@ -143,7 +140,7 @@ function CreatePost() {
                     variant="contained"
                     sx={{ mt: 3, mb: 2 }}
                     color="secondary"
-                    onClick={() => handleClickOpen()}
+                    onClick={handleClickOpen}
                     data-testid="previewButton"
                     size="large"
                     disabled={!(form.title !== "" && form.body !== "")}

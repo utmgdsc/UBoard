@@ -20,7 +20,7 @@ export default function PreviewPopUp(props: {
   eventCapacity: string;
   location: string;
   openPopup: boolean;
-  handleClose: () => any;
+  handleClose: () => void;
 }) {
   const {
     title,

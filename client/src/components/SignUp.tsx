@@ -8,9 +8,11 @@ import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
-import { api_v1 } from "../api/v1";
+import ServerApi from "../api/v1/index";
 
 function SignUp(props: { handleChange: Function }) {
+  const api = new ServerApi();
+
   // create hooks for inputs and errors associated
   const [form, setForm] = useState({
     email: "",
@@ -42,16 +44,7 @@ function SignUp(props: { handleChange: Function }) {
       return;
     }
 
-    api_v1
-      .post("/users/signup", form)
-      .then((response) => {
-        window.alert("Email confirmation sent!");
-      })
-      .catch((error) => {
-        const msg = error.response.data.message;
-        console.error(msg);
-        window.alert(`Message: ${msg}`);
-      });
+    api.signUp(form);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +116,7 @@ function SignUp(props: { handleChange: Function }) {
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit}
+        data-testid="form"
         sx={{ mt: 3 }}
       >
         <Grid container spacing={2}>
@@ -135,6 +129,7 @@ function SignUp(props: { handleChange: Function }) {
               onChange={handleChange}
               fullWidth
               required
+              data-testid="firstNameForm"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
@@ -156,6 +151,7 @@ function SignUp(props: { handleChange: Function }) {
               onChange={handleChange}
               fullWidth
               required
+              data-testid="lastNameForm"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
@@ -199,6 +195,7 @@ function SignUp(props: { handleChange: Function }) {
               onChange={handleChange}
               fullWidth
               required
+              data-testid="userNameForm"
               size="small"
               variant="standard"
               onBlur={(e) =>
@@ -244,6 +241,7 @@ function SignUp(props: { handleChange: Function }) {
               onChange={(e) => setConfirmPass(e.target.value)}
               fullWidth
               required
+              data-testid="confirmPassForm"
               type="password"
               onBlur={(e) => validateConfirmPass()}
               error={confirmPassError !== ""}

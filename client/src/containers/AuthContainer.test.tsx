@@ -1,8 +1,16 @@
 import React from "react";
-import AuthContainer from "./AuthContainer";
 import { unmountComponentAtNode } from "react-dom";
 import { act } from "react-dom/test-utils";
 import { render, screen, fireEvent } from "@testing-library/react";
+
+import AuthContainer from "./AuthContainer";
+
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => jest.fn(),
+  useLocation: () =>
+    jest.fn().mockReturnValue({ state: { from: { pathname: undefined } } }),
+}));
 
 let container: HTMLElement | null = null;
 beforeEach(() => {

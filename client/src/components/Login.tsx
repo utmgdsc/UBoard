@@ -9,13 +9,15 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography"
+import Typography from "@mui/material/Typography";
 
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate, useLocation } from "react-router-dom";
 
-import { api_v1 } from "../api/v1";
+import ServerApi from "../api/v1/index";
 
 function Login(props: { handleChange: Function }) {
+  const api = new ServerApi();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -58,15 +60,7 @@ function Login(props: { handleChange: Function }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
-    api_v1
-      .post("/users/signin", form)
-      .then((response) => {
-        navigate(from, { replace: true });
-      })
-      .catch((error) => {
-        console.error(error.response.data.message);
-        window.alert(`Message: ${error.response.data.message}`);
-      });
+    api.signIn(form, navigate, from);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

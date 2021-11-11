@@ -1,15 +1,17 @@
-import React from "react";
-import Button from "@mui/material/Button";
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Typography from "@mui/material/Typography";
-import Pagination from "@mui/material/Pagination";
+import React from 'react';
+import Button from '@mui/material/Button';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Typography from '@mui/material/Typography';
+import Pagination from '@mui/material/Pagination';
 
-import Header from "../components/Header";
-import PostPreview from "../components/PostPreview";
+import Header from '../components/Header';
+import PostPreview from '../components/PostPreview';
 
-import { api_v1 } from "../api/v1";
+import { api_v1 } from '../api/v1';
+import CreatePost from '../components/CreatePost';
+import Dialog from '@mui/material/Dialog';
 // import { PostUser } from "server/controllers/PostUser"
 
 
@@ -18,7 +20,7 @@ function RecentPosts() {
 
   const fetchRecentPosts = (limit: number, offset: number) => {
     api_v1
-      .get("/posts/", {
+      .get('/posts/', {
         params: { limit, offset },
       })
       .then((res: any) => {
@@ -61,12 +63,12 @@ export default function PostDashboard() {
               item
               xs={12}
               style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'flex-end',
               }}
             >
-              <Button variant="contained">New Post</Button>
+              <CreatePost/>
             </Grid>
             <RecentPosts />
           </Grid>
@@ -77,16 +79,16 @@ export default function PostDashboard() {
         <Grid
           item
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <Pagination count={1} color="primary" variant="outlined" />
         </Grid>
 
         <Box
-          sx={{ bgcolor: "background.paper", p: 6, margin: "auto" }}
+          sx={{ bgcolor: 'background.paper', p: 6, margin: 'auto' }}
           component="footer"
         >
           <Typography variant="h6" align="center" gutterBottom>

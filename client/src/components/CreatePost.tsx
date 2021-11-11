@@ -8,9 +8,11 @@ import TextField from '@mui/material/TextField';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
+import Dialog from '@mui/material/Dialog';
 
 import PreviewPopUp from './PreviewPopUp';
 import { api_v1 } from '../api/v1';
+
 
 function CreatePost() {
   // create hooks for input fields
@@ -51,7 +53,23 @@ function CreatePost() {
     setForm({ ...form, file: url });
   };
 
+const [isOpen, toggleDialog] = React.useState(false);
+  const closeDialog = () => {
+    toggleDialog(false);
+  };
+
+
   return (
+    <>
+      <Button
+        variant="outlined"
+        onClick={() => {
+          toggleDialog(true);
+        }}
+      >
+        New Post
+      </Button>
+      <Dialog fullScreen open={isOpen} onClose={closeDialog}>
     <Container component="main" maxWidth="md">
       <Box
         sx={{
@@ -149,6 +167,7 @@ function CreatePost() {
             <Grid item xs={5} md={3}>
               <Tooltip title="Enter all required fields!">
                 <Box>
+
                   <Button
                     fullWidth
                     variant="contained"
@@ -170,6 +189,7 @@ function CreatePost() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
                 size="large"
+                disabled={!(form.title !== '' && form.body !== '')}
                 onClick={handleSubmit}
               >
                 Create
@@ -189,7 +209,7 @@ function CreatePost() {
           handleClose={() => setOpenPopup(false)}
         ></PreviewPopUp>
       </Box>
-    </Container>
+    </Container> </Dialog></>
   );
 }
 

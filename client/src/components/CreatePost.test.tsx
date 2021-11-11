@@ -3,18 +3,18 @@ import CreatePost from "./CreatePost";
 import { unmountComponentAtNode } from "react-dom";
 import { act } from "react-dom/test-utils";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import newImage from "../assets/background.jpg";
 
 let container: HTMLElement | null = null;
-beforeEach(async () => {
+beforeEach(() => {
   // setup a DOM element as a render target
   container = document.createElement("div");
   document.body.appendChild(container);
   act(() => {
     render(<CreatePost />);
   });
-  const newPostButton = screen.findByTestId("newPostButton");
-  (await newPostButton).click();
+  // const newPostButton = screen.findByTestId("newPostButton");
+  // newPostButton.click();
+  screen.getByTestId("newPostButton").click();
 });
 
 afterEach(() => {

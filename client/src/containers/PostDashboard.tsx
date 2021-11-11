@@ -11,12 +11,9 @@ import PostPreview from "../components/PostPreview";
 
 import { api_v1 } from "../api/v1";
 // import { PostUser } from "server/controllers/PostUser"
-// import { Post } from "server/models/post";
-// import { UserAttributes } from "server/models/user";
+
 
 function RecentPosts() {
-
-  // RESPONSE TYPE: {"status":200,"data":{"result":[{"id":"68a64a97-848c-49a8-a031-5eecf4efbbd0","title":"title","feedbackScore":10,"createdAt":"2021-11-11T04:46:07.281Z","User":{"firstName":"test","lastName":"test","userName":"testing"}}],"count":1}}
   const [recentPosts, updateRecent] = React.useState([]);
 
   const fetchRecentPosts = (limit: number, offset: number) => {
@@ -25,7 +22,6 @@ function RecentPosts() {
         params: { limit, offset },
       })
       .then((res: any) => {
-        console.dir(res.data.data.result);
         if (res.data.data.result) {
           updateRecent(res.data.data.result);
         }
@@ -36,7 +32,7 @@ function RecentPosts() {
   React.useEffect(() => {
     const interval = setInterval(() => {
       fetchRecentPosts(15, 0);
-    }, 10000);
+    }, 500);
 
     return () => clearInterval(interval);
   });

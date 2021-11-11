@@ -23,7 +23,8 @@ export default function PostPreview(props: { postUser: any }) {
       >
         <CardMedia
           component="img"
-          src={props.postUser.thumbnail}
+          //TODO: once we set this up src={props.postUser.thumbnail}
+          src="https://i.imgur.com/8EYKtwP.png"
           alt="placeholder"
           sx={{ maxWidth: "500px", maxHeight: "145px" }}
         />

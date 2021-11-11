@@ -11,9 +11,16 @@ import Link from "@mui/material/Link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography"
 
+import { useNavigate, useLocation } from "react-router";
+
 import { api_v1 } from "../api/v1";
 
 function Login(props: { handleChange: Function }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/dashboard";
+
   // create hooks for username and password
   const [form, setForm] = useState({
     userName: "",
@@ -54,7 +61,7 @@ function Login(props: { handleChange: Function }) {
     api_v1
       .post("/users/signin", form)
       .then((response) => {
-        window.alert("Signed in!");
+        navigate(from, { replace: true });
       })
       .catch((error) => {
         console.error(error.response.data.message);

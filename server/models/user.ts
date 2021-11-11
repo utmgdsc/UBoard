@@ -1,6 +1,6 @@
 import { Sequelize, Model, UUIDV4, DataTypes, Optional } from "sequelize";
 
-interface UserAttributes {
+export interface UserAttributes {
   /* Login Specific */
   id: string;
   firstName: string;

@@ -161,7 +161,7 @@ export default class PostController {
     location?: string,
     capacity?: number
   ): Promise<{status: number; data: {result?: Post; message?: string}}> {
-    if (!title || !body || !location || !capacity) {
+    if (!title || !body || !location || capacity == undefined) {
       return {status: 400, data: {message: 'Missing fields.'}};
     }
 

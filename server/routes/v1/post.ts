@@ -4,12 +4,12 @@ import PostController from '../../controllers/v1/post';
 import {getAuthUser} from '../../middleware/auth';
 
 const postRouter = express.Router();
-const postController = new PostController(db.User);
+const postController = new PostController(db.Post);
 
 postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.body.limit;
   const offset = req.body.offset;
-  if (!limit || !offset) {
+  if (!limit || offset == undefined) {
     return res.status(400).json({
       code: 400,
       message: `Missing ${!limit ? 'limit' : ''} ${!limit && !offset ? 'and' : ''} ${

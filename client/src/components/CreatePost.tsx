@@ -66,6 +66,7 @@ const [isOpen, toggleDialog] = React.useState(false);
         onClick={() => {
           toggleDialog(true);
         }}
+        data-testid="btn-newpost"
       >
         New Post
       </Button>

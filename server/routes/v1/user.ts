@@ -19,7 +19,8 @@ async function signOut(req: Request, res: Response) {
     .clearCookie(cookie_key, {
       httpOnly: true,
     })
-    .status(204).json();
+    .status(204)
+    .json();
 }
 
 export async function signInHandler(req: Request, res: Response) {
@@ -28,11 +29,12 @@ export async function signInHandler(req: Request, res: Response) {
 
     if (!userName || !password) {
       res.status(400).json({
-        message: !userName
-          ? !password
-            ? "Username and password"
-            : "Username"
-          : "Password" + " not provided",
+        message:
+          (!userName
+            ? !password
+              ? "Username and password"
+              : "Username"
+            : "Password") + " not provided",
       });
       return;
     }

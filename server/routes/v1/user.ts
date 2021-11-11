@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import EmailService from "../../services/emailService";
 import db from "../../models";
 import UserController from "../../controllers/v1/user";
+import { getAuthUser } from "../../middleware/auth";
 
 const userRouter = express.Router();
 const apiRoute = `${process.env.PAGE_URL}api/v1`;
@@ -131,11 +132,21 @@ async function resetPassHandler(req: Request, res: Response) {
   }
 }
 
+async function me(req: Request, res: Response) {
+  try {
+    const user = getAuthUser(res);
+    res.status(200).json(user);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 userRouter.post("/signin", signInHandler);
 userRouter.post("/signup", signUpHandler);
 userRouter.post("/signout", signOut);
 
 userRouter.get("/confirm", confirmEmailHandler);
 userRouter.get("/password-reset", resetPassHandler);
+userRouter.get("/me", me);
 
 export default userRouter;

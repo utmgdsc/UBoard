@@ -9,37 +9,71 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import Typography from "@mui/material/Typography";
+import Typography from "@mui/material/Typography"
+
+import { api_v1 } from "../api/v1";
 
 function Login(props: { handleChange: Function }) {
   // create hooks for username and password
-  const [username, setUsername] = useState("");
-  const [usernameError, setUsernameError] = useState("");
+  const [form, setForm] = useState({
+    userName: "",
+    password: "",
+  });
 
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [errors, setErrors] = useState({
+    userName: "",
+    password: "",
+  });
 
-  const validateBlurUsername = (regexPattern: RegExp) => {
-    if (!regexPattern.test(username)) {
-      setUsernameError("Please enter a valid username");
+  /**
+   * Validates all input forms except for `confirmPass` input
+   * @param regexPattern  pattern to match
+   * @param checkString   string to verify
+   * @param setHook       set function for the input's hook
+   * @param errorMessage  error message to display for that input field
+   */
+  const validateBlur = (
+    regexPattern: RegExp,
+    checkString: string,
+    setHook: Function,
+    errorMessage: string
+  ) => {
+    // only check for the confirm password field
+
+    if (!regexPattern.test(checkString)) {
+      setHook(errorMessage);
     } else {
-      setUsernameError("");
-    }
-  };
-  const validateBlurPassword = (regexPattern: RegExp) => {
-    if (!regexPattern.test(password)) {
-      setPasswordError("Ensure password is 8 characters or longer");
-    } else {
-      setPasswordError("");
+      setHook("");
     }
   };
 
   // handle function for submitting username and password
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
-    // TODO api calls here after submit
+    api_v1
+      .post("/users/signin", form)
+      .then((response) => {
+        window.alert("Signed in!");
+      })
+      .catch((error) => {
+        console.error(error.response.data.message);
+        window.alert(`Message: ${error.response.data.message}`);
+      });
   };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleError =
+    (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    (msg: string) => {
+      return setErrors({
+        ...errors,
+        [e.target.name]: msg,
+      });
+    };
 
   return (
     <Box
@@ -67,25 +101,41 @@ function Login(props: { handleChange: Function }) {
         sx={{ mt: 1 }}
       >
         <TextField
+          name="userName"
           margin="normal"
           label="Username"
-          onChange={(e) => setUsername(e.target.value)}
+          onChange={handleChange}
           fullWidth
           required
-          onBlur={(e) => validateBlurUsername(/^[a-zA-Z0-9]+$/)}
-          error={usernameError !== ""}
-          helperText={usernameError}
+          onBlur={(e) =>
+            validateBlur(
+              /^[a-zA-Z0-9]+$/,
+              form.userName,
+              handleError(e),
+              "Please enter a valid username"
+            )
+          }
+          error={errors.userName !== ""}
+          helperText={errors.userName}
         />
         <TextField
+          name="password"
           margin="normal"
           label="Password"
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={handleChange}
           fullWidth
           required
           type="password"
-          onBlur={(e) => validateBlurPassword(/.{8,}/)}
-          error={passwordError !== ""}
-          helperText={passwordError}
+          onBlur={(e) =>
+            validateBlur(
+              /.{8,}/,
+              form.password,
+              handleError(e),
+              "Ensure password is 8 characters or longer"
+            )
+          }
+          error={errors.password !== ""}
+          helperText={errors.password}
         />
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}

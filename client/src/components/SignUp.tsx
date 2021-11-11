@@ -8,39 +8,73 @@ import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
+import { api_v1 } from "../api/v1";
+
 function SignUp(props: { handleChange: Function }) {
   // create hooks for inputs and errors associated
-  const [firstName, setFirstName] = useState("");
-  const [firstNameError, setFirstNameError] = useState("");
+  const [form, setForm] = useState({
+    email: "",
+    userName: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
 
-  const [lastName, setLastName] = useState("");
-  const [lastNameError, setLastNameError] = useState("");
-
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-
-  const [username, setUsername] = useState("");
-  const [usernameError, setUsernameError] = useState("");
-
-  const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    userName: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+  });
 
   const [confirmPass, setConfirmPass] = useState("");
   const [confirmPassError, setConfirmPassError] = useState("");
 
   // handle function
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
-    // TODO api calls here after submit
+
+    if (!validateConfirmPass()) {
+      const msg = "Passwords do not match.";
+      console.error(msg);
+      window.alert(msg);
+      return;
+    }
+
+    api_v1
+      .post("/users/signup", form)
+      .then((response) => {
+        window.alert("Email confirmation sent!");
+      })
+      .catch((error) => {
+        const msg = error.response.data.message;
+        console.error(msg);
+        window.alert(`Message: ${msg}`);
+      });
   };
 
-  const validateConfirmPass = () => {
-    if (password !== confirmPass) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleError =
+    (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    (msg: string) => {
+      return setErrors({
+        ...errors,
+        [e.target.name]: msg,
+      });
+    };
+
+  const validateConfirmPass = (): boolean => {
+    if (form.password !== confirmPass) {
       const errMsg = "Password does not match!";
       setConfirmPassError(errMsg);
-      return;
+      return false;
     } else {
       setConfirmPassError("");
+      return true;
     }
   };
 
@@ -94,49 +128,52 @@ function SignUp(props: { handleChange: Function }) {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
+              name="firstName"
               label="First Name"
               size="small"
               variant="standard"
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={handleChange}
               fullWidth
               required
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
-                  firstName,
-                  setFirstNameError,
+                  form.firstName,
+                  handleError(e),
                   "Please enter a valid first name"
                 )
               }
-              error={firstNameError !== ""}
-              helperText={firstNameError}
+              error={errors.firstName !== ""}
+              helperText={errors.firstName}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
+              name="lastName"
               label="Last Name"
               size="small"
               variant="standard"
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={handleChange}
               fullWidth
               required
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
-                  lastName,
-                  setLastNameError,
+                  form.lastName,
+                  handleError(e),
                   "Please enter a valid last name"
                 )
               }
-              error={lastNameError !== ""}
-              helperText={lastNameError}
+              error={errors.lastName !== ""}
+              helperText={errors.lastName}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
+              name="email"
               label="Email Address"
               placeholder="john@mail.utoronto.ca"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={handleChange}
               fullWidth
               required
               data-testid="emailForm"
@@ -145,20 +182,21 @@ function SignUp(props: { handleChange: Function }) {
               variant="standard"
               onBlur={(e) =>
                 validateBlur(
-                  /.*@(mail\.|alum\.){0,}utoronto.ca$/,
-                  email,
-                  setEmailError,
+                  /..*@(mail\.|alum\.){0,}utoronto.ca$/,
+                  form.email,
+                  handleError(e),
                   "Invalid email, only utoronto emails allowed"
                 )
               }
-              error={emailError !== ""}
-              helperText={emailError}
+              error={errors.email !== ""}
+              helperText={errors.email}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
+              name="userName"
               label="Username"
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={handleChange}
               fullWidth
               required
               size="small"
@@ -166,35 +204,36 @@ function SignUp(props: { handleChange: Function }) {
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z0-9]+$/,
-                  username,
-                  setUsernameError,
+                  form.userName,
+                  handleError(e),
                   "Please enter a valid username"
                 )
               }
-              error={usernameError !== ""}
-              helperText={usernameError}
+              error={errors.userName !== ""}
+              helperText={errors.userName}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
+              name="password"
               label="Password"
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={handleChange}
               fullWidth
               required
               type="password"
               size="small"
               variant="standard"
               data-testid="passwordForm"
-              onBlur={() => {
+              onBlur={(e) => {
                 validateBlur(
                   /.{8,}/,
-                  password,
-                  setPasswordError,
+                  form.password,
+                  handleError(e),
                   "Ensure password is 8 characters or longer"
                 );
               }}
-              error={passwordError !== ""}
-              helperText={passwordError}
+              error={errors.password !== ""}
+              helperText={errors.password}
             />
           </Grid>
           <Grid item xs={12}>

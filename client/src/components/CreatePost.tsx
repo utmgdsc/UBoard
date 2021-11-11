@@ -1,28 +1,42 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
 
-import PreviewPopUp from "./PreviewPopUp";
+import PreviewPopUp from './PreviewPopUp';
+import { api_v1 } from '../api/v1';
 
 function CreatePost() {
   // create hooks for input fields
   const [form, setForm] = useState({
-    title: "",
-    body: "",
-    file: "",
-    tags: "",
-    eventCapacity: "",
-    eventLocation: "",
+    title: '',
+    body: '',
+    file: '',
+    tags: '',
+    capacity: '',
+    location: '',
   });
 
   const [openPopup, setOpenPopup] = useState(false);
+
+  const handleSubmit = () => {
+    api_v1
+      .post('/posts/', form)
+      .then((res) => {
+        console.dir(res);
+        alert("Success!");
+      })
+      .catch((err) => {
+        console.error(err);  
+        alert("An error occurred. Ensure all the fields are correct")
+      });
+  };
 
   // handle functions
   const handleClickOpen = () => {
@@ -42,9 +56,9 @@ function CreatePost() {
       <Box
         sx={{
           marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
       >
         <Typography component="h3" variant="h3" fontWeight="bold">
@@ -98,7 +112,7 @@ function CreatePost() {
                 fullWidth
                 size="small"
                 onChange={(e) =>
-                  setForm({ ...form, eventCapacity: e.target.value })
+                  setForm({ ...form, capacity: e.target.value })
                 }
               />
             </Grid>
@@ -110,7 +124,7 @@ function CreatePost() {
                 placeholder="Deerfield Hall"
                 size="small"
                 onChange={(e) =>
-                  setForm({ ...form, eventLocation: e.target.value })
+                  setForm({ ...form, location: e.target.value })
                 }
               />
             </Grid>
@@ -143,7 +157,7 @@ function CreatePost() {
                     onClick={handleClickOpen}
                     data-testid="previewButton"
                     size="large"
-                    disabled={!(form.title !== "" && form.body !== "")}
+                    disabled={!(form.title !== '' && form.body !== '')}
                   >
                     Preview
                   </Button>
@@ -156,6 +170,7 @@ function CreatePost() {
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
                 size="large"
+                onClick={handleSubmit}
               >
                 Create
               </Button>
@@ -168,8 +183,8 @@ function CreatePost() {
           body={form.body}
           img={form.file}
           tags={form.tags}
-          eventCapacity={form.eventCapacity}
-          location={form.eventLocation}
+          eventCapacity={form.capacity}
+          location={form.location}
           openPopup={openPopup}
           handleClose={() => setOpenPopup(false)}
         ></PreviewPopUp>

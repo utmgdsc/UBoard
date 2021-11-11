@@ -2,8 +2,14 @@ import PostDashboard from "../containers/PostDashboard";
 import { act } from "react-dom/test-utils";
 import { render, screen, cleanup } from "@testing-library/react";
 import { unmountComponentAtNode } from "react-dom";
+import { makePost, makeUser } from '../../../server/models/tests/testHelpers';
 
 let container: HTMLElement | null = null;
+
+beforeAll(async () => {
+  const User = await makeUser("jony123", "gloop@utoronto.ca");
+  await makePost(User.id, "This is a testing title", "This is a post body that is being tested");
+})
 
 beforeEach(() => {
   container = document.createElement("div");
@@ -21,6 +27,15 @@ afterEach(() => {
   }
   cleanup();
 });
+
+describe("Posts properly show up", () => {
+  it("Post properly fetched from API", () =>  {
+    expect(screen.queryByText("This is a testing title")).toBeInTheDocument();
+
+  })
+
+
+})
 
 describe("Test interaction with dashboard", () => {
   it("Account Menu properly opens", () => {
@@ -45,7 +60,6 @@ describe("Test interaction with dashboard", () => {
     /* TODO: This test will change once we integrate with API. Will make a dummy post and check
      that data is displayed correctly */
     expect(screen.queryByTestId("test-post-dialog")).toBeNull();
-
     screen.getByTestId("test-btn-preview").click();
     expect(screen.queryByTestId("test-post-dialog")).toBeInTheDocument();
 

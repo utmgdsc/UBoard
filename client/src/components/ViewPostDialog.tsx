@@ -18,6 +18,9 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbUpOffAltIcon from "@mui/icons-material/ThumbUpOffAlt";
 
 import GenerateTags from "./Tags";
+// import { Post } from "../../../server/models/post";
+// import { User } from "../../../server/models/user"
+
 
 const Transition = React.forwardRef((
   props: TransitionProps & {
@@ -46,7 +49,7 @@ function MoreOptions() {
         aria-controls="settings-menu"
         aria-haspopup="true"
         aria-expanded={isOpen}
-        onClick={() => {toggleMenu(true)}}
+        onClick={() => { toggleMenu(true) }}
       >
         <MoreVert />
       </IconButton>
@@ -96,22 +99,21 @@ function CapacityBar() {
   // TODO: This data should be synced with db
   const [capacity, setCapacity] = React.useState(0);
   const [isCheckedin, toggleCheckin] = React.useState(false);
-  const maxCapacity = 10; 
+  const maxCapacity = 10;
 
   const handleCheckIn = () => {
     toggleCheckin((prev) => !prev);
   };
 
   React.useEffect(() => {
-    if (isCheckedin)
-    {
+    if (isCheckedin) {
       setCapacity((prev) => prev + 1);
     } else {
-      setCapacity((prev) => prev > 0 ? prev - 1: prev);
+      setCapacity((prev) => prev > 0 ? prev - 1 : prev);
     }
   }, [isCheckedin])
 
-  
+
   const buttonHandler =
     capacity < maxCapacity ? (
       isCheckedin ? (
@@ -142,7 +144,7 @@ function CapacityBar() {
 }
 
 /* Opens a full screen dialog containing a post. */
-export default function ViewPostDialog() {
+export default function ViewPostDialog(props: { postUser: any, tags: JSX.Element }) {
   const [isOpen, toggleDialog] = React.useState(false);
 
   const closeDialog = () => {
@@ -151,9 +153,9 @@ export default function ViewPostDialog() {
 
   return (
     <div>
-    {/* TODO:  change ID after integrating with API*/}
+      {/* TODO:  change ID after integrating with API*/}
 
-      <Button data-testid="test-btn-preview" variant="outlined" onClick={() => {toggleDialog(true)}} sx={{ mb: 3 }}>
+      <Button data-testid="test-btn-preview" variant="outlined" onClick={() => { toggleDialog(true) }} sx={{ mb: 3 }}>
         Read More
       </Button>
       <Dialog
@@ -179,7 +181,7 @@ export default function ViewPostDialog() {
         {/* Title and Options (3 dots) */}
         <Stack direction="row" sx={{ pt: 5, pl: 4 }}>
           <Typography variant="h5">
-            This is a placeholder event title
+            {props.postUser.title}
           </Typography>
           <MoreOptions />
         </Stack>
@@ -187,11 +189,11 @@ export default function ViewPostDialog() {
         {/* Top information (author, date, tags..) */}
         <Stack sx={{ pl: 4 }}>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            Posted 01/01/1969 by John Smith (username123)
+            {props.postUser.User.firstName} {props.postUser.User.lastName}
           </Typography>
-          {GenerateTags(["Tag 1", "Tag 2"])}
+          {props.tags}
           <Typography variant="body2" sx={{ pt: 2 }}>
-            Location: China
+            Location: {props.postUser.location}
           </Typography>
           {/* TODO: Implement Google Maps API */}
         </Stack>
@@ -206,34 +208,14 @@ export default function ViewPostDialog() {
             }}
           >
             <img
-              src="https://i.imgur.com/8EYKtwP.png"
+              src={props.postUser.thumbnail}
               alt="Thumbnail"
               height="400px"
               width="400px"
             />
           </Box>
           <Typography variant="body1" sx={{ px: 4, py: 1, pb: 4 }}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum
-            dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-            incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-            veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-            ea commodo consequat. Duis aute irure dolor in reprehenderit in
-            voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-            officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit
-            amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
-            ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-            nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-            consequat. Duis aute irure dolor in reprehenderit in voluptate velit
-            esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-            cupidatat non proident, sunt in culpa qui officia deserunt mollit
-            anim id est laborum.
+            {props.postUser.body}
           </Typography>
           <Stack direction="row" sx={{ px: 4, pb: 5 }}>
             {/* Capacity information and check-in (if applicable -- otherwise, this is hidden) */}

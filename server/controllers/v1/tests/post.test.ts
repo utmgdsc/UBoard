@@ -20,6 +20,7 @@ describe('Test v1 - Post Controller', () => {
       expect(result.data.count).toBe(2);
       expect(result.data.result![0].id).toBe(posts[1].id);
       expect(result.data.result![1].id).toBe(posts[0].id);
+      expect(result.data.result![1].User.firstName).toBe(author.firstName);
     });
 
     it('should return valid post details', async () => {
@@ -30,6 +31,7 @@ describe('Test v1 - Post Controller', () => {
 
       expect(result.status).toBe(200);
       expect(result.data.result?.body).toBe(post.body);
+      expect(result.data.result?.User.lastName).toBe(author.lastName);
     });
 
     it('should return an error for a missing post', async () => {

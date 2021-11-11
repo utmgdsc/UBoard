@@ -1,10 +1,12 @@
 import React from "react";
-import "./App.css";
-import { AuthContainer } from "./containers";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+
+import CssBaseline from "@mui/material/CssBaseline";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
 import PostDashboard from "./containers/PostDashboard";
-import { createTheme } from "@mui/material/styles";
-import ThemeProvider from "@mui/system/ThemeProvider";
+import { AuthContainer } from "./containers";
+import "./App.css";
 
 const theme = createTheme({
   palette: {
@@ -17,13 +19,14 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme} >
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AuthContainer />} />
-        <Route path="/dashboard" element={<PostDashboard/>} /> 
-        {/* TODO: Ensure authenticated then redirect to dashboard */}
-      </Routes>
-    </BrowserRouter>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<AuthContainer />} />
+          <Route path="/dashboard" element={<PostDashboard/>} /> 
+          {/* TODO: Ensure authenticated then redirect to dashboard */}
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   );
 }

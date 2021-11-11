@@ -70,28 +70,31 @@ describe("verifying valid input for signup page", () => {
     screen.getByTestId("SignUpTabButton").click();
     const emailForm = screen.getByPlaceholderText("john@mail.utoronto.ca");
 
-    const testCases = [
-      ["firstname@gmail.com", false],
-      ["gurvir@utoronto.com", false],
-      ["bob@....utoronto.ca", false],
-      ["bob.vance@alum.utoronto.ca", true],
-      ["andy.c@mail.utoronto.ca", true],
-      ["bob@utoronto.ca", true],
+    const invalidCases = [
+      "firstname@gmail.com",
+      "gurvir@utoronto.com",
+      "bob@....utoronto.ca",
     ];
-
-    for (let i = 0; i < testCases.length; i++) {
-      const [emailToCheck, isValid] = testCases[i];
+    invalidCases.forEach((emailToCheck) => {
       fireEvent.change(emailForm, { target: { value: emailToCheck } });
       fireEvent.blur(emailForm);
-      if (isValid) {
-        expect(
-          screen.queryByText("Invalid Email. Only utoronto emails allowed")
-        ).toBeNull();
-      } else {
-        expect(
-          screen.getByText("Invalid Email. Only utoronto emails allowed")
-        ).toBeInTheDocument();
-      }
-    }
+      expect(
+        screen.getByText("Invalid email, only utoronto emails allowed")
+      ).toBeInTheDocument();
+    });
+
+    const validCases = [
+      "bob.vance@alum.utoronto.ca",
+      "andy.c@mail.utoronto.ca",
+      "bob@utoronto.ca",
+    ];
+
+    validCases.forEach((emailToCheck) => {
+      fireEvent.change(emailForm, { target: { value: emailToCheck } });
+      fireEvent.blur(emailForm);
+      expect(
+        screen.queryByText("Invalid email, only utoronto emails allowed")
+      ).toBeNull();
+    });
   });
 });

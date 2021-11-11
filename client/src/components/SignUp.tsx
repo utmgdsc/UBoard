@@ -1,26 +1,14 @@
 import React, { useState } from "react";
 import Grid from "@mui/material/Grid";
-import Paper from "@mui/material/Paper";
 import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 
 function SignUp(props: { handleChange: Function }) {
-  const paperStyle = {
-    padding: 18,
-    borderRadius: "20px",
-    height: "600px",
-    display: "grid",
-  };
-
-  const avatarStyle = {
-    backgroundColor: "#f4003d",
-    width: 50,
-    height: 50,
-  };
-
   // create hooks for inputs and errors associated
   const [firstName, setFirstName] = useState("");
   const [firstNameError, setFirstNameError] = useState("");
@@ -41,20 +29,18 @@ function SignUp(props: { handleChange: Function }) {
   const [confirmPassError, setConfirmPassError] = useState("");
 
   // handle function
-  const handleSubmit = (e: React.ChangeEvent<{}>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
     // TODO api calls here after submit
   };
 
-  const valideConfirmPass = () => {
+  const validateConfirmPass = () => {
     if (password !== confirmPass) {
-      const errMsg = "Passwords don't match!";
+      const errMsg = "Password does not match!";
       setConfirmPassError(errMsg);
-      setPasswordError(errMsg);
       return;
     } else {
       setConfirmPassError("");
-      setPasswordError("");
     }
   };
 
@@ -81,27 +67,36 @@ function SignUp(props: { handleChange: Function }) {
   };
 
   return (
-    <Paper style={paperStyle} data-testid="SignUpTab">
-      <Grid container justifyContent="center">
-        <Grid item>
-          <Avatar style={avatarStyle}>
-            <CircleOutlined
-              fontSize="large"
-              style={{ justifyContent: "center" }}
-            />
-          </Avatar>
-        </Grid>
-      </Grid>
-
-      <Box textAlign="center">
-        <h1>Sign Up</h1>
-      </Box>
-      <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-        <Grid container spacing={0}>
-          <Grid item xs={12} md={6}>
+    <Box
+      data-testid="SignUpTab"
+      sx={{
+        mx: 2,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+      overflow="auto"
+      maxHeight="70vh"
+    >
+      <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+        <CircleOutlined />
+      </Avatar>
+      <Typography component="h1" variant="h5">
+        Sign up
+      </Typography>
+      <Box
+        component="form"
+        noValidate
+        autoComplete="off"
+        onSubmit={handleSubmit}
+        sx={{ mt: 3 }}
+      >
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="First Name"
-              placeholder="FirstName"
+              size="small"
+              variant="standard"
               onChange={(e) => setFirstName(e.target.value)}
               fullWidth
               required
@@ -117,10 +112,11 @@ function SignUp(props: { handleChange: Function }) {
               helperText={firstNameError}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               label="Last Name"
-              placeholder="LastName"
+              size="small"
+              variant="standard"
               onChange={(e) => setLastName(e.target.value)}
               fullWidth
               required
@@ -136,104 +132,109 @@ function SignUp(props: { handleChange: Function }) {
               helperText={lastNameError}
             />
           </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Email Address"
+              placeholder="john@mail.utoronto.ca"
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              required
+              data-testid="emailForm"
+              type="email"
+              size="small"
+              variant="standard"
+              onBlur={(e) =>
+                validateBlur(
+                  /.*@(mail\.|alum\.){0,}utoronto.ca$/,
+                  email,
+                  setEmailError,
+                  "Invalid email, only utoronto emails allowed"
+                )
+              }
+              error={emailError !== ""}
+              helperText={emailError}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Username"
+              onChange={(e) => setUsername(e.target.value)}
+              fullWidth
+              required
+              size="small"
+              variant="standard"
+              onBlur={(e) =>
+                validateBlur(
+                  /^[a-zA-Z0-9]+$/,
+                  username,
+                  setUsernameError,
+                  "Please enter a valid username"
+                )
+              }
+              error={usernameError !== ""}
+              helperText={usernameError}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Password"
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+              required
+              type="password"
+              size="small"
+              variant="standard"
+              data-testid="passwordForm"
+              onBlur={() => {
+                validateBlur(
+                  /.{8,}/,
+                  password,
+                  setPasswordError,
+                  "Ensure password is 8 characters or longer"
+                );
+              }}
+              error={passwordError !== ""}
+              helperText={passwordError}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Confirm Password"
+              size="small"
+              variant="standard"
+              onChange={(e) => setConfirmPass(e.target.value)}
+              fullWidth
+              required
+              type="password"
+              onBlur={(e) => validateConfirmPass()}
+              error={confirmPassError !== ""}
+              helperText={confirmPassError}
+            />
+          </Grid>
         </Grid>
-
-        <TextField
-          label="Email"
-          placeholder="john@mail.utoronto.ca"
-          onChange={(e) => setEmail(e.target.value)}
-          fullWidth
-          required
-          data-testid="emailForm"
-          type="email"
-          onBlur={(e) =>
-            validateBlur(
-              /.*@(mail\.|alum\.){0,}utoronto.ca$/,
-              email,
-              setEmailError,
-              "Invalid Email. Only utoronto emails allowed"
-            )
-          }
-          error={emailError !== ""}
-          helperText={emailError}
-        />
-
-        <TextField
-          label="Username"
-          placeholder="Enter Username"
-          onChange={(e) => setUsername(e.target.value)}
-          fullWidth
-          required
-          type="tel"
-          onBlur={(e) =>
-            validateBlur(
-              /^[a-zA-Z0-9]+$/,
-              username,
-              setUsernameError,
-              "Please enter a valid username"
-            )
-          }
-          error={usernameError !== ""}
-          helperText={usernameError}
-        />
-        <TextField
-          label="Password"
-          placeholder="Enter Password"
-          onChange={(e) => setPassword(e.target.value)}
-          fullWidth
-          required
-          type="password"
-          data-testid="passwordForm"
-          onBlur={() =>
-            validateBlur(
-              /.{8,}/,
-              password,
-              setPasswordError,
-              "Ensure password is 8 characters or long"
-            )
-          }
-          error={passwordError !== ""}
-          helperText={passwordError}
-        />
-
-        <TextField
-          label="Confirm Password"
-          placeholder="Enter Password"
-          onChange={(e) => setConfirmPass(e.target.value)}
-          fullWidth
-          required
-          type="password"
-          onBlur={(e) => valideConfirmPass()}
-          error={confirmPassError !== ""}
-          helperText={confirmPassError}
-        />
-
-        <Box paddingTop="30px">
-          <Button
-            type="submit"
-            size="large"
-            color="primary"
-            variant="contained"
-            fullWidth
-            data-testid="submitButton"
-          >
-            Submit
-          </Button>
-        </Box>
-      </form>
-
-      <Box paddingTop="5px" textAlign="center">
-        <p>Already have an account? </p>
         <Button
-          variant="outlined"
-          onClick={(e) => props.handleChange(e, 0)}
-          color="primary"
-          data-testid="GoToLogIn"
+          type="submit"
+          variant="contained"
+          fullWidth
+          data-testid="submitButton"
+          sx={{ mt: 3, mb: 2 }}
         >
-          Log In
+          Sign Up
         </Button>
+        <Grid container justifyContent="flex-end">
+          <Grid item>
+            <Link
+              href="#"
+              variant="body2"
+              onClick={(e) => props.handleChange(e, 0)}
+              data-testid="GoToLogIn"
+            >
+              Already have an account? Log In
+            </Link>
+          </Grid>
+        </Grid>
       </Box>
-    </Paper>
+    </Box>
   );
 }
 

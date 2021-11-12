@@ -10,7 +10,7 @@ jest.mock("axios", () => ({
             if (form.valid) {
               resolve({ data: {} });
             } else {
-              reject({ response: {} });
+              reject({ isAxiosError: true, response: {} });
             }
           })
       ),
@@ -23,6 +23,9 @@ describe("ServerApi class", () => {
     it("should return Promise with error property on error", async () => {
       const api = new ServerApi();
       const result = await api.post("/test/path", { valid: false });
+      if (!result) {
+        throw new Error("Result should be defined");
+      }
       expect(result.response).not.toBeDefined();
       expect(result.error).toBeDefined();
     });
@@ -30,6 +33,9 @@ describe("ServerApi class", () => {
     it("should return Promise with response property on success", async () => {
       const api = new ServerApi();
       const result = await api.post("/test/path", { valid: true });
+      if (!result) {
+        throw new Error("Result should be defined");
+      }
       expect(result.response).toBeDefined();
       expect(result.error).not.toBeDefined();
     });

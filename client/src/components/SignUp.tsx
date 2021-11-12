@@ -43,16 +43,25 @@ function SignUp(props: { handleChange: Function }) {
       window.alert(msg);
       return;
     }
-
-    const result = await api.signUp(form);
-    if (result.error) {
-      const msg = result.error.response.data.message;
-      console.error(msg);
-      window.alert(`Message: ${msg}`);
-      return;
-    } else {
-      window.alert("Email confirmation sent!");
-      return;
+    try {
+      const result = await api.signUp(form);
+      if (!result) {
+        console.error("Error occurred during post request");
+        throw new Error();
+      }
+      if (result.error) {
+        if (!result.error.response) {
+          console.error("Missing error response");
+          throw new Error();
+        }
+        const msg = result.error.response.data.message;
+        console.error(msg);
+        window.alert(`Message: ${msg}`);
+      } else {
+        window.alert("Email confirmation sent!");
+      }
+    } catch (error) {
+      window.alert("Failed request");
     }
   };
 

@@ -60,13 +60,25 @@ function Login(props: { handleChange: Function }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
-    const result = await api.signIn(form);
-    if (result.error) {
-      const msg = result.error.response.data.message;
-      console.error(msg);
-      window.alert(`Message: ${msg}`);
-    } else {
-      navigate(from, { replace: true });
+    try {
+      const result = await api.signIn(form);
+      if (!result) {
+        console.log("Error occurred during post request");
+        throw new Error();
+      }
+      if (result.error) {
+        if (!result.error.response) {
+          console.log("Missing error response");
+          throw new Error();
+        }
+        const msg = result.error.response.data.message;
+        console.error(msg);
+        window.alert(`Message: ${msg}`);
+      } else {
+        navigate(from, { replace: true });
+      }
+    } catch (error) {
+      window.alert("Failed request");
     }
   };
 

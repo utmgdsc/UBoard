@@ -11,8 +11,10 @@ export default class ServerApi {
     try {
       const response = await this.api.post(path, form);
       return { response: response };
-    } catch (error: any) {
-      return { error: error };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return { error: error };
+      }
     }
   }
 

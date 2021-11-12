@@ -2,7 +2,7 @@ import React from "react";
 import { unmountComponentAtNode } from "react-dom";
 import { act } from "react-dom/test-utils";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
-import { AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from "axios";
 
 import AuthContainer from "./AuthContainer";
 import ServerApi from "../api/v1";
@@ -155,7 +155,9 @@ describe("signUp component", () => {
       const mockSignUp = jest
         .spyOn(ServerApi.prototype, "signUp")
         .mockImplementation(() =>
-          Promise.resolve({ error: { response: { data: { message: msg } } } })
+          Promise.resolve({
+            error: { response: { data: { message: msg } } } as AxiosError,
+          })
         );
       const mockAlert = jest
         .spyOn(window, "alert")
@@ -213,7 +215,9 @@ describe("Login component", () => {
       const mockSignIn = jest
         .spyOn(ServerApi.prototype, "signIn")
         .mockImplementation(() =>
-          Promise.resolve({ error: { response: { data: { message: msg } } } })
+          Promise.resolve({
+            error: { response: { data: { message: msg } } } as AxiosError,
+          })
         );
       const mockAlert = jest
         .spyOn(window, "alert")

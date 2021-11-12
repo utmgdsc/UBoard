@@ -17,8 +17,8 @@ Make sure that "declaration": true is set in server tsconfig and perform yarn bu
 
 Then in the root directory of the project run this:
 
-`ln -s "$PWD/server/build" "$PWD/client/node_modules/server"`
-`ln -s "$PWD/server/" "$PWD/client/node_modules/@types/server"`
+`ln -s "$PWD/server/build/models" "$PWD/client/node_modules/models"`
+`ln -s "$PWD/server/build/types/models" "$PWD/client/node_modules/@types/models"`
 
 The types should then be picked up with the import path server/... For example import {
 UserAttributes } from "server/models/user"

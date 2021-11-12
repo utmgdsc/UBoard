@@ -63,13 +63,11 @@ function Login(props: { handleChange: Function }) {
     try {
       const result = await api.signIn(form);
       if (!result) {
-        console.log("Error occurred during post request");
-        throw new Error();
+        throw new Error("Error occurred during post request");
       }
       if (result.error) {
         if (!result.error.response) {
-          console.log("Missing error response");
-          throw new Error();
+          throw new Error("Missing error response");
         }
         const msg = result.error.response.data.message;
         console.error(msg);
@@ -78,6 +76,7 @@ function Login(props: { handleChange: Function }) {
         navigate(from, { replace: true });
       }
     } catch (error) {
+      console.log(error);
       window.alert("Failed request");
     }
   };

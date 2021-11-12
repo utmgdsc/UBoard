@@ -20,7 +20,7 @@ jest.mock("axios", () => ({
 
 describe("ServerApi class", () => {
   describe("post method", () => {
-    it("should return Promise with error property on error", async () => {
+    it("should return Promise with error property on AxiosError", async () => {
       const api = new ServerApi();
       const result = await api.post("/test/path", { valid: false });
       if (!result) {

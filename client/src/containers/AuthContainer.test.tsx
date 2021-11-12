@@ -1,7 +1,6 @@
 import React from "react";
-import { unmountComponentAtNode } from "react-dom";
 import { act } from "react-dom/test-utils";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { AxiosError, AxiosResponse } from "axios";
 
 import AuthContainer from "./AuthContainer";
@@ -16,29 +15,14 @@ jest.mock("react-router-dom", () => ({
     jest.fn().mockReturnValue({ state: { from: { pathname: undefined } } }),
 }));
 
-let container: HTMLElement | null = null;
 beforeEach(() => {
-  // setup a DOM element as a render target
-  container = document.createElement("div");
-  document.body.appendChild(container);
-});
-
-afterEach(() => {
-  // cleanup on exiting
-  if (container != null) {
-    unmountComponentAtNode(container);
-    container.remove();
-    container = null;
-  }
-  cleanup();
+  act(() => {
+    render(<AuthContainer />);
+  });
 });
 
 describe("test Auth Pages", () => {
   it("should switch pages between Login and Sign up on Tab Response", () => {
-    act(() => {
-      render(<AuthContainer />);
-    });
-
     // test if auth container has been rendered
     const inputLogin = screen.getByTestId("LogInTab");
     expect(inputLogin).toBeInTheDocument();
@@ -55,10 +39,6 @@ describe("test Auth Pages", () => {
   });
 
   it("should switch pages between Login and Sign up inside form button clicks", () => {
-    act(() => {
-      render(<AuthContainer />);
-    });
-
     // test if auth container has been rendered
     const inputLogin = screen.getByTestId("LogInTab");
     expect(inputLogin).toBeInTheDocument();
@@ -77,9 +57,6 @@ describe("test Auth Pages", () => {
 
 describe("verifying valid input for signup page", () => {
   it("only allows valid uToronto email addresses", () => {
-    act(() => {
-      render(<AuthContainer />);
-    });
     screen.getByTestId("SignUpTabButton").click();
     const emailForm = screen.getByPlaceholderText("john@mail.utoronto.ca");
 
@@ -115,10 +92,6 @@ describe("verifying valid input for signup page", () => {
 describe("signUp component", () => {
   describe("handleSubmit function", () => {
     it("should show password mismatch alert", async () => {
-      act(() => {
-        render(<AuthContainer />);
-      });
-
       screen.getByTestId("SignUpTabButton").click();
 
       const fields = [
@@ -144,10 +117,6 @@ describe("signUp component", () => {
     });
 
     it("should show backend error alert on backend error", async () => {
-      act(() => {
-        render(<AuthContainer />);
-      });
-
       screen.getByTestId("SignUpTabButton").click();
 
       const form = screen.getByTestId("form");
@@ -177,10 +146,6 @@ describe("signUp component", () => {
     });
 
     it("should show email confirmation alert on success", async () => {
-      act(() => {
-        render(<AuthContainer />);
-      });
-
       screen.getByTestId("SignUpTabButton").click();
 
       const form = screen.getByTestId("form");
@@ -204,10 +169,6 @@ describe("signUp component", () => {
 describe("Login component", () => {
   describe("handleSubmit function", () => {
     it("should show backend error alert on backend error", async () => {
-      act(() => {
-        render(<AuthContainer />);
-      });
-
       screen.getByTestId("LogInTabButton").click();
 
       const form = screen.getByTestId("form");
@@ -230,10 +191,6 @@ describe("Login component", () => {
     });
 
     it("should navigate to dashboard on success", async () => {
-      act(() => {
-        render(<AuthContainer />);
-      });
-
       screen.getByTestId("LogInTabButton").click();
 
       const form = screen.getByTestId("form");

@@ -46,13 +46,11 @@ function SignUp(props: { handleChange: Function }) {
     try {
       const result = await api.signUp(form);
       if (!result) {
-        console.error("Error occurred during post request");
-        throw new Error();
+        throw new Error("Error occurred during post request");
       }
       if (result.error) {
         if (!result.error.response) {
-          console.error("Missing error response");
-          throw new Error();
+          throw new Error("Missing error response");
         }
         const msg = result.error.response.data.message;
         console.error(msg);
@@ -61,6 +59,7 @@ function SignUp(props: { handleChange: Function }) {
         window.alert("Email confirmation sent!");
       }
     } catch (error) {
+      console.log(error);
       window.alert("Failed request");
     }
   };

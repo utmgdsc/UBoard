@@ -44,7 +44,16 @@ function SignUp(props: { handleChange: Function }) {
       return;
     }
 
-    api.signUp(form);
+    const result = await api.signUp(form);
+    if (result.error) {
+      const msg = result.error.response.data.message;
+      console.error(msg);
+      window.alert(`Message: ${msg}`);
+      return;
+    } else {
+      window.alert("Email confirmation sent!");
+      return;
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

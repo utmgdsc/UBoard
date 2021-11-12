@@ -60,7 +60,14 @@ function Login(props: { handleChange: Function }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
-    api.signIn(form, navigate, from);
+    const result = await api.signIn(form);
+    if (result.error) {
+      const msg = result.error.response.data.message;
+      console.error(msg);
+      window.alert(`Message: ${msg}`);
+    } else {
+      navigate(from, { replace: true });
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,6 +106,7 @@ function Login(props: { handleChange: Function }) {
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit}
+        data-testid="form"
         sx={{ mt: 1 }}
       >
         <TextField

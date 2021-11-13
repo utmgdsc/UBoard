@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from "axios";
 
 export default class ServerApi {
-  api: AxiosInstance;
+  protected api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({ baseURL: `api/v1` });

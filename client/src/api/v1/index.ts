@@ -1,13 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 
 export default class ServerApi {
-  api: AxiosInstance;
+  protected api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({ baseURL: `api/v1` });
   }
 
-  async post(path: string, form: any) {
+  protected async post<Type>(path: string, form: Type) {
     try {
       const response = await this.api.post(path, form);
       return { response: response };

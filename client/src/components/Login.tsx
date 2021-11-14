@@ -8,31 +8,51 @@ import Box from "@mui/material/Box";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
+
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 import { useNavigate, useLocation } from "react-router-dom";
 
 import ServerApi from "../api/v1/index";
 
-function Login(props: { handleChange: Function }) {
+function Login(props: { handleChange: Function; showAlert: Function }) {
   const api = new ServerApi();
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  const from = location.state?.from?.pathname || "/dashboard";
+  const previousPath = location.state?.from?.pathname || "/dashboard";
 
   // create hooks for username and password
-  const [form, setForm] = useState({
+  const [loginForm, setLoginForm] = useState({
     userName: "",
     password: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [loginFormErrors, setLoginFormErrors] = useState({
     userName: "",
     password: "",
   });
+
+  const formIsMissingFields = () => {
+    for (const key in loginForm) {
+      if (loginForm[key as keyof typeof loginForm] === "") {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const getErrorMessages = () => {
+    let msg = "";
+    for (const key in loginFormErrors) {
+      const err = loginFormErrors[key as keyof typeof loginFormErrors];
+      msg += err === "" ? err : `${err}.\n`;
+    }
+    msg = msg.slice(0, -1);
+    return msg;
+  };
 
   /**
    * Validates all input forms except for `confirmPass` input
@@ -60,36 +80,50 @@ function Login(props: { handleChange: Function }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
+    const msg = getErrorMessages();
+    if (msg !== "") {
+      console.warn(msg);
+      props.showAlert("warning", msg);
+      return;
+    }
+
+    if (formIsMissingFields()) {
+      const msg = "Please fill in all the fields.";
+      console.warn(msg);
+      props.showAlert("warning", msg);
+      return;
+    }
+
     try {
-      const result = await api.signIn(form);
+      const result = await api.signIn(loginForm);
       if (!result) {
-        throw new Error("Error occurred during post request");
+        throw new Error("Error occurred during sign in.");
       }
       if (result.error) {
         if (!result.error.response) {
-          throw new Error("Missing error response");
+          throw new Error("Missing error response.");
         }
         const msg = result.error.response.data.message;
         console.error(msg);
-        window.alert(`Message: ${msg}`);
+        props.showAlert("error", "An error occurred logging you in. Please try again later.");
       } else {
-        navigate(from, { replace: true });
+        navigate(previousPath, { replace: true });
       }
     } catch (error) {
-      console.log(error);
-      window.alert("Failed request");
+      console.error(error);
+      props.showAlert("error", "An error occurred logging you in. Please try again later.");
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
   };
 
   const handleError =
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     (msg: string) => {
-      return setErrors({
-        ...errors,
+      return setLoginFormErrors({
+        ...loginFormErrors,
         [e.target.name]: msg,
       });
     };
@@ -124,38 +158,40 @@ function Login(props: { handleChange: Function }) {
           name="userName"
           margin="normal"
           label="Username"
-          onChange={handleChange}
+          onChange={handleFormInput}
           fullWidth
           required
+          data-testid="userNameForm"
           onBlur={(e) =>
             validateBlur(
               /^[a-zA-Z0-9]+$/,
-              form.userName,
+              loginForm.userName,
               handleError(e),
               "Please enter a valid username"
             )
           }
-          error={errors.userName !== ""}
-          helperText={errors.userName}
+          error={loginFormErrors.userName !== ""}
+          helperText={loginFormErrors.userName}
         />
         <TextField
           name="password"
           margin="normal"
           label="Password"
-          onChange={handleChange}
+          onChange={handleFormInput}
           fullWidth
           required
+          data-testid="passwordForm"
           type="password"
           onBlur={(e) =>
             validateBlur(
               /.{8,}/,
-              form.password,
+              loginForm.password,
               handleError(e),
               "Ensure password is 8 characters or longer"
             )
           }
-          error={errors.password !== ""}
-          helperText={errors.password}
+          error={loginFormErrors.password !== ""}
+          helperText={loginFormErrors.password}
         />
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}

@@ -1,7 +1,7 @@
 import React from "react";
 import { act } from "react-dom/test-utils";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 
 import AuthContainer from "./AuthContainer";
 import ServerApi from "../api/v1";
@@ -16,9 +16,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 beforeEach(() => {
-  act(() => {
-    render(<AuthContainer />);
-  });
+  render(<AuthContainer />);
 });
 
 describe("test Auth Pages", () => {
@@ -91,119 +89,155 @@ describe("verifying valid input for signup page", () => {
 
 describe("signUp component", () => {
   describe("handleSubmit function", () => {
-    it("should show password mismatch alert", async () => {
-      screen.getByTestId("SignUpTabButton").click();
+    describe("On error", () => {
+      it("should not call signUp if form is missing fields", async () => {
+        screen.getByTestId("SignUpTabButton").click();
 
-      const fields = [
-        ["passwordForm", "password"],
-        ["confirmPassForm", "passwordd"],
-      ];
-      fields.forEach((pair) => {
-        fireEvent.change(
-          screen
-            .getByTestId(pair[0])
-            .querySelector("input") as HTMLInputElement,
-          { target: { value: pair[1] } }
-        );
+        const form = screen.getByTestId("form");
+        const mockSignUp = jest
+          .spyOn(ServerApi.prototype, "signUp")
+          .mockImplementation();
+
+        fireEvent.submit(form);
+        expect(mockSignUp).not.toBeCalled();
       });
 
-      const form = screen.getByTestId("form");
-      const mockAlert = jest
-        .spyOn(window, "alert")
-        .mockImplementation(() => {});
+      it("should not call signUp if errors are present", async () => {
+        screen.getByTestId("SignUpTabButton").click();
 
-      fireEvent.submit(form);
-      expect(mockAlert).toBeCalledWith("Passwords do not match.");
+        const form = screen.getByTestId("form");
+        const mockSignUp = jest
+          .spyOn(ServerApi.prototype, "signUp")
+          .mockImplementation();
+        const passwordForm = screen.getByTestId("passwordForm");
+
+        fireEvent.blur(passwordForm);
+        fireEvent.submit(form);
+        /**
+         * Since fireEvent.submit is not async function we cannot use await
+         * Without an await, expect(mockSignUp) assertion can run before
+         * fireEvent.submit can complete execution causing the test to fail.
+         * Therefore, we await on dummy Promise to delay execution while
+         * fireEvent.submit completes.
+         */
+        await new Promise((r) => setTimeout(r, 1));
+        expect(mockSignUp).not.toBeCalled();
+      });
     });
 
-    it("should show backend error alert on backend error", async () => {
-      screen.getByTestId("SignUpTabButton").click();
+    describe("On success", () => {
+      it("should call signUp if fields are valid", async () => {
+        screen.getByTestId("SignUpTabButton").click();
 
-      const form = screen.getByTestId("form");
-      const msg = "test";
-      const mockSignUp = jest
-        .spyOn(ServerApi.prototype, "signUp")
-        .mockImplementation(() =>
-          Promise.resolve({
-            error: { response: { data: { message: msg } } } as AxiosError,
-          })
-        );
-      const mockAlert = jest
-        .spyOn(window, "alert")
-        .mockImplementation(() => {});
+        const fields = {
+          emailForm: "daniel.zingaro@mail.utoronto.ca",
+          userNameForm: "zingarod",
+          passwordForm: "password",
+          confirmPassForm: "password",
+          firstNameForm: "Daniel",
+          lastNameForm: "Zingaro",
+        };
+        Object.keys(fields).forEach((key) => {
+          fireEvent.change(
+            screen.getByTestId(key).querySelector("input") as HTMLInputElement,
+            { target: { value: fields[key as keyof typeof fields] } }
+          );
+        });
 
-      fireEvent.submit(form);
-      /**
-       * Since fireEvent.submit is not async function we cannot use await
-       * Without an await, expect(mockAlert) assertion can run before
-       * fireEvent.submit can complete execution causing the test to fail.
-       * Therefore, we await on dummy Promise to delay execution while
-       * fireEvent.submit completes.
-       */
-      await new Promise((r) => setTimeout(r, 1));
-      expect(mockSignUp).toBeCalled();
-      expect(mockAlert).toBeCalledWith(`Message: ${msg}`);
-    });
+        const form = screen.getByTestId("form");
+        const mockSignUp = jest
+          .spyOn(ServerApi.prototype, "signUp")
+          .mockImplementation(() =>
+            Promise.resolve({ response: {} as AxiosResponse })
+          );
+        const formData = {
+          email: "daniel.zingaro@mail.utoronto.ca",
+          userName: "zingarod",
+          password: "password",
+          firstName: "Daniel",
+          lastName: "Zingaro",
+        };
 
-    it("should show email confirmation alert on success", async () => {
-      screen.getByTestId("SignUpTabButton").click();
+        await act(async () => {
+          fireEvent.submit(form);
+          await new Promise((r) => setTimeout(r, 1));
+        });
+        expect(mockSignUp).toBeCalledWith(formData);
 
-      const form = screen.getByTestId("form");
-      const mockSignUp = jest
-        .spyOn(ServerApi.prototype, "signUp")
-        .mockImplementation(() =>
-          Promise.resolve({ response: {} as AxiosResponse })
-        );
-      const mockAlert = jest
-        .spyOn(window, "alert")
-        .mockImplementation(() => {});
-
-      fireEvent.submit(form);
-      await new Promise((r) => setTimeout(r, 1));
-      expect(mockSignUp).toBeCalled();
-      expect(mockAlert).toBeCalledWith("Email confirmation sent!");
+      });
     });
   });
 });
 
 describe("Login component", () => {
   describe("handleSubmit function", () => {
-    it("should show backend error alert on backend error", async () => {
-      screen.getByTestId("LogInTabButton").click();
+    describe("On error", () => {
+      it("should not call Login if form is missing fields", async () => {
+        screen.getByTestId("LogInTabButton").click();
 
-      const form = screen.getByTestId("form");
-      const msg = "test";
-      const mockSignIn = jest
-        .spyOn(ServerApi.prototype, "signIn")
-        .mockImplementation(() =>
-          Promise.resolve({
-            error: { response: { data: { message: msg } } } as AxiosError,
-          })
-        );
-      const mockAlert = jest
-        .spyOn(window, "alert")
-        .mockImplementation(() => {});
+        const form = screen.getByTestId("form");
+        const mockSignIn = jest
+          .spyOn(ServerApi.prototype, "signIn")
+          .mockImplementation();
 
-      fireEvent.submit(form);
-      await new Promise((r) => setTimeout(r, 1));
-      expect(mockSignIn).toBeCalled();
-      expect(mockAlert).toBeCalledWith(`Message: ${msg}`);
+        fireEvent.submit(form);
+        expect(mockSignIn).not.toBeCalled();
+      });
+
+      it("should not call Login if errors are present", async () => {
+        screen.getByTestId("LogInTabButton").click();
+
+        const form = screen.getByTestId("form");
+        const mockSignIn = jest
+          .spyOn(ServerApi.prototype, "signIn")
+          .mockImplementation();
+        const passwordForm = screen.getByTestId("passwordForm");
+
+        fireEvent.blur(passwordForm);
+        fireEvent.submit(form);
+        /**
+         * Since fireEvent.submit is not async function we cannot use await
+         * Without an await, expect(mockSignUp) assertion can run before
+         * fireEvent.submit can complete execution causing the test to fail.
+         * Therefore, we await on dummy Promise to delay execution while
+         * fireEvent.submit completes.
+         */
+        await new Promise((r) => setTimeout(r, 1));
+        expect(mockSignIn).not.toBeCalled();
+      });
     });
 
-    it("should navigate to dashboard on success", async () => {
-      screen.getByTestId("LogInTabButton").click();
+    describe("On success", () => {
+      it("should navigate to dashboard", async () => {
+        screen.getByTestId("LogInTabButton").click();
 
-      const form = screen.getByTestId("form");
-      const mockSignIn = jest
-        .spyOn(ServerApi.prototype, "signIn")
-        .mockImplementation(() =>
-          Promise.resolve({ response: {} as AxiosResponse })
-        );
+        const fields = {
+          userNameForm: "zingarod",
+          passwordForm: "password",
+        };
+        Object.keys(fields).forEach((key) => {
+          fireEvent.change(
+            screen.getByTestId(key).querySelector("input") as HTMLInputElement,
+            { target: { value: fields[key as keyof typeof fields] } }
+          );
+        });
 
-      fireEvent.submit(form);
-      await new Promise((r) => setTimeout(r, 1));
-      expect(mockSignIn).toBeCalled();
-      expect(mockNavigate).toBeCalled();
+        const form = screen.getByTestId("form");
+        const mockSignIn = jest
+          .spyOn(ServerApi.prototype, "signIn")
+          .mockImplementation(() =>
+            Promise.resolve({ response: {} as AxiosResponse })
+          );
+        const formData = {
+          userName: "zingarod",
+          password: "password",
+        };
+
+        fireEvent.submit(form);
+        await new Promise((r) => setTimeout(r, 1));
+        expect(mockSignIn).toBeCalledWith(formData);
+        expect(mockNavigate).toBeCalled();
+      });
     });
   });
 });

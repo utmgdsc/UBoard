@@ -1,12 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+import Alert, { AlertColor } from "@mui/material/Alert";
+import Collapse from "@mui/material/Collapse";
+
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
 
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
@@ -39,6 +43,38 @@ function TabPanel(props: TabPanelProps) {
 function AuthContainer() {
   const theme = useTheme();
 
+  const useAlert = (): [
+    { severity: string; message: string; display: boolean },
+    (type: string, message: string) => void,
+    () => void
+  ] => {
+    const [alert, setAlert] = useState({
+      severity: "success",
+      message: "",
+      display: false,
+    });
+
+    const showAlert = (type: string, message: string) => {
+      setAlert({ severity: type, message: message, display: true });
+    };
+
+    const hideAlert = () => setAlert({ ...alert, display: false });
+
+    return [alert, showAlert, hideAlert];
+  };
+
+  const [alert, showAlert, hideAlert] = useAlert();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      hideAlert();
+    }, 5000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  });
+
   const [tabIndex, setTabIndex] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -49,6 +85,32 @@ function AuthContainer() {
 
   return (
     <div className="AuthContainer">
+      <Box
+        display="flex"
+        justifyContent="center"
+        sx={{ position: "absolute", width: "100vw", zIndex: 1 }}
+      >
+        <Collapse in={alert.display}>
+          <Alert
+            severity={alert.severity as AlertColor}
+            action={
+              <IconButton
+                aria-label="close"
+                size="small"
+                onClick={() => {
+                  hideAlert();
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <Typography sx={{ whiteSpace: "pre-line" }}>
+              {alert.message}
+            </Typography>
+          </Alert>
+        </Collapse>
+      </Box>
       <Grid
         container
         component="main"
@@ -97,10 +159,10 @@ function AuthContainer() {
               </Tabs>
             </Box>
             <TabPanel value={tabIndex} index={0}>
-              <Login handleChange={handleChange} />
+              <Login handleChange={handleChange} showAlert={showAlert} />
             </TabPanel>
             <TabPanel value={tabIndex} index={1}>
-              <SignUp handleChange={handleChange} />
+              <SignUp handleChange={handleChange} showAlert={showAlert} />
             </TabPanel>
           </Box>
         </Grid>

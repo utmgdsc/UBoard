@@ -10,25 +10,47 @@ import Typography from "@mui/material/Typography";
 
 import ServerApi from "../api/v1/index";
 
-function SignUp(props: { handleChange: Function }) {
+function SignUp(props: { handleChange: Function; showAlert: Function }) {
   const api = new ServerApi();
 
   // create hooks for inputs and errors associated
-  const [form, setForm] = useState({
+  const [signupForm, setSignupForm] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     userName: "",
     password: "",
-    firstName: "",
-    lastName: "",
   });
 
-  const [errors, setErrors] = useState({
+  const [signupFormErrors, setSignupFormErrors] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     userName: "",
     password: "",
-    firstName: "",
-    lastName: "",
   });
+
+  const formIsMissingFields = () => {
+    for (const key in signupForm) {
+      if (signupForm[key as keyof typeof signupForm] === "") {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const getErrorMessages = () => {
+    let msg = "";
+    for (const key in signupFormErrors) {
+      const err = signupFormErrors[key as keyof typeof signupFormErrors];
+      msg += err === "" ? err : `${err}.\n`;
+    }
+    if (!validateConfirmPass()) {
+      msg += `Passwords must be matching.\n`;
+    }
+    msg = msg.slice(0, -1);
+    return msg;
+  };
 
   const [confirmPass, setConfirmPass] = useState("");
   const [confirmPassError, setConfirmPassError] = useState("");
@@ -37,49 +59,57 @@ function SignUp(props: { handleChange: Function }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
-    if (!validateConfirmPass()) {
-      const msg = "Passwords do not match.";
-      console.error(msg);
-      window.alert(msg);
+    const msg = getErrorMessages();
+    if (msg !== "") {
+      console.warn(msg);
+      props.showAlert("warning", msg);
       return;
     }
+
+    if (formIsMissingFields()) {
+      const msg = "Please fill in all the fields.";
+      console.warn(msg);
+      props.showAlert("warning", msg);
+      return;
+    }
+
     try {
-      const result = await api.signUp(form);
+      const result = await api.signUp(signupForm);
       if (!result) {
-        throw new Error("Error occurred during post request");
+        throw new Error("Error occurred during signup.");
       }
       if (result.error) {
         if (!result.error.response) {
-          throw new Error("Missing error response");
+          throw new Error("Missing error response.");
         }
         const msg = result.error.response.data.message;
         console.error(msg);
-        window.alert(`Message: ${msg}`);
+        props.showAlert("error", "An error occurred creating your account. Please try again later.");
       } else {
-        window.alert("Email confirmation sent!");
+        props.showAlert("success", "Email confirmation sent!");
       }
     } catch (error) {
-      console.log(error);
-      window.alert("Failed request");
+      console.error(error);
+      props.showAlert("error", "An error occurred creating your account. Please try again later.");
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSignupForm({ ...signupForm, [e.target.name]: e.target.value });
   };
 
   const handleError =
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     (msg: string) => {
-      return setErrors({
-        ...errors,
+      return setSignupFormErrors({
+        ...signupFormErrors,
         [e.target.name]: msg,
       });
     };
 
   const validateConfirmPass = (): boolean => {
-    if (form.password !== confirmPass) {
-      const errMsg = "Password does not match!";
+    if (signupForm.password !== confirmPass) {
+      const errMsg = "Passwords must be matching";
       setConfirmPassError(errMsg);
       return false;
     } else {
@@ -143,20 +173,20 @@ function SignUp(props: { handleChange: Function }) {
               label="First Name"
               size="small"
               variant="standard"
-              onChange={handleChange}
+              onChange={handleFormInput}
               fullWidth
               required
               data-testid="firstNameForm"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
-                  form.firstName,
+                  signupForm.firstName,
                   handleError(e),
                   "Please enter a valid first name"
                 )
               }
-              error={errors.firstName !== ""}
-              helperText={errors.firstName}
+              error={signupFormErrors.firstName !== ""}
+              helperText={signupFormErrors.firstName}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -165,20 +195,20 @@ function SignUp(props: { handleChange: Function }) {
               label="Last Name"
               size="small"
               variant="standard"
-              onChange={handleChange}
+              onChange={handleFormInput}
               fullWidth
               required
               data-testid="lastNameForm"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
-                  form.lastName,
+                  signupForm.lastName,
                   handleError(e),
                   "Please enter a valid last name"
                 )
               }
-              error={errors.lastName !== ""}
-              helperText={errors.lastName}
+              error={signupFormErrors.lastName !== ""}
+              helperText={signupFormErrors.lastName}
             />
           </Grid>
           <Grid item xs={12}>
@@ -186,7 +216,7 @@ function SignUp(props: { handleChange: Function }) {
               name="email"
               label="Email Address"
               placeholder="john@mail.utoronto.ca"
-              onChange={handleChange}
+              onChange={handleFormInput}
               fullWidth
               required
               data-testid="emailForm"
@@ -196,20 +226,20 @@ function SignUp(props: { handleChange: Function }) {
               onBlur={(e) =>
                 validateBlur(
                   /..*@(mail\.|alum\.){0,}utoronto.ca$/,
-                  form.email,
+                  signupForm.email,
                   handleError(e),
                   "Invalid email, only utoronto emails allowed"
                 )
               }
-              error={errors.email !== ""}
-              helperText={errors.email}
+              error={signupFormErrors.email !== ""}
+              helperText={signupFormErrors.email}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               name="userName"
               label="Username"
-              onChange={handleChange}
+              onChange={handleFormInput}
               fullWidth
               required
               data-testid="userNameForm"
@@ -218,20 +248,20 @@ function SignUp(props: { handleChange: Function }) {
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z0-9]+$/,
-                  form.userName,
+                  signupForm.userName,
                   handleError(e),
                   "Please enter a valid username"
                 )
               }
-              error={errors.userName !== ""}
-              helperText={errors.userName}
+              error={signupFormErrors.userName !== ""}
+              helperText={signupFormErrors.userName}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               name="password"
               label="Password"
-              onChange={handleChange}
+              onChange={handleFormInput}
               fullWidth
               required
               type="password"
@@ -241,13 +271,13 @@ function SignUp(props: { handleChange: Function }) {
               onBlur={(e) => {
                 validateBlur(
                   /.{8,}/,
-                  form.password,
+                  signupForm.password,
                   handleError(e),
                   "Ensure password is 8 characters or longer"
                 );
               }}
-              error={errors.password !== ""}
-              helperText={errors.password}
+              error={signupFormErrors.password !== ""}
+              helperText={signupFormErrors.password}
             />
           </Grid>
           <Grid item xs={12}>

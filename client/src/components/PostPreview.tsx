@@ -6,10 +6,17 @@ import CardMedia from "@mui/material/CardMedia";
 import Stack from "@mui/material/Stack";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
+
 import GenerateTags from "./Tags";
 import ViewPostDialog from "./ViewPostDialog";
 
-export default function PostPreview(props: { postUser: any }) {
+import { Post } from "models/post";
+import { User } from "models/user";
+
+export type PostUser = Post & {User: User};
+
+
+export default function PostPreview(props: { postUser: PostUser }) {
   const tags = GenerateTags(["Placeholder"]);
 
   return (

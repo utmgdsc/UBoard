@@ -1,5 +1,4 @@
 import React from 'react';
-import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -11,8 +10,6 @@ import PostPreview from '../components/PostPreview';
 
 import { api_v1 } from '../api/v1';
 import CreatePost from '../components/CreatePost';
-import Dialog from '@mui/material/Dialog';
-// import { PostUser } from "server/controllers/PostUser"
 
 
 function RecentPosts() {

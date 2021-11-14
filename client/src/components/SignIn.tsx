@@ -16,7 +16,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import ServerApi from "../api/v1/index";
 
-function Login(props: { handleChange: Function; showAlert: Function }) {
+function SignIn(props: { handleChange: Function; showAlert: Function }) {
   const api = new ServerApi();
 
   const navigate = useNavigate();
@@ -25,19 +25,19 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
   const previousPath = location.state?.from?.pathname || "/dashboard";
 
   // create hooks for username and password
-  const [loginForm, setLoginForm] = useState({
+  const [signinForm, setSignInForm] = useState({
     userName: "",
     password: "",
   });
 
-  const [loginFormErrors, setLoginFormErrors] = useState({
+  const [signinFormErrors, setSignInFormErrors] = useState({
     userName: "",
     password: "",
   });
 
   const formIsMissingFields = () => {
-    for (const key in loginForm) {
-      if (loginForm[key as keyof typeof loginForm] === "") {
+    for (const key in signinForm) {
+      if (signinForm[key as keyof typeof signinForm] === "") {
         return true;
       }
     }
@@ -46,8 +46,8 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
 
   const getErrorMessages = () => {
     let msg = "";
-    for (const key in loginFormErrors) {
-      const err = loginFormErrors[key as keyof typeof loginFormErrors];
+    for (const key in signinFormErrors) {
+      const err = signinFormErrors[key as keyof typeof signinFormErrors];
       msg += err === "" ? err : `${err}.\n`;
     }
     msg = msg.slice(0, -1);
@@ -95,7 +95,7 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
     }
 
     try {
-      const result = await api.signIn(loginForm);
+      const result = await api.signIn(signinForm);
       if (!result) {
         throw new Error("Error occurred during sign in.");
       }
@@ -116,21 +116,21 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
   };
 
   const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setLoginForm({ ...loginForm, [e.target.name]: e.target.value });
+    setSignInForm({ ...signinForm, [e.target.name]: e.target.value });
   };
 
   const handleError =
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     (msg: string) => {
-      return setLoginFormErrors({
-        ...loginFormErrors,
+      return setSignInFormErrors({
+        ...signinFormErrors,
         [e.target.name]: msg,
       });
     };
 
   return (
     <Box
-      data-testid="LogInTab"
+      data-testid="SignInTab"
       sx={{
         mx: 2,
         display: "flex",
@@ -165,13 +165,13 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
           onBlur={(e) =>
             validateBlur(
               /^[a-zA-Z0-9]+$/,
-              loginForm.userName,
+              signinForm.userName,
               handleError(e),
               "Please enter a valid username"
             )
           }
-          error={loginFormErrors.userName !== ""}
-          helperText={loginFormErrors.userName}
+          error={signinFormErrors.userName !== ""}
+          helperText={signinFormErrors.userName}
         />
         <TextField
           name="password"
@@ -185,13 +185,13 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
           onBlur={(e) =>
             validateBlur(
               /.{8,}/,
-              loginForm.password,
+              signinForm.password,
               handleError(e),
               "Ensure password is 8 characters or longer"
             )
           }
-          error={loginFormErrors.password !== ""}
-          helperText={loginFormErrors.password}
+          error={signinFormErrors.password !== ""}
+          helperText={signinFormErrors.password}
         />
         <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}
@@ -227,4 +227,4 @@ function Login(props: { handleChange: Function; showAlert: Function }) {
   );
 }
 
-export default Login;
+export default SignIn;

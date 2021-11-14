@@ -311,7 +311,7 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
               href="#"
               variant="body2"
               onClick={(e) => props.handleChange(e, 0)}
-              data-testid="GoToLogIn"
+              data-testid="GoToSignIn"
             >
               Already have an account? Log In
             </Link>

@@ -15,7 +15,7 @@ import IconButton from "@mui/material/IconButton";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 
-import Login from "../components/Login";
+import SignIn from "../components/SignIn";
 import SignUp from "../components/SignUp";
 
 import "./AuthContainer.css";
@@ -88,9 +88,9 @@ function AuthContainer() {
       <Box
         display="flex"
         justifyContent="center"
-        sx={{ position: "absolute", width: "100vw", zIndex: 1 }}
+        sx={{ position: "absolute", width: "100vw" }}
       >
-        <Collapse in={alert.display}>
+        <Collapse in={alert.display} sx={{ zIndex: 1 }}>
           <Alert
             severity={alert.severity as AlertColor}
             action={
@@ -151,15 +151,15 @@ function AuthContainer() {
               <Tabs
                 value={tabIndex}
                 onChange={handleChange}
-                aria-label="Login and Signup tabs"
+                aria-label="SignIn and Signup tabs"
                 variant="fullWidth"
               >
-                <Tab label="Sign In" data-testid="LogInTabButton" />
+                <Tab label="Sign In" data-testid="SignInTabButton" />
                 <Tab label="Sign Up" data-testid="SignUpTabButton" />
               </Tabs>
             </Box>
             <TabPanel value={tabIndex} index={0}>
-              <Login handleChange={handleChange} showAlert={showAlert} />
+              <SignIn handleChange={handleChange} showAlert={showAlert} />
             </TabPanel>
             <TabPanel value={tabIndex} index={1}>
               <SignUp handleChange={handleChange} showAlert={showAlert} />

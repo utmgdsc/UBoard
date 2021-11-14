@@ -20,26 +20,26 @@ beforeEach(() => {
 });
 
 describe("test Auth Pages", () => {
-  it("should switch pages between Login and Sign up on Tab Response", () => {
+  it("should switch pages between SignIn and Sign up on Tab Response", () => {
     // test if auth container has been rendered
-    const inputLogin = screen.getByTestId("LogInTab");
-    expect(inputLogin).toBeInTheDocument();
+    const inputSignIn = screen.getByTestId("SignInTab");
+    expect(inputSignIn).toBeInTheDocument();
 
     // toggle to sign up
     screen.getByTestId("SignUpTabButton").click();
     const checkSignUp = screen.getByTestId("SignUpTab");
     expect(checkSignUp).toBeInTheDocument();
 
-    // toggle to login
-    screen.getByTestId("LogInTabButton").click();
-    const checkLogIn = screen.getByTestId("LogInTab");
-    expect(checkLogIn).toBeInTheDocument();
+    // toggle to signin
+    screen.getByTestId("SignInTabButton").click();
+    const checkSignIn = screen.getByTestId("SignInTab");
+    expect(checkSignIn).toBeInTheDocument();
   });
 
-  it("should switch pages between Login and Sign up inside form button clicks", () => {
+  it("should switch pages between SignIn and Sign up inside form button clicks", () => {
     // test if auth container has been rendered
-    const inputLogin = screen.getByTestId("LogInTab");
-    expect(inputLogin).toBeInTheDocument();
+    const inputSignIn = screen.getByTestId("SignInTab");
+    expect(inputSignIn).toBeInTheDocument();
 
     // toggle to sign up from in-form button
     screen.getByTestId("CreateAccountButton").click();
@@ -47,9 +47,9 @@ describe("test Auth Pages", () => {
     expect(checkSignUp).toBeInTheDocument();
 
     // toggle to log in from in-form button
-    screen.getByTestId("GoToLogIn").click();
-    const checkLogIn = screen.getByTestId("LogInTab");
-    expect(checkLogIn).toBeInTheDocument();
+    screen.getByTestId("GoToSignIn").click();
+    const checkSignIn = screen.getByTestId("SignInTab");
+    expect(checkSignIn).toBeInTheDocument();
   });
 });
 
@@ -169,11 +169,11 @@ describe("signUp component", () => {
   });
 });
 
-describe("Login component", () => {
+describe("SignIn component", () => {
   describe("handleSubmit function", () => {
     describe("On error", () => {
-      it("should not call Login if form is missing fields", async () => {
-        screen.getByTestId("LogInTabButton").click();
+      it("should not call SignIn if form is missing fields", async () => {
+        screen.getByTestId("SignInTabButton").click();
 
         const form = screen.getByTestId("form");
         const mockSignIn = jest
@@ -184,8 +184,8 @@ describe("Login component", () => {
         expect(mockSignIn).not.toBeCalled();
       });
 
-      it("should not call Login if errors are present", async () => {
-        screen.getByTestId("LogInTabButton").click();
+      it("should not call SignIn if errors are present", async () => {
+        screen.getByTestId("SignInTabButton").click();
 
         const form = screen.getByTestId("form");
         const mockSignIn = jest
@@ -209,7 +209,7 @@ describe("Login component", () => {
 
     describe("On success", () => {
       it("should navigate to dashboard", async () => {
-        screen.getByTestId("LogInTabButton").click();
+        screen.getByTestId("SignInTabButton").click();
 
         const fields = {
           userNameForm: "zingarod",

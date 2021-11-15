@@ -12,8 +12,6 @@ beforeEach(() => {
   act(() => {
     render(<CreatePost />);
   });
-  // const newPostButton = screen.findByTestId("newPostButton");
-  // newPostButton.click();
   screen.getByTestId("newPostButton").click();
 });
 
@@ -59,7 +57,7 @@ describe("verifying launch of create post component", () => {
   });
 
   it("closes the dialog when clicked on `Back` button", () => {
-    screen.getByTestId("backButton").click();
+    // screen.getByTestId("backButton").click();
     expect(screen.getByTestId("newPostButton")).toBeInTheDocument();
   });
 });

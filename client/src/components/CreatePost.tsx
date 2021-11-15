@@ -26,6 +26,7 @@ function CreatePost() {
     location: "",
   });
 
+  // dialog hooks
   const [openPopup, setOpenPopup] = useState(false);
 
   const handleSubmit = () => {
@@ -58,6 +59,9 @@ function CreatePost() {
   const closeDialog = () => {
     toggleDialog(false);
   };
+
+  // validating hooks
+  const [capacityError, setCapacityError] = React.useState("");
 
   return (
     <>
@@ -154,6 +158,15 @@ function CreatePost() {
                     onChange={(e) =>
                       setForm({ ...form, capacity: e.target.value })
                     }
+                    onBlur={() => {
+                      if (!/^[0-9]*$/.test(form.capacity)) {
+                        setCapacityError("Only numbers allowed!");
+                      } else {
+                        setCapacityError("");
+                      }
+                    }}
+                    error={capacityError !== ""}
+                    helperText={capacityError}
                   />
                 </Grid>
 

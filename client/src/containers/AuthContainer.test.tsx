@@ -1,7 +1,6 @@
 import React from "react";
 import { act } from "react-dom/test-utils";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { AxiosError, AxiosResponse } from "axios";
 
 import AuthContainer from "./AuthContainer";
 import ServerApi from "../api/v1";
@@ -147,7 +146,7 @@ describe("signup component", () => {
       const mockSignUp = jest
         .spyOn(ServerApi.prototype, "signUp")
         .mockImplementation(() =>
-          Promise.resolve({ response: {} as AxiosResponse })
+          Promise.resolve({ status: 204, data: { message: "" } })
         );
       const formData = {
         email: "daniel.zingaro@mail.utoronto.ca",
@@ -217,11 +216,11 @@ describe("signin component", () => {
       });
 
       const form = screen.getByTestId("form");
-      const msg = "Invalid credentials.";
       const mockSignIn = jest
         .spyOn(ServerApi.prototype, "signIn")
         .mockResolvedValue({
-          error: { response: { data: { message: msg } } } as AxiosError,
+          status: 400,
+          data: { message: "Invalid credentials." },
         });
       const formData = {
         userName: "zingarod",
@@ -256,7 +255,7 @@ describe("signin component", () => {
       const mockSignIn = jest
         .spyOn(ServerApi.prototype, "signIn")
         .mockImplementation(() =>
-          Promise.resolve({ response: {} as AxiosResponse })
+          Promise.resolve({ status: 204, data: { message: "" } })
         );
       const formData = {
         userName: "zingarod",

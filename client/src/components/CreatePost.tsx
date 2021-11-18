@@ -9,14 +9,16 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import Dialog from "@mui/material/Dialog";
-import { AppBar, IconButton } from "@mui/material";
 import { ArrowBack } from "@mui/icons-material";
 import PreviewPopUp from "./PreviewPopUp";
+import Snackbar from "@mui/material/Snackbar";
 
-import { api_v1 } from "../api/v1";
+import ServerApi from "../api/v1/index";
+
+const API = new ServerApi();
 
 function CreatePost() {
-  // create hooks for input fields
+  // hooks
   const [form, setForm] = useState({
     title: "",
     body: "",
@@ -25,43 +27,42 @@ function CreatePost() {
     capacity: "",
     location: "",
   });
+  const [openPopup, setOpenPopup] = useState(false); // for preview popup
+  const [isAlertOpen, showAlert] = useState(false); // for snackbar
+  const [alertMsg, setMsg] = useState("An error has occurred"); // for snackbar message
+  const [capacityError, setCapacityError] = React.useState(""); // for capacity input validation
+  const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
 
-  // dialog hooks
-  const [openPopup, setOpenPopup] = useState(false);
-
-  const handleSubmit = () => {
-    api_v1
-      .post("/posts/", form)
-      .then((res) => {
-        console.dir(res);
-        alert("Success!");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("An error occurred. Ensure all the fields are correct");
-      });
+  const closeDialog = () => {
+    toggleDialog(false);
   };
-
-  // handle functions
   const handleClickOpen = () => {
     setOpenPopup(true);
   };
 
-  // handle functions
+  // handling
+  const handleSubmit = () => {
+    API.createPost(`/posts/`, form)
+      .then((res: any) => {
+        if (res.response.status === 204) {
+          setMsg("Post has been succesfully created.");
+        } else {
+          setMsg("Failed to create post");
+        }
+        showAlert(true);
+      })
+      .catch((err) => {
+        console.error(err);
+        setMsg("Failed to create post. Ensure all the fields are correct");
+        showAlert(true);
+      });
+  };
+
   const handleImageUpload = (event: React.ChangeEvent<{}>) => {
     const target = event.target as HTMLInputElement;
-    /** do something with the file **/
     let url = URL.createObjectURL((target.files as FileList)[0]);
     setForm({ ...form, file: url });
   };
-
-  const [isOpen, toggleDialog] = React.useState(false);
-  const closeDialog = () => {
-    toggleDialog(false);
-  };
-
-  // validating hooks
-  const [capacityError, setCapacityError] = React.useState("");
 
   return (
     <>
@@ -228,6 +229,12 @@ function CreatePost() {
                   >
                     Create
                   </Button>
+                  <Snackbar
+                    open={isAlertOpen}
+                    autoHideDuration={6000}
+                    onClose={() => showAlert(false)}
+                    message={alertMsg}
+                  />
                 </Grid>
               </Grid>
             </Box>

@@ -18,6 +18,10 @@ export default class ServerApi {
     }
   }
 
+  async createPost(path: string, form: {}) {
+    return await this.post(path, form);
+  }
+
   async signUp(form: {
     email: string;
     userName: string;

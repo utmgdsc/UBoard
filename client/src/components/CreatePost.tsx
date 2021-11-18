@@ -1,44 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Divider from '@mui/material/Divider';
-import Typography from '@mui/material/Typography';
-import Tooltip from '@mui/material/Tooltip';
-import Dialog from '@mui/material/Dialog';
+import Grid from "@mui/material/Grid";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Divider from "@mui/material/Divider";
+import Typography from "@mui/material/Typography";
+import Tooltip from "@mui/material/Tooltip";
 
-import PreviewPopUp from './PreviewPopUp';
-import { api_v1 } from '../api/v1';
-
+import PreviewPopUp from "./PreviewPopUp";
 
 function CreatePost() {
   // create hooks for input fields
   const [form, setForm] = useState({
-    title: '',
-    body: '',
-    file: '',
-    tags: '',
-    capacity: '',
-    location: '',
+    title: "",
+    body: "",
+    file: "",
+    tags: "",
+    eventCapacity: "",
+    eventLocation: "",
   });
 
   const [openPopup, setOpenPopup] = useState(false);
-
-  const handleSubmit = () => {
-    api_v1
-      .post('/posts/', form)
-      .then((res) => {
-        console.dir(res);
-        alert("Success!");
-      })
-      .catch((err) => {
-        console.error(err);  
-        alert("An error occurred. Ensure all the fields are correct")
-      });
-  };
 
   // handle functions
   const handleClickOpen = () => {
@@ -53,31 +37,14 @@ function CreatePost() {
     setForm({ ...form, file: url });
   };
 
-const [isOpen, toggleDialog] = React.useState(false);
-  const closeDialog = () => {
-    toggleDialog(false);
-  };
-
-
   return (
-    <>
-      <Button
-        variant="outlined"
-        onClick={() => {
-          toggleDialog(true);
-        }}
-        data-testid="btn-newpost"
-      >
-        New Post
-      </Button>
-      <Dialog fullScreen open={isOpen} onClose={closeDialog}>
     <Container component="main" maxWidth="md">
       <Box
         sx={{
           marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <Typography component="h3" variant="h3" fontWeight="bold">
@@ -131,7 +98,7 @@ const [isOpen, toggleDialog] = React.useState(false);
                 fullWidth
                 size="small"
                 onChange={(e) =>
-                  setForm({ ...form, capacity: e.target.value })
+                  setForm({ ...form, eventCapacity: e.target.value })
                 }
               />
             </Grid>
@@ -143,7 +110,7 @@ const [isOpen, toggleDialog] = React.useState(false);
                 placeholder="Deerfield Hall"
                 size="small"
                 onChange={(e) =>
-                  setForm({ ...form, location: e.target.value })
+                  setForm({ ...form, eventLocation: e.target.value })
                 }
               />
             </Grid>
@@ -168,7 +135,6 @@ const [isOpen, toggleDialog] = React.useState(false);
             <Grid item xs={5} md={3}>
               <Tooltip title="Enter all required fields!">
                 <Box>
-
                   <Button
                     fullWidth
                     variant="contained"
@@ -177,7 +143,7 @@ const [isOpen, toggleDialog] = React.useState(false);
                     onClick={handleClickOpen}
                     data-testid="previewButton"
                     size="large"
-                    disabled={!(form.title !== '' && form.body !== '')}
+                    disabled={!(form.title !== "" && form.body !== "")}
                   >
                     Preview
                   </Button>
@@ -190,8 +156,6 @@ const [isOpen, toggleDialog] = React.useState(false);
                 variant="contained"
                 sx={{ mt: 3, mb: 2 }}
                 size="large"
-                disabled={!(form.title !== '' && form.body !== '')}
-                onClick={handleSubmit}
               >
                 Create
               </Button>
@@ -204,13 +168,13 @@ const [isOpen, toggleDialog] = React.useState(false);
           body={form.body}
           img={form.file}
           tags={form.tags}
-          eventCapacity={form.capacity}
-          location={form.location}
+          eventCapacity={form.eventCapacity}
+          location={form.eventLocation}
           openPopup={openPopup}
           handleClose={() => setOpenPopup(false)}
         ></PreviewPopUp>
       </Box>
-    </Container> </Dialog></>
+    </Container>
   );
 }
 

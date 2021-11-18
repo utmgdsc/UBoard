@@ -13,7 +13,6 @@ beforeEach(() => {
   act(() => {
     render(<CreatePost />);
   });
-  screen.getByTestId("btn-newpost").click();
 });
 
 afterEach(() => {

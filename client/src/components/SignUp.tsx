@@ -30,7 +30,7 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
     password: "",
   });
 
-  const formIsMissingFields = () => {
+  const isFormMissingFields = () => {
     for (const key in signupForm) {
       if (signupForm[key as keyof typeof signupForm] === "") {
         return true;
@@ -66,7 +66,7 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
       return;
     }
 
-    if (formIsMissingFields()) {
+    if (isFormMissingFields()) {
       const msg = "Please fill in all the fields.";
       console.warn(msg);
       props.showAlert("warning", msg);
@@ -84,7 +84,7 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
         }
         const msg = result.error.response.data.message;
         console.error(msg);
-        props.showAlert("error", "An error occurred creating your account. Please try again later.");
+        props.showAlert("error", msg);
       } else {
         props.showAlert("success", "Email confirmation sent!");
       }

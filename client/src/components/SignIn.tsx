@@ -35,7 +35,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
     password: "",
   });
 
-  const formIsMissingFields = () => {
+  const isFormMissingFields = () => {
     for (const key in signinForm) {
       if (signinForm[key as keyof typeof signinForm] === "") {
         return true;
@@ -87,7 +87,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
       return;
     }
 
-    if (formIsMissingFields()) {
+    if (isFormMissingFields()) {
       const msg = "Please fill in all the fields.";
       console.warn(msg);
       props.showAlert("warning", msg);
@@ -105,7 +105,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
         }
         const msg = result.error.response.data.message;
         console.error(msg);
-        props.showAlert("error", "An error occurred logging you in. Please try again later.");
+        props.showAlert("error", msg);
       } else {
         navigate(previousPath, { replace: true });
       }

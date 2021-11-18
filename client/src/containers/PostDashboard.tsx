@@ -7,22 +7,37 @@ import Pagination from '@mui/material/Pagination';
 
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
-
-import { api_v1 } from '../api/v1';
 import CreatePost from '../components/CreatePost';
 
+import ServerApi from '../api/v1';
+import { User } from 'models/user';
+
+const UserContext = React.createContext({});
+
+
+const fetchCurrentUser = () => {
+  let currUser: User | {} = {};
+
+  API.me().then((res: any) => {
+      if (res.response.status === 200) {
+        currUser = res.data;
+      }
+    })
+    .catch((err) => console.error(err));
+
+  return currUser;
+};
+
+const API = new ServerApi();
 
 function RecentPosts() {
   const [recentPosts, updateRecent] = React.useState([]);
 
   const fetchRecentPosts = (limit: number, offset: number) => {
-    api_v1
-      .get('/posts/', {
-        params: { limit, offset },
-      })
+    API.fetchRecentPosts(limit, offset)
       .then((res: any) => {
-        if (res.data.data.result) {
-          updateRecent(res.data.data.result);
+        if (res.response.data.data.result) {
+          updateRecent(res.response.data.data.result);
         }
       })
       .catch((err) => console.log(err));
@@ -46,14 +61,16 @@ function RecentPosts() {
 }
 
 export default function PostDashboard() {
+  console.dir(fetchCurrentUser());
+
   return (
     <>
       <Header />
       <main>
         <Container
           sx={{ py: 5 }}
-          maxWidth="xl"
-          data-testid="test-post-container"
+          maxWidth='xl'
+          data-testid='test-post-container'
         >
           <Grid container spacing={7}>
             <Grid
@@ -65,9 +82,13 @@ export default function PostDashboard() {
                 alignItems: 'flex-end',
               }}
             >
-              <CreatePost/>
+              {/*TODO: GURVIR <CreatePost /> */}
             </Grid>
-            <RecentPosts />
+              <UserContext.Provider value={{test: "test"}}>
+                <RecentPosts />
+              </UserContext.Provider>
+              
+            
           </Grid>
         </Container>
       </main>
@@ -81,21 +102,21 @@ export default function PostDashboard() {
             alignItems: 'center',
           }}
         >
-          <Pagination count={1} color="primary" variant="outlined" />
+          <Pagination count={1} color='primary' variant='outlined' />
         </Grid>
 
         <Box
           sx={{ bgcolor: 'background.paper', p: 6, margin: 'auto' }}
-          component="footer"
+          component='footer'
         >
-          <Typography variant="h6" align="center" gutterBottom>
+          <Typography variant='h6' align='center' gutterBottom>
             UBoard
           </Typography>
           <Typography
-            variant="subtitle1"
-            align="center"
-            color="text.secondary"
-            component="p"
+            variant='subtitle1'
+            align='center'
+            color='text.secondary'
+            component='p'
           >
             You're all up to date!
           </Typography>

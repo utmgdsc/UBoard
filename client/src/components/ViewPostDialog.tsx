@@ -19,7 +19,10 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 
 import { PostUser } from './PostPreview';
-import { api_v1 } from '../api/v1';
+import { User } from 'models/user';
+import ServerApi from '../api/v1';
+
+const API = new ServerApi();
 
 const Transition = React.forwardRef(
   (
@@ -34,7 +37,7 @@ const Transition = React.forwardRef(
 
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
-function MoreOptions(props: { postID: string, isAuth: boolean }) {
+function MoreOptions(props: { postID: string; isAuth: boolean }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
   const [alertMsg, setMsg] = React.useState('An error has occurred');
@@ -44,12 +47,12 @@ function MoreOptions(props: { postID: string, isAuth: boolean }) {
   };
 
   const deletePost = () => {
-    api_v1
-      .delete(`/posts/${props.postID}`)
-      .then((res) => {
+      API
+      .deletePost(props.postID)
+      .then((res: any) => {
         console.dir(res);
 
-        if (res.status === 204) {
+        if (res.response.status === 204) {
           setMsg('Post has been succesfully deleted.');
         } else {
           setMsg('Failed to delete post');
@@ -183,14 +186,13 @@ export default function ViewPostDialog(props: {
 }) {
   const [isOpen, toggleDialog] = React.useState(false);
   const [postData, setData] = React.useState(props.postUser);
-
   const [isAuthor, setIsAuthor] = React.useState(false);
+  
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
-    api_v1
-      .get(`/posts/${props.postUser.id}`)
-      .then((res) => {
+      API.fetchPost(props.postUser.id)
+      .then((res: any) => {
         console.dir(res);
         if (res.data) {
           setData(res.data.data.result);
@@ -198,9 +200,7 @@ export default function ViewPostDialog(props: {
       })
       .catch((err) => console.error(`Error making post ${err}`));
 
-    //TODO: Check if current user is the author (add new API route)
-    setIsAuthor(true);
-    
+      // setIsAuthor(currentUser.id === postData.User.id);
   };
 
   const closeDialog = () => {
@@ -252,7 +252,7 @@ export default function ViewPostDialog(props: {
           style={{ wordWrap: 'break-word' }}
         >
           <Typography variant='h5'>{postData.title}</Typography>
-          <MoreOptions postID={postData.id} isAuth={isAuthor}/>
+          <MoreOptions postID={postData.id} isAuth={isAuthor} />
         </Stack>
 
         {/* Top information (author, date, tags..) */}

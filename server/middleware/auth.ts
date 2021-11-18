@@ -1,6 +1,6 @@
-import {Request, Response, NextFunction} from 'express';
+import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import {User} from '../models/user';
+import { User } from '../models/user';
 
 const secret = process.env.JWT_SECRET as string;
 
@@ -20,7 +20,7 @@ class UnauthorizedError extends Error {
 export function getAuthUser(res: Response): User {
   if (!res.locals.user) {
     const err = 'User is not authorized to perform this request';
-    res.status(401).json({message: err});
+    res.status(401).json({ message: err });
     throw new UnauthorizedError(err);
   }
 
@@ -37,7 +37,11 @@ export function getAuthUser(res: Response): User {
  */
 function auth(userRepo: typeof User, skipPaths: string[] = []) {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (skipPaths.map(pathRegex => req.path.match(pathRegex)).some(match => match)) {
+    if (
+      skipPaths
+        .map((pathRegex) => req.path.match(pathRegex))
+        .some((match) => match)
+    ) {
       return next();
     }
 
@@ -53,11 +57,11 @@ function auth(userRepo: typeof User, skipPaths: string[] = []) {
         });
         next();
       } else {
-        res.status(401).json({message: 'Missing token in cookie'});
+        res.status(401).json({ message: 'Missing token in cookie' });
       }
     } catch (error) {
       console.error(error);
-      res.status(401).json({message: 'Bad session'});
+      res.status(401).json({ message: 'Bad session' });
     }
   };
 }

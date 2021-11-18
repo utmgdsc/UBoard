@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios';
 
 export default class ServerApi {
   protected api: AxiosInstance;
@@ -25,10 +25,10 @@ export default class ServerApi {
     firstName: string;
     lastName: string;
   }) {
-    return await this.post("/users/signup", form);
+    return await this.post('/users/signup', form);
   }
 
   async signIn(form: { userName: string; password: string }) {
-    return await this.post("/users/signin", form);
+    return await this.post('/users/signin', form);
   }
 }

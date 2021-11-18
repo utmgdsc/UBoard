@@ -14,8 +14,9 @@ import PreviewPopUp from "./PreviewPopUp";
 import Snackbar from "@mui/material/Snackbar";
 
 import ServerApi from "../api/v1/index";
+import { Post } from "models/post";
 
-const API = new ServerApi();
+const api = new ServerApi();
 
 function CreatePost() {
   // hooks
@@ -30,7 +31,7 @@ function CreatePost() {
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
   const [alertMsg, setMsg] = useState("An error has occurred"); // for snackbar message
-  const [capacityError, setCapacityError] = React.useState(""); // for capacity input validation
+  const [capacityError, setCapacityError] = useState(""); // for capacity input validation
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
 
   const closeDialog = () => {
@@ -42,15 +43,21 @@ function CreatePost() {
 
   // handling
   const handleSubmit = () => {
-    API.createPost(`/posts/`, form)
-      .then((res: any) => {
-        if (res.response.status === 204) {
-          setMsg("Post has been succesfully created.");
-        } else {
-          setMsg("Failed to create post");
+    api
+      .createPost(form)
+      .then(
+        (res: {
+          status: number;
+          data?: { result?: Post; message?: string };
+        }) => {
+          if (res.status === 204) {
+            setMsg("Post has been succesfully created.");
+          } else {
+            setMsg("Failed to create post");
+          }
+          showAlert(true);
         }
-        showAlert(true);
-      })
+      )
       .catch((err) => {
         console.error(err);
         setMsg("Failed to create post. Ensure all the fields are correct");

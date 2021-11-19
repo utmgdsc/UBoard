@@ -1,4 +1,14 @@
 import axios, { AxiosInstance } from 'axios';
+import { Post } from 'models/post';
+import { User } from 'models/user';
+
+export type PostUser = Post & {
+  User: { id: string; firstName: string; lastName: string };
+};
+
+export class ApiError extends Error {}
+
+export type APIResponse<T> = { status: number; data?: T };
 
 export default class ServerApi {
   protected api: AxiosInstance;
@@ -18,16 +28,23 @@ export default class ServerApi {
     }
   }
 
-  protected async get<Type>(path: string, params: Type | {} = {}) {
+  protected async get<RequestDataType, ResponseType>(
+    path: string,
+    params: RequestDataType
+  ): Promise<{ status: number; data?: ResponseType }> {
     try {
       const response = await this.api.get(path, {
         params,
       });
-      return { response: response };
+      return { status: response.status, data: response.data };
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return { error: error };
+        return {
+          status: error.response?.status as number,
+          data: error.response?.data,
+        };
       }
+      throw new ApiError(`Could not GET to path: ${path}`);
     }
   }
 
@@ -47,15 +64,21 @@ export default class ServerApi {
   }
 
   async me() {
-    return await this.get('/users/me');
+    return await this.get<{}, User>('/users/me', {});
   }
 
   async fetchRecentPosts(limit: number, offset: number) {
-    return await this.get('/posts/', { limit, offset });
+    return await this.get<
+      { limit: number; offset: number },
+      { data: { result?: PostUser[]; count: number } }
+    >('/posts/', { limit, offset });
   }
 
   async fetchPost(postID: string) {
-    return await this.get(`/posts/${postID}`);
+    return await this.get<{}, { result?: PostUser; message?: string }>(
+      `/posts/${postID}`,
+      {}
+    );
   }
 
   async signUp(form: {
@@ -70,5 +93,9 @@ export default class ServerApi {
 
   async signIn(form: { userName: string; password: string }) {
     return await this.post('/users/signin', form);
+  }
+
+  async signOut() {
+    return await this.post('users/signout', {});
   }
 }

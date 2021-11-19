@@ -9,35 +9,22 @@ import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
 
-import ServerApi from '../api/v1';
+import ServerApi, { APIResponse, PostUser } from '../api/v1';
 import { User } from 'models/user';
 
-const UserContext = React.createContext({});
+const api = new ServerApi();
 
-
-const fetchCurrentUser = () => {
-  let currUser: User | {} = {};
-
-  API.me().then((res: any) => {
-      if (res.response.status === 200) {
-        currUser = res.data;
-      }
-    })
-    .catch((err) => console.error(err));
-
-  return currUser;
-};
-
-const API = new ServerApi();
+export const UserContext: React.Context< { isLoading?: boolean, data?: User }> = React.createContext({});
 
 function RecentPosts() {
-  const [recentPosts, updateRecent] = React.useState([]);
+  const [recentPosts, updateRecent] = React.useState([] as PostUser[]);
 
   const fetchRecentPosts = (limit: number, offset: number) => {
-    API.fetchRecentPosts(limit, offset)
-      .then((res: any) => {
-        if (res.response.data.data.result) {
-          updateRecent(res.response.data.data.result);
+    api
+      .fetchRecentPosts(limit, offset)
+      .then((res: APIResponse<{ data: { result?: PostUser[]; count: number } }>) => {
+        if (res.data && res.data.data.result) {
+          updateRecent(res.data.data.result);
         }
       })
       .catch((err) => console.log(err));
@@ -61,10 +48,24 @@ function RecentPosts() {
 }
 
 export default function PostDashboard() {
-  console.dir(fetchCurrentUser());
+  const [currentUser, setUser] = React.useState({} as User);
+  const [isLoading, setLoading] = React.useState(true);
+
+  if (isLoading) { // Load once
+    api
+    .me()
+    .then((res: any) => { // TODO: Fix type after Daniel merge
+      if (res.status === 200) {
+        setUser(res.data);
+        setLoading(false);
+      }
+    })
+    .catch((err) => console.error(err));
+  } // TODO: Wipe context on logout
+    // TODO: Check cap
 
   return (
-    <>
+    <UserContext.Provider value={ {isLoading, data: currentUser} }>
       <Header />
       <main>
         <Container
@@ -84,11 +85,8 @@ export default function PostDashboard() {
             >
               {/*TODO: GURVIR <CreatePost /> */}
             </Grid>
-              <UserContext.Provider value={{test: "test"}}>
-                <RecentPosts />
-              </UserContext.Provider>
-              
-            
+
+            <RecentPosts />
           </Grid>
         </Container>
       </main>
@@ -122,6 +120,6 @@ export default function PostDashboard() {
           </Typography>
         </Box>
       </footer>
-    </>
+    </UserContext.Provider>
   );
 }

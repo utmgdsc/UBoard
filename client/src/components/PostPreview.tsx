@@ -10,14 +10,12 @@ import Typography from "@mui/material/Typography";
 import GenerateTags from "./Tags";
 import ViewPostDialog from "./ViewPostDialog";
 
-import { Post } from "models/post";
-import { User } from "models/user";
-
-export type PostUser = Post & {User: User};
+import { PostUser } from "../api/v1/index";
 
 
 export default function PostPreview(props: { postUser: PostUser }) {
   const tags = GenerateTags(["Placeholder"]);
+
 
   return (
     <Grid data-testid="test-postpreview" item xs={12} sm={6} md={4} lg={4}>

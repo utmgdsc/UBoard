@@ -18,11 +18,12 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 
-import { PostUser } from './PostPreview';
 import { User } from 'models/user';
-import ServerApi from '../api/v1';
+import ServerApi, { APIResponse, PostUser } from '../api/v1';
+import { UserContext } from "../containers/PostDashboard";
 
-const API = new ServerApi();
+
+const api = new ServerApi();
 
 const Transition = React.forwardRef(
   (
@@ -47,11 +48,9 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
   };
 
   const deletePost = () => {
-      API
+      api
       .deletePost(props.postID)
       .then((res: any) => {
-        console.dir(res);
-
         if (res.response.status === 204) {
           setMsg('Post has been succesfully deleted.');
         } else {
@@ -60,9 +59,9 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
         showAlert(true);
       })
       .catch((err) => {
-        console.error(err);
         setMsg('Failed to delete post');
         showAlert(true);
+        console.error(err);
       });
 
     closeMenu();
@@ -93,9 +92,10 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
           'aria-labelledby': 'post-settings',
         }}
       >
-        {props.isAuth && <MenuItem onClick={closeMenu}>Edit</MenuItem> && (
-          <MenuItem onClick={deletePost}>Delete</MenuItem>
-        )}
+        {props.isAuth ? 
+          <><MenuItem onClick={closeMenu}>Edit</MenuItem> 
+          <MenuItem onClick={deletePost}>Delete</MenuItem></>: <></>
+        }
         <MenuItem onClick={closeMenu}>Report</MenuItem>
       </Menu>
       <Snackbar
@@ -187,21 +187,36 @@ export default function ViewPostDialog(props: {
   const [isOpen, toggleDialog] = React.useState(false);
   const [postData, setData] = React.useState(props.postUser);
   const [isAuthor, setIsAuthor] = React.useState(false);
-  
+  const userContext = React.useContext(UserContext);
 
+  
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
-      API.fetchPost(props.postUser.id)
-      .then((res: any) => {
-        console.dir(res);
-        if (res.data) {
-          setData(res.data.data.result);
+      api.fetchPost(props.postUser.id)
+      .then((res: APIResponse<{result?: PostUser; message?: string}>) => {
+        console.log("New fetch");
+        console.dir(props.postUser);
+        console.log("Fet");
+        
+        if (res.data && res.data.result) {
+          console.log("Data set");
+          setData(res.data.result);
+          if (!userContext.isLoading && userContext.data) {
+            setIsAuthor(userContext.data.id === props.postUser.User.id); 
+          }
         }
       })
       .catch((err) => console.error(`Error making post ${err}`));
-
-      // setIsAuthor(currentUser.id === postData.User.id);
   };
+
+  React.useEffect(() => {
+    /* Fetch the auth user once our context data is loaded */
+    if (!userContext.isLoading && userContext.data) {
+      console.log(`RFX Post is: ${userContext.data.id} and the user is ${props.postUser.User.id} `)
+      console.dir(props.postUser);
+      setIsAuthor(userContext.data.id === props.postUser.User.id); 
+    }
+  }, [userContext, props.postUser]);
 
   const closeDialog = () => {
     toggleDialog(false);
@@ -297,7 +312,7 @@ export default function ViewPostDialog(props: {
             ) : (
               <></>
             )}
-            <LikeButton numLikes={Number(postData.feedbackScore)} />
+            {/* <LikeButton numLikes={Number(postData.feedbackScore)} /> */}
           </Stack>
         </Stack>
 

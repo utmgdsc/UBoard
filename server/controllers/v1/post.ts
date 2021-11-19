@@ -2,7 +2,9 @@ import { Post } from '../../models/post';
 import db from '../../models';
 
 // The return type of a Post associated with the Post's User.
-export type PostUser = Post & { User: { firstName: string; lastName: string } };
+export type PostUser = Post & {
+  User: { id: string; firstName: string; lastName: string };
+};
 
 // The maximum number of results to return.
 const MAX_RESULTS = 50;
@@ -29,11 +31,11 @@ export default class PostController {
       limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
       // Since we are returning multiple results, we want to limit the data. This data will be shown
       // in a list, so ignoring body is ok as it won't be displayed anyway.
-      attributes: ['id', 'body', 'title', 'feedbackScore', 'createdAt'],
+      attributes: ['id', 'body', 'title', 'createdAt'],
       include: [
         {
           model: db.User,
-          attributes: ['firstName', 'lastName', 'userName'],
+          attributes: ['firstName', 'lastName', 'userName', 'id'],
         },
       ],
       order: [['createdAt', 'DESC']],

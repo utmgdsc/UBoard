@@ -5,6 +5,12 @@ import { unmountComponentAtNode } from "react-dom";
 
 let container: HTMLElement | null = null;
 
+const mockNavigate = jest.fn();
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
+  useNavigate: () => mockNavigate,
+}));
+
 beforeEach(() => {
   container = document.createElement("div");
   document.body.appendChild(container);
@@ -36,7 +42,7 @@ describe("Test interaction with dashboard", () => {
     expect(screen.queryByTestId("test-post-settings-menu")).toBeNull();
     expect(menuBtn).toBeInTheDocument();
 
-    const menuItems = ["My Posts", "Settings", "Logout"];
+    const menuItems = ["My Posts", "Logout"];
     // Initially menu items should not show up
     for (let i = 0; i < menuItems.length; i++) {
       expect(screen.queryByText(menuItems[i])).not.toBeInTheDocument();
@@ -49,8 +55,5 @@ describe("Test interaction with dashboard", () => {
     }
   });
 
-  it("Read more button opens up a post", () => {
-    /* TODO */
 
-  });
 });

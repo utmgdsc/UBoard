@@ -18,10 +18,9 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 
-import { User } from 'models/user';
-import ServerApi, { APIResponse, PostUser } from '../api/v1';
-import { UserContext } from "../containers/PostDashboard";
+import { UserContext } from '../containers/PostDashboard';
 
+import ServerApi, { APIResponse, PostUser } from '../api/v1';
 
 const api = new ServerApi();
 
@@ -38,7 +37,11 @@ const Transition = React.forwardRef(
 
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
-function MoreOptions(props: { postID: string; isAuth: boolean }) {
+function MoreOptions(props: {
+  postID: string;
+  isAuth: boolean;
+  closeDialog: Function;
+}) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
   const [alertMsg, setMsg] = React.useState('An error has occurred');
@@ -48,15 +51,14 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
   };
 
   const deletePost = () => {
-      api
+    api
       .deletePost(props.postID)
       .then((res: any) => {
-        if (res.response.status === 204) {
-          setMsg('Post has been succesfully deleted.');
-        } else {
+        if (res.response.status !== 204) {
           setMsg('Failed to delete post');
         }
         showAlert(true);
+        props.closeDialog();
       })
       .catch((err) => {
         setMsg('Failed to delete post');
@@ -66,6 +68,13 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
 
     closeMenu();
   };
+
+  const reportPost = () => {
+    // TODO for now we will lie to the user and tell them we did something :-)
+
+    setMsg("Post has been reported.");
+    showAlert(true);
+  }
 
   return (
     <>
@@ -92,11 +101,15 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
           'aria-labelledby': 'post-settings',
         }}
       >
-        {props.isAuth ? 
-          <><MenuItem onClick={closeMenu}>Edit</MenuItem> 
-          <MenuItem onClick={deletePost}>Delete</MenuItem></>: <></>
-        }
-        <MenuItem onClick={closeMenu}>Report</MenuItem>
+        {props.isAuth ? (
+          <>
+            <MenuItem onClick={closeMenu}>Edit</MenuItem>
+            <MenuItem onClick={deletePost}>Delete</MenuItem>
+          </>
+        ) : (
+          <></>
+        )}
+        <MenuItem onClick={reportPost}>Report</MenuItem>
       </Menu>
       <Snackbar
         open={isAlertOpen}
@@ -112,7 +125,7 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
 function LikeButton(props: { numLikes: number }) {
   // TODO: update/get data from db
   const [isLiked, toggleLiked] = React.useState(false);
-  const numLikes = !isNaN(props.numLikes) ? props.numLikes: 0;
+  let numLikes = !isNaN(props.numLikes) ? props.numLikes : 0;
 
   const handleClick = () => {
     toggleLiked((prevLike) => !prevLike);
@@ -127,7 +140,7 @@ function LikeButton(props: { numLikes: number }) {
   return (
     <Stack>
       {likeButton}
-      <Typography sx={{ px: 2 }}>{numLikes}</Typography>
+      <Typography sx={{ px: 2, pl: 1}}>{numLikes}</Typography>
     </Stack>
   );
 }
@@ -191,18 +204,23 @@ export default function ViewPostDialog(props: {
   const [isAuthor, setIsAuthor] = React.useState(false);
   const userContext = React.useContext(UserContext);
 
-  
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
-      api.fetchPost(props.postUser.id)
-      .then((res: APIResponse<{ data: { result?: PostUser  } ; message?: string }>) => {    
-        if (res.data && res.data.data && res.data.data.result) { // appeasing TS
-          setData(res.data.data.result);
-          if (!userContext.isLoading && userContext.data) {
-            setIsAuthor(userContext.data.id === props.postUser.User.id); 
+    api
+      .fetchPost(props.postUser.id)
+      .then(
+        (
+          res: APIResponse<{ data: { result?: PostUser }; message?: string }>
+        ) => {
+          if (res.data && res.data.data && res.data.data.result) {
+            // appeasing TS
+            setData(res.data.data.result);
+            if (!userContext.isLoading && userContext.data) {
+              setIsAuthor(userContext.data.id === props.postUser.User.id);
+            }
           }
         }
-      })
+      )
       .catch((err) => console.error(`Error making post ${err}`));
   };
 
@@ -210,11 +228,10 @@ export default function ViewPostDialog(props: {
     /* Fetch incase data has changed / post was edited */
     if (isOpen) {
       const interval = setInterval(() => {
-      fetchData();
-    }, 500);
-    return () => clearInterval(interval);
+        fetchData();
+      }, 500);
+      return () => clearInterval(interval);
     }
-    
   });
 
   const closeDialog = () => {
@@ -224,7 +241,7 @@ export default function ViewPostDialog(props: {
   if (!postData || !postData.User) {
     return <></>;
   }
-  
+
   return (
     <>
       <Button
@@ -260,13 +277,15 @@ export default function ViewPostDialog(props: {
         </AppBar>
 
         {/* Title and Options (3 dots) */}
-        <Stack
-          direction='row'
-          sx={{ pt: 5, pl: 4 }}
-          style={{ wordWrap: 'break-word' }}
-        >
-          <Typography variant='h5'>{postData.title}</Typography>
-          <MoreOptions postID={postData.id} isAuth={isAuthor} />
+        <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
+          <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
+            {postData.title}
+          </Typography>
+          <MoreOptions
+            postID={postData.id}
+            isAuth={isAuthor}
+            closeDialog={closeDialog}
+          />
         </Stack>
 
         {/* Top information (author, date, tags..) */}
@@ -309,7 +328,7 @@ export default function ViewPostDialog(props: {
             {Number(postData.capacity) > 0 ? (
               <CapacityBar maxCapacity={Number(postData.capacity)} />
             ) : (
-              <>err</>
+              <></>
             )}
             <LikeButton numLikes={Number(postData.feedbackScore)} />
           </Stack>

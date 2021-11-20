@@ -34,13 +34,13 @@ export default function PostPreview(props: { postUser: PostUser }) {
           sx={{ maxWidth: "500px", maxHeight: "145px" }}
         />
         <CardContent sx={{ flexGrow: 1, mb: -2 }}>
-          <Typography variant="h5" component="h2">
-            {props.postUser.title.substring(0, 25)}
+          <Typography variant="h5" component="h2" style={{ wordWrap: 'break-word' }}>
+            {props.postUser.title.substring(0, 25) + "..."}
           </Typography>
-          <Typography sx={{ fontStyle: "italic" }}>
+          <Typography sx={{ fontStyle: "italic" }} style={{ wordWrap: 'break-word' }}>
             By {props.postUser.User.firstName} {props.postUser.User.lastName}
           </Typography>
-          <Typography sx={{ py: 1 }}>
+          <Typography sx={{ py: 1 }} style={{ wordWrap: 'break-word' }}>
             { props.postUser.body.substring(0, 120) + "..." }
           </Typography>
         </CardContent>

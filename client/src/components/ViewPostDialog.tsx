@@ -112,6 +112,7 @@ function MoreOptions(props: { postID: string; isAuth: boolean }) {
 function LikeButton(props: { numLikes: number }) {
   // TODO: update/get data from db
   const [isLiked, toggleLiked] = React.useState(false);
+  const numLikes = !isNaN(props.numLikes) ? props.numLikes: 0;
 
   const handleClick = () => {
     toggleLiked((prevLike) => !prevLike);
@@ -126,7 +127,7 @@ function LikeButton(props: { numLikes: number }) {
   return (
     <Stack>
       {likeButton}
-      <Typography sx={{ px: 2 }}>{props.numLikes}</Typography>
+      <Typography sx={{ px: 2 }}>{numLikes}</Typography>
     </Stack>
   );
 }
@@ -135,6 +136,7 @@ function CapacityBar(props: { maxCapacity: number }) {
   // TODO: This data should be synced with db -- models needs to be updated
   const [capacity, setCapacity] = React.useState(0);
   const [isCheckedin, toggleCheckin] = React.useState(false);
+  const maxCapacity = !isNaN(props.maxCapacity) ? props.maxCapacity : 0;
 
   const handleCheckIn = () => {
     toggleCheckin((prev) => !prev);
@@ -168,11 +170,11 @@ function CapacityBar(props: { maxCapacity: number }) {
   return (
     <Stack spacing={1} sx={{ mr: 4 }}>
       <Typography variant='body1' sx={{ pr: 2 }}>
-        Capacity: {capacity}/{props.maxCapacity}
+        Capacity: {capacity}/{maxCapacity}
       </Typography>
       <LinearProgress
         variant='determinate'
-        value={(capacity * 100) / props.maxCapacity}
+        value={(capacity * 100) / maxCapacity}
       ></LinearProgress>
       {buttonHandler}
     </Stack>
@@ -193,14 +195,9 @@ export default function ViewPostDialog(props: {
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
       api.fetchPost(props.postUser.id)
-      .then((res: APIResponse<{result?: PostUser; message?: string}>) => {
-        console.log("New fetch");
-        console.dir(props.postUser);
-        console.log("Fet");
-        
-        if (res.data && res.data.result) {
-          console.log("Data set");
-          setData(res.data.result);
+      .then((res: APIResponse<{ data: { result?: PostUser  } ; message?: string }>) => {    
+        if (res.data && res.data.data && res.data.data.result) { // appeasing TS
+          setData(res.data.data.result);
           if (!userContext.isLoading && userContext.data) {
             setIsAuthor(userContext.data.id === props.postUser.User.id); 
           }
@@ -210,13 +207,15 @@ export default function ViewPostDialog(props: {
   };
 
   React.useEffect(() => {
-    /* Fetch the auth user once our context data is loaded */
-    if (!userContext.isLoading && userContext.data) {
-      console.log(`RFX Post is: ${userContext.data.id} and the user is ${props.postUser.User.id} `)
-      console.dir(props.postUser);
-      setIsAuthor(userContext.data.id === props.postUser.User.id); 
+    /* Fetch incase data has changed / post was edited */
+    if (isOpen) {
+      const interval = setInterval(() => {
+      fetchData();
+    }, 500);
+    return () => clearInterval(interval);
     }
-  }, [userContext, props.postUser]);
+    
+  });
 
   const closeDialog = () => {
     toggleDialog(false);
@@ -225,7 +224,7 @@ export default function ViewPostDialog(props: {
   if (!postData || !postData.User) {
     return <></>;
   }
-
+  
   return (
     <>
       <Button
@@ -307,12 +306,12 @@ export default function ViewPostDialog(props: {
             {postData.body}
           </Typography>
           <Stack direction='row' sx={{ px: 4, pb: 5 }}>
-            {postData.capacity > 0 ? (
+            {Number(postData.capacity) > 0 ? (
               <CapacityBar maxCapacity={Number(postData.capacity)} />
             ) : (
-              <></>
+              <>err</>
             )}
-            {/* <LikeButton numLikes={Number(postData.feedbackScore)} /> */}
+            <LikeButton numLikes={Number(postData.feedbackScore)} />
           </Stack>
         </Stack>
 

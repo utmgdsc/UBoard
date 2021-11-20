@@ -75,10 +75,10 @@ export default class ServerApi {
   }
 
   async fetchPost(postID: string) {
-    return await this.get<{}, { result?: PostUser; message?: string }>(
-      `/posts/${postID}`,
-      {}
-    );
+    return await this.get<
+      {},
+      { data: { result?: PostUser }; message?: string }
+    >(`/posts/${postID}`, {});
   }
 
   async signUp(form: {

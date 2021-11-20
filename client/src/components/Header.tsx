@@ -58,12 +58,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function AccountMenu() {
+function AccountMenu(props: { setAuthLoading: Function }) {
   const [isOpen, openMenu] = React.useState(false);
 
   const closeMenu = () => {
     openMenu(false);
   };
+
 
   return (
     <div>
@@ -91,10 +92,10 @@ function AccountMenu() {
         }}
       >
         <MenuItem onClick={closeMenu}>My Posts</MenuItem>
-        <MenuItem onClick={closeMenu}>Settings</MenuItem>
         <MenuItem
           onClick={() => {
             api.signOut();
+            props.setAuthLoading(true); // Enables reloading auth user from /me
           }}
         >
           Logout
@@ -104,7 +105,8 @@ function AccountMenu() {
   );
 }
 
-export default function Header() {
+export default function Header(props: { setAuthLoading: Function }) {
+
   return (
     <AppBar position='static'>
       <Toolbar sx={{ alignItems: 'center' }}>
@@ -120,7 +122,7 @@ export default function Header() {
             inputProps={{ 'aria-label': 'search' }}
           />
         </Search>
-        <AccountMenu />
+        <AccountMenu setAuthLoading={props.setAuthLoading} />
       </Toolbar>
     </AppBar>
   );

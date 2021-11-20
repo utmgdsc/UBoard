@@ -5,16 +5,21 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
 
+import { User } from 'models/user';
+
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
 
 import ServerApi, { APIResponse, PostUser } from '../api/v1';
-import { User } from 'models/user';
+import { useNavigate } from 'react-router-dom';
 
 const api = new ServerApi();
 
-export const UserContext: React.Context< { isLoading?: boolean, data?: User }> = React.createContext({});
+export const UserContext: React.Context<{
+  isLoading?: boolean;
+  data?: User | null;
+}> = React.createContext({});
 
 function RecentPosts() {
   const [recentPosts, updateRecent] = React.useState([] as PostUser[]);
@@ -22,11 +27,15 @@ function RecentPosts() {
   const fetchRecentPosts = (limit: number, offset: number) => {
     api
       .fetchRecentPosts(limit, offset)
-      .then((res: APIResponse<{ data: { result?: PostUser[]; count: number } }>) => {
-        if (res.data && res.data.data.result) {
-          updateRecent(res.data.data.result);
+      .then(
+        (
+          res: APIResponse<{ data: { result?: PostUser[]; count: number } }>
+        ) => {
+          if (res.data && res.data.data.result) {
+            updateRecent(res.data.data.result);
+          }
         }
-      })
+      )
       .catch((err) => console.log(err));
   };
 
@@ -48,25 +57,41 @@ function RecentPosts() {
 }
 
 export default function PostDashboard() {
-  const [currentUser, setUser] = React.useState({} as User);
+  const [currentUser, setUser] = React.useState(null);
   const [isLoading, setLoading] = React.useState(true);
+  const navigate = useNavigate();
 
-  if (isLoading) { // Load once
-    api
-    .me()
-    .then((res: any) => { // TODO: Fix type after Daniel merge
-      if (res.status === 200) {
-        setUser(res.data);
-        setLoading(false);
-      }
-    })
-    .catch((err) => console.error(err));
-  } // TODO: Wipe context on logout
-    // TODO: Check cap
+  const authBarrier = () => {
+    // force a login
+    navigate('/');
+    setUser(null);
+  };
+
+  React.useEffect(() => {
+    if (isLoading) {
+      // Only called once per login. Set to false on logout
+      api
+        .me()
+        .then((res: any) => {
+          // TODO: Fix type after Daniel merge
+          if (res.status === 200) {
+            setUser(res.data);
+            setLoading(false);
+          } else {
+            console.log(`Not Logged in`);
+            authBarrier();
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          authBarrier();
+        });
+    }
+  });
 
   return (
-    <UserContext.Provider value={ {isLoading, data: currentUser} }>
-      <Header />
+    <UserContext.Provider value={{ isLoading, data: currentUser }}>
+      <Header setAuthLoading={setLoading} />
       <main>
         <Container
           sx={{ py: 5 }}

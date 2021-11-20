@@ -1,6 +1,6 @@
-import axios, { AxiosInstance } from "axios";
-import { UserAttributes } from "models/user";
-import { Post } from "models/post";
+import axios, { AxiosInstance } from 'axios';
+import { UserAttributes } from 'models/user';
+import { Post } from 'models/post';
 
 export class ApiError extends Error {}
 
@@ -38,7 +38,7 @@ export default class ServerApi {
     location: string;
   }) {
     return await this.post<typeof form, { result?: Post; message?: string }>(
-      "/posts/",
+      '/posts/',
       form
     );
   }
@@ -50,10 +50,16 @@ export default class ServerApi {
     firstName: string;
     lastName: string;
   }) {
-    return await this.post("/users/signup", form);
+    return await this.post<typeof form, { message: string }>(
+      '/users/signup',
+      form
+    );
   }
 
   async signIn(form: { userName: string; password: string }) {
-    return await this.post("/users/signin", form);
+    return await this.post<
+      typeof form,
+      { message: string; result?: UserAttributes }
+    >('/users/signin', form);
   }
 }

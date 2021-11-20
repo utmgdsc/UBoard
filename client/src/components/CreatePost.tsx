@@ -1,37 +1,36 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
-import Dialog from "@mui/material/Dialog";
-import { ArrowBack } from "@mui/icons-material";
-import PreviewPopUp from "./PreviewPopUp";
-import Snackbar from "@mui/material/Snackbar";
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import Dialog from '@mui/material/Dialog';
+import { ArrowBack } from '@mui/icons-material';
+import PreviewPopUp from './PreviewPopUp';
+import Snackbar from '@mui/material/Snackbar';
 
-import ServerApi from "../api/v1/index";
-import { Post } from "models/post";
+import ServerApi from '../api/v1/index';
 
 const api = new ServerApi();
 
 function CreatePost() {
   // hooks
   const [form, setForm] = useState({
-    title: "",
-    body: "",
-    file: "",
-    tags: "",
-    capacity: "",
-    location: "",
+    title: '',
+    body: '',
+    file: '',
+    tags: '',
+    capacity: '',
+    location: '',
   });
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
-  const [alertMsg, setMsg] = useState("An error has occurred"); // for snackbar message
-  const [capacityError, setCapacityError] = useState(""); // for capacity input validation
+  const [alertMsg, setMsg] = useState('An error has occurred'); // for snackbar message
+  const [capacityError, setCapacityError] = useState(''); // for capacity input validation
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
 
   const closeDialog = () => {
@@ -45,22 +44,17 @@ function CreatePost() {
   const handleSubmit = () => {
     api
       .createPost(form)
-      .then(
-        (res: {
-          status: number;
-          data?: { result?: Post; message?: string };
-        }) => {
-          if (res.status === 204) {
-            setMsg("Post has been succesfully created.");
-          } else {
-            setMsg("Failed to create post");
-          }
-          showAlert(true);
+      .then((res) => {
+        if (res.status === 204) {
+          setMsg('Post has been succesfully created.');
+        } else {
+          setMsg('Failed to create post');
         }
-      )
+        showAlert(true);
+      })
       .catch((err) => {
         console.error(err);
-        setMsg("Failed to create post. Ensure all the fields are correct");
+        setMsg('Failed to create post. Ensure all the fields are correct');
         showAlert(true);
       });
   };
@@ -74,31 +68,31 @@ function CreatePost() {
   return (
     <>
       <Button
-        variant="outlined"
+        variant='outlined'
         onClick={() => {
           toggleDialog(true);
         }}
-        data-testid="newPostButton"
+        data-testid='newPostButton'
       >
         New Post
       </Button>
       <Dialog fullScreen open={isOpen} onClose={closeDialog}>
-        <Container component="main" maxWidth="md">
+        <Container component='main' maxWidth='md'>
           <Box
             sx={{
               marginTop: 8,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
           >
             <Grid container>
               <Grid item xs={4}>
                 <Button
                   onClick={closeDialog}
-                  size="large"
-                  variant="contained"
-                  data-testid="backButton"
+                  size='large'
+                  variant='contained'
+                  data-testid='backButton'
                 >
                   <ArrowBack />
                   Back
@@ -107,24 +101,24 @@ function CreatePost() {
             </Grid>
 
             <Typography
-              component="h3"
-              variant="h3"
-              fontWeight="bold"
-              paddingTop="10px"
+              component='h3'
+              variant='h3'
+              fontWeight='bold'
+              paddingTop='10px'
             >
               Create Post
             </Typography>
             {/* form  begins*/}
-            <Box component="form" noValidate sx={{ mt: 2 }}>
+            <Box component='form' noValidate sx={{ mt: 2 }}>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
                     required
                     fullWidth
-                    label="Title"
-                    placeholder="title"
-                    size="small"
-                    data-testid="titleTextField"
+                    label='Title'
+                    placeholder='title'
+                    size='small'
+                    data-testid='titleTextField'
                     onChange={(e) =>
                       setForm({ ...form, title: e.target.value })
                     }
@@ -135,9 +129,9 @@ function CreatePost() {
                   <TextField
                     required
                     fullWidth
-                    label="Body"
-                    data-testid="bodyTextField"
-                    placeholder="description"
+                    label='Body'
+                    data-testid='bodyTextField'
+                    placeholder='description'
                     multiline
                     rows={6}
                     onChange={(e) => setForm({ ...form, body: e.target.value })}
@@ -147,33 +141,33 @@ function CreatePost() {
                 <Grid item xs={12} md={4}>
                   <TextField
                     required
-                    label="Upload Thumbnail"
-                    type="file"
+                    label='Upload Thumbnail'
+                    type='file'
                     fullWidth
-                    data-testid="fileField"
+                    data-testid='fileField'
                     InputLabelProps={{ shrink: true }}
-                    size="small"
+                    size='small'
                     onChange={(e) => handleImageUpload(e)}
                   />
                 </Grid>
 
                 <Grid item xs={12} md={3}>
                   <TextField
-                    label="Event Capacity"
-                    placeholder="40"
+                    label='Event Capacity'
+                    placeholder='40'
                     fullWidth
-                    size="small"
+                    size='small'
                     onChange={(e) =>
                       setForm({ ...form, capacity: e.target.value })
                     }
                     onBlur={() => {
                       if (!/^[0-9]*$/.test(form.capacity)) {
-                        setCapacityError("Only numbers allowed!");
+                        setCapacityError('Only numbers allowed!');
                       } else {
-                        setCapacityError("");
+                        setCapacityError('');
                       }
                     }}
-                    error={capacityError !== ""}
+                    error={capacityError !== ''}
                     helperText={capacityError}
                   />
                 </Grid>
@@ -181,9 +175,9 @@ function CreatePost() {
                 <Grid item xs={12} md={5}>
                   <TextField
                     fullWidth
-                    label="Location"
-                    placeholder="Deerfield Hall"
-                    size="small"
+                    label='Location'
+                    placeholder='Deerfield Hall'
+                    size='small'
                     onChange={(e) =>
                       setForm({ ...form, location: e.target.value })
                     }
@@ -193,9 +187,9 @@ function CreatePost() {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Tags (Separate tags by a comma)"
-                    placeholder="Clubs, Math, MCS"
-                    size="small"
+                    label='Tags (Separate tags by a comma)'
+                    placeholder='Clubs, Math, MCS'
+                    size='small'
                     onChange={(e) => setForm({ ...form, tags: e.target.value })}
                   />
                 </Grid>
@@ -206,19 +200,19 @@ function CreatePost() {
                 <Divider />
               </Box>
 
-              <Grid container spacing={2} justifyContent="center">
+              <Grid container spacing={2} justifyContent='center'>
                 <Grid item xs={5} md={3}>
-                  <Tooltip title="Enter all required fields!">
+                  <Tooltip title='Enter all required fields!'>
                     <Box>
                       <Button
                         fullWidth
-                        variant="contained"
+                        variant='contained'
                         sx={{ mt: 3, mb: 2 }}
-                        color="secondary"
+                        color='secondary'
                         onClick={handleClickOpen}
-                        data-testid="previewButton"
-                        size="large"
-                        disabled={!(form.title !== "" && form.body !== "")}
+                        data-testid='previewButton'
+                        size='large'
+                        disabled={!(form.title !== '' && form.body !== '')}
                       >
                         Preview
                       </Button>
@@ -228,10 +222,10 @@ function CreatePost() {
                 <Grid item xs={7} md={5}>
                   <Button
                     fullWidth
-                    variant="contained"
+                    variant='contained'
                     sx={{ mt: 3, mb: 2 }}
-                    size="large"
-                    disabled={!(form.title !== "" && form.body !== "")}
+                    size='large'
+                    disabled={!(form.title !== '' && form.body !== '')}
                     onClick={handleSubmit}
                   >
                     Create
@@ -257,7 +251,7 @@ function CreatePost() {
               handleClose={() => setOpenPopup(false)}
             ></PreviewPopUp>
           </Box>
-        </Container>{" "}
+        </Container>{' '}
       </Dialog>
     </>
   );

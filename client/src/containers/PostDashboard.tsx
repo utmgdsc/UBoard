@@ -11,8 +11,10 @@ import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
 
-import ServerApi, { APIResponse, PostUser } from '../api/v1';
+import ServerApi, { PostUserPreview } from '../api/v1';
 import { useNavigate } from 'react-router-dom';
+
+const POSTS_PER_PAGE = 25; // Maximum (previewable) posts per page
 
 const api = new ServerApi();
 
@@ -21,27 +23,23 @@ export const UserContext: React.Context<{
   data?: User | null;
 }> = React.createContext({});
 
-function RecentPosts() {
-  const [recentPosts, updateRecent] = React.useState([] as PostUser[]);
-
-  const fetchRecentPosts = (limit: number, offset: number) => {
-    api
-      .fetchRecentPosts(limit, offset)
-      .then(
-        (
-          res: APIResponse<{ data: { result?: PostUser[]; count: number } }>
-        ) => {
-          if (res.data && res.data.data.result) {
-            updateRecent(res.data.data.result);
-          }
-        }
-      )
-      .catch((err) => console.log(err));
-  };
+function RecentPosts(props: {
+  setPageCount: React.Dispatch<React.SetStateAction<number>>;
+  pageNum: number;
+}) {
+  const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
 
   React.useEffect(() => {
     const interval = setInterval(() => {
-      fetchRecentPosts(15, 0);
+      api
+        .fetchRecentPosts(POSTS_PER_PAGE, POSTS_PER_PAGE * (props.pageNum - 1))
+        .then((res) => {
+          if (res.data && res.data.data.result) {
+            updateRecent(res.data.data.result);
+            props.setPageCount(Math.ceil(res.data.data.count / POSTS_PER_PAGE));
+          }
+        })
+        .catch((err) => console.log(err));
     }, 500);
 
     return () => clearInterval(interval);
@@ -59,6 +57,8 @@ function RecentPosts() {
 export default function PostDashboard() {
   const [currentUser, setUser] = React.useState(null);
   const [isLoading, setLoading] = React.useState(true);
+  const [pageCount, setPageCount] = React.useState(1);
+  const [page, setPage] = React.useState(1);
   const navigate = useNavigate();
 
   const authBarrier = () => {
@@ -111,7 +111,7 @@ export default function PostDashboard() {
               {/*TODO: GURVIR <CreatePost /> */}
             </Grid>
 
-            <RecentPosts />
+            <RecentPosts setPageCount={setPageCount} pageNum={page} />
           </Grid>
         </Container>
       </main>
@@ -125,7 +125,15 @@ export default function PostDashboard() {
             alignItems: 'center',
           }}
         >
-          <Pagination count={1} color='primary' variant='outlined' />
+          <Pagination
+            count={pageCount}
+            page={page}
+            onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
+              setPage(pg);
+            }}
+            color='primary'
+            variant='outlined'
+          />
         </Grid>
 
         <Box
@@ -141,7 +149,7 @@ export default function PostDashboard() {
             color='text.secondary'
             component='p'
           >
-            You're all up to date!
+            You"re all up to date!
           </Typography>
         </Box>
       </footer>

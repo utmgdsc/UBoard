@@ -10,10 +10,10 @@ import Typography from "@mui/material/Typography";
 import GenerateTags from "./Tags";
 import ViewPostDialog from "./ViewPostDialog";
 
-import { PostUser } from "../api/v1/index";
+import { PostUser, PostUserPreview } from "../api/v1/index";
 
 
-export default function PostPreview(props: { postUser: PostUser }) {
+export default function PostPreview(props: { postUser: PostUserPreview }) {
   const tags = GenerateTags(["Placeholder"]);
 
 
@@ -35,13 +35,13 @@ export default function PostPreview(props: { postUser: PostUser }) {
         />
         <CardContent sx={{ flexGrow: 1, mb: -2 }}>
           <Typography variant="h5" component="h2" style={{ wordWrap: 'break-word' }}>
-            {props.postUser.title.substring(0, 25) + "..."}
+            {props.postUser.title.substring(0, 28) + "..."}
           </Typography>
           <Typography sx={{ fontStyle: "italic" }} style={{ wordWrap: 'break-word' }}>
             By {props.postUser.User.firstName} {props.postUser.User.lastName}
           </Typography>
           <Typography sx={{ py: 1 }} style={{ wordWrap: 'break-word' }}>
-            { props.postUser.body.substring(0, 120) + "..." }
+            { props.postUser.body.substring(0, 150) + "..." }
           </Typography>
         </CardContent>
         <CardActions>

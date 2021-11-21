@@ -6,9 +6,17 @@ export type PostUser = Post & {
   User: { id: string; firstName: string; lastName: string };
 };
 
-export class ApiError extends Error {}
+export type PostUserPreview = {
+  id: string;
+  thumbnail: string;
+  body: string;
+  title: string;
+  createdAt: Date;
+} & {
+  User: { id: string; firstName: string; lastName: string; userName: string };
+};
 
-export type APIResponse<T> = { status: number; data?: T };
+export class ApiError extends Error {}
 
 export default class ServerApi {
   protected api: AxiosInstance;
@@ -48,19 +56,42 @@ export default class ServerApi {
     }
   }
 
-  protected async delete(path: string) {
+  protected async delete<ResponseDataType>(
+    path: string
+  ): Promise<{ status: number; data?: ResponseDataType }> {
     try {
       const response = await this.api.delete(path);
-      return { response: response };
+      return { status: response.status };
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        return { error: error };
+        return {
+          status: error.response?.status as number,
+          data: error.response?.data,
+        };
       }
+      throw new ApiError(`Could not DELETE ${path}`);
+    }
+  }
+
+  protected async put<ResponseDataType>(
+    path: string
+  ): Promise<{ status: number; data?: ResponseDataType }> {
+    try {
+      const response = await this.api.put(path);
+      return { status: response.status, data: response.data };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        return {
+          status: error.response?.status as number,
+          data: error.response?.data,
+        };
+      }
+      throw new ApiError(`Could not PUT ${path}`);
     }
   }
 
   async deletePost(postID: string) {
-    return await this.delete(`/posts/${postID}`);
+    return await this.delete<{ message: string }>(`/posts/${postID}`);
   }
 
   async me() {
@@ -70,7 +101,14 @@ export default class ServerApi {
   async fetchRecentPosts(limit: number, offset: number) {
     return await this.get<
       { limit: number; offset: number },
-      { data: { result?: PostUser[]; count: number } }
+      {
+        data: {
+          result?: PostUserPreview[];
+          count: number;
+          total: number;
+          message?: string;
+        };
+      }
     >('/posts/', { limit, offset });
   }
 
@@ -96,6 +134,14 @@ export default class ServerApi {
   }
 
   async signOut() {
-    return await this.post('users/signout', {});
+    return await this.post('/users/signout', {});
+  }
+
+  async likePost(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/upvote`);
+  }
+
+  async reportPost(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/report`);
   }
 }

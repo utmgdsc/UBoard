@@ -20,7 +20,7 @@ import Snackbar from '@mui/material/Snackbar';
 
 import { UserContext } from '../containers/PostDashboard';
 
-import ServerApi, { APIResponse, PostUser } from '../api/v1';
+import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
 
 const api = new ServerApi();
 
@@ -53,27 +53,37 @@ function MoreOptions(props: {
   const deletePost = () => {
     api
       .deletePost(props.postID)
-      .then((res: any) => {
-        if (res.response.status !== 204) {
-          setMsg('Failed to delete post');
+      .then((res) => {
+        if (res.status === 204) {
+          showAlert(true);
+          props.closeDialog();
         }
-        showAlert(true);
-        props.closeDialog();
       })
       .catch((err) => {
-        setMsg('Failed to delete post');
-        showAlert(true);
-        console.error(err);
+          setMsg('Failed to delete post');
+          showAlert(true);
+          console.error(err);
       });
 
     closeMenu();
   };
 
   const reportPost = () => {
-    // TODO for now we will lie to the user and tell them we did something :-)
+    // TODO need to fix spam / backend interactions
 
-    setMsg("Post has been reported.");
-    showAlert(true);
+    api.reportPost(props.postID).then((res) => {
+      if (res.status === 204) {
+          setMsg("Post has been reported.");
+          showAlert(true);
+      } else {
+        setMsg("Failed to report post. ");
+        showAlert(true);
+      }
+    }).catch(() => {
+      setMsg("Failed to report post.");
+      showAlert(true)
+    })
+
   }
 
   return (
@@ -196,11 +206,11 @@ function CapacityBar(props: { maxCapacity: number }) {
 
 /* Opens a full screen dialog containing a post. */
 export default function ViewPostDialog(props: {
-  postUser: PostUser;
+  postUser: PostUserPreview;
   tags: JSX.Element;
 }) {
   const [isOpen, toggleDialog] = React.useState(false);
-  const [postData, setData] = React.useState(props.postUser);
+  const [postData, setData] = React.useState(props.postUser as any as PostUser);
   const [isAuthor, setIsAuthor] = React.useState(false);
   const userContext = React.useContext(UserContext);
 
@@ -209,11 +219,8 @@ export default function ViewPostDialog(props: {
     api
       .fetchPost(props.postUser.id)
       .then(
-        (
-          res: APIResponse<{ data: { result?: PostUser }; message?: string }>
-        ) => {
+        (res) => {
           if (res.data && res.data.data && res.data.data.result) {
-            // appeasing TS
             setData(res.data.data.result);
             if (!userContext.isLoading && userContext.data) {
               setIsAuthor(userContext.data.id === props.postUser.User.id);

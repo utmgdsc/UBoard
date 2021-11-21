@@ -6,6 +6,16 @@ export type PostUser = Post & {
   User: { id: string; firstName: string; lastName: string };
 };
 
+export type PostUserPreview = {
+  id: string;
+  thumbnail: string;
+  body: string;
+  title: string;
+  createdAt: Date;
+} & {
+  User: { id: string; firstName: string; lastName: string; userName: string };
+};
+
 // The maximum number of results to return.
 const MAX_RESULTS = 50;
 
@@ -26,25 +36,34 @@ export default class PostController {
   async getPosts(
     limit: number,
     offset: number
-  ): Promise<{ status: number; data: { result?: PostUser[]; count: number } }> {
-    const data = await this.postsRepo.findAndCountAll({
-      limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
-      // Since we are returning multiple results, we want to limit the data. This data will be shown
-      // in a list, so ignoring body is ok as it won't be displayed anyway.
-      attributes: ['id', 'body', 'title', 'createdAt'],
-      include: [
-        {
-          model: db.User,
-          attributes: ['firstName', 'lastName', 'userName', 'id'],
-        },
-      ],
-      order: [['createdAt', 'DESC']],
-      offset: offset,
-    });
+  ): Promise<{
+    status: number;
+    data: { result?: PostUserPreview[]; count: number; total: number };
+  }> {
+    const data = await Promise.all([
+      this.postsRepo.findAndCountAll({
+        limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
+        // Since we are returning multiple results, we want to limit the data.
+        attributes: ['id', 'body', 'title', 'createdAt', 'thumbnail'],
+        include: [
+          {
+            model: db.User,
+            attributes: ['firstName', 'lastName', 'id'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+        offset: offset,
+      }),
+      this.postsRepo.count(),
+    ]);
 
     return {
-      status: data.count > 0 ? 200 : 204,
-      data: { result: data.rows as PostUser[], count: data.count },
+      status: data[0].count > 0 ? 200 : 204,
+      data: {
+        result: data[0].rows as any as PostUserPreview[],
+        count: data[0].count,
+        total: data[1],
+      },
     };
   }
 

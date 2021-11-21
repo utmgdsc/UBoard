@@ -58,13 +58,14 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function AccountMenu(props: { setAuthLoading: Function }) {
+function AccountMenu(props: {
+  setAuthLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [isOpen, openMenu] = React.useState(false);
 
   const closeMenu = () => {
     openMenu(false);
   };
-
 
   return (
     <div>
@@ -105,8 +106,9 @@ function AccountMenu(props: { setAuthLoading: Function }) {
   );
 }
 
-export default function Header(props: { setAuthLoading: Function }) {
-
+export default function Header(props: {
+  setAuthLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   return (
     <AppBar position='static'>
       <Toolbar sx={{ alignItems: 'center' }}>

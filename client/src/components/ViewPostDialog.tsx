@@ -55,7 +55,6 @@ function MoreOptions(props: {
       .deletePost(props.postID)
       .then((res) => {
         if (res.status === 204) {
-          showAlert(true);
           props.closeDialog();
         }
       })
@@ -74,11 +73,10 @@ function MoreOptions(props: {
     api.reportPost(props.postID).then((res) => {
       if (res.status === 204) {
           setMsg("Post has been reported.");
-          showAlert(true);
       } else {
-        setMsg("Failed to report post. ");
-        showAlert(true);
+        setMsg("Failed to report post. ");;
       }
+      showAlert(true);
     }).catch(() => {
       setMsg("Failed to report post.");
       showAlert(true)
@@ -214,6 +212,8 @@ export default function ViewPostDialog(props: {
   const [isAuthor, setIsAuthor] = React.useState(false);
   const userContext = React.useContext(UserContext);
 
+  
+
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
     api
@@ -240,6 +240,8 @@ export default function ViewPostDialog(props: {
       return () => clearInterval(interval);
     }
   });
+
+
 
   const closeDialog = () => {
     toggleDialog(false);

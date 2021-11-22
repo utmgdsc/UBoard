@@ -28,42 +28,52 @@ function RecentPosts(props: {
   pageNum: number;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
+  const [openedPost, setOpenedPost] = React.useState(false);
 
   /* Fetch new posts by polling */
   React.useEffect(() => {
-    const interval = setInterval(() => {
-      api
-      .fetchRecentPosts(POSTS_PER_PAGE, POSTS_PER_PAGE * (props.pageNum - 1))
-      .then((res) => {
-        if (res.data && res.data.data.result) {
-          updateRecent(res.data.data.result);
-          props.setPageCount(Math.ceil(res.data.data.count / POSTS_PER_PAGE));
+      const interval = setInterval(() => {
+        if (!openedPost) { 
+          api
+            .fetchRecentPosts(
+              POSTS_PER_PAGE,
+              POSTS_PER_PAGE * (props.pageNum - 1)
+            )
+            .then((res) => {
+              if (res.data && res.data.data.result) {
+                updateRecent(res.data.data.result);
+                props.setPageCount(
+                  Math.ceil(res.data.data.count / POSTS_PER_PAGE)
+                );
+              }
+            })
+            .catch((err) => console.log(err));
         }
-      })
-      .catch((err) => console.log(err));
-    }, 500);
+      }, 500);
 
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    
   });
 
-  /* Fetch posts triggered by page-change */
+  /* Fetch posts triggered by page-change or post dialog close */
   React.useEffect(() => {
+    if (!openedPost) {
       api
-      .fetchRecentPosts(POSTS_PER_PAGE, POSTS_PER_PAGE * (props.pageNum - 1))
-      .then((res) => {
-        if (res.data && res.data.data.result) {
-          updateRecent(res.data.data.result);
-          props.setPageCount(Math.ceil(res.data.data.count / POSTS_PER_PAGE));
-        }
-      })
-      .catch((err) => console.log(err));
-
-  }, [props]);
+        .fetchRecentPosts(POSTS_PER_PAGE, POSTS_PER_PAGE * (props.pageNum - 1))
+        .then((res) => {
+          if (res.data && res.data.data.result) {
+            updateRecent(res.data.data.result);
+            props.setPageCount(Math.ceil(res.data.data.count / POSTS_PER_PAGE));
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [props, openedPost]);
 
   return (
     <>
       {recentPosts.map((data) => (
-        <PostPreview postUser={data} />
+        <PostPreview postUser={data} setOpenedPost={setOpenedPost} />
       ))}
     </>
   );
@@ -74,6 +84,7 @@ export default function PostDashboard() {
   const [isLoading, setLoading] = React.useState(true);
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
+
   const navigate = useNavigate();
 
   const authBarrier = () => {

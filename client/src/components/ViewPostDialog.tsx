@@ -146,9 +146,9 @@ function LikeButton(props: { numLikes: number }) {
   );
 
   return (
-    <Stack>
+    <Stack direction='row'>
       {likeButton}
-      <Typography sx={{ px: 2, pl: 1}}>{numLikes}</Typography>
+      <Typography sx={{ pt: 0.5, px: 1, pl: 1}}>{numLikes}</Typography>
     </Stack>
   );
 }
@@ -206,13 +206,12 @@ function CapacityBar(props: { maxCapacity: number }) {
 export default function ViewPostDialog(props: {
   postUser: PostUserPreview;
   tags: JSX.Element;
+  setOpenedPost: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   const [isOpen, toggleDialog] = React.useState(false);
   const [postData, setData] = React.useState(props.postUser as any as PostUser);
   const [isAuthor, setIsAuthor] = React.useState(false);
   const userContext = React.useContext(UserContext);
-
-  
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
@@ -241,9 +240,8 @@ export default function ViewPostDialog(props: {
     }
   });
 
-
-
   const closeDialog = () => {
+    props.setOpenedPost(false);
     toggleDialog(false);
   };
 
@@ -258,6 +256,7 @@ export default function ViewPostDialog(props: {
         variant='outlined'
         onClick={() => {
           toggleDialog(true);
+          props.setOpenedPost(true);
           fetchData();
         }}
         sx={{ mb: 3 }}

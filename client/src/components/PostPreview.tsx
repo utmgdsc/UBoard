@@ -13,7 +13,9 @@ import ViewPostDialog from "./ViewPostDialog";
 import { PostUserPreview } from "../api/v1/index";
 
 
-export default function PostPreview(props: { postUser: PostUserPreview }) {
+export default function PostPreview(props: { postUser: PostUserPreview, 
+  setOpenedPost: React.Dispatch<React.SetStateAction<boolean>> }) {
+    
   const tags = GenerateTags(["Placeholder"]);
 
   return (
@@ -45,7 +47,7 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
         </CardContent>
         <CardActions>
           <Stack sx={{ pl: 1 }}>
-          <ViewPostDialog postUser={props.postUser} tags={tags}/>
+          <ViewPostDialog postUser={props.postUser} tags={tags} setOpenedPost={props.setOpenedPost}/>
           {tags}
           </Stack>
         </CardActions>

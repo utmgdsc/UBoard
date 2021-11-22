@@ -1,15 +1,7 @@
 import PostDashboard from '../containers/PostDashboard';
-import { act } from 'react-dom/test-utils';
 import { render, screen, cleanup } from '@testing-library/react';
-import { unmountComponentAtNode } from 'react-dom';
 import PostPreview from '../components/PostPreview';
-import { PostUserPreview } from '../api/v1';
-
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...(jest.requireActual('react-router-dom') as any),
-  useNavigate: () => mockNavigate,
-}));
+import { PostUserPreview, ServerApi } from '../api/v1';
 
 function fakePostPreview(
   title: string,
@@ -30,6 +22,38 @@ function fakePostPreview(
     },
   };
 }
+
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom') as any),
+  useNavigate: () => mockNavigate,
+}));
+
+let posts = [] as any as PostUserPreview[];
+
+const fakeRecent = jest.fn(() => {
+  return {
+    status: 200,
+    data: {
+      data: {
+        result: posts,
+        count: posts.length,
+        total: posts.length,
+        message: 'Success',
+      },
+    },
+  };
+});
+
+// might break the types?
+
+// jest.mock("../api/v1/index", () => {
+//   return jest.fn().mockImplementation(() => {
+
+//   })
+
+
+})
 
 afterEach(() => {
   cleanup();
@@ -87,10 +111,9 @@ describe('Post Preview correctly displayed', () => {
         `1 hour(s) ago by ${post.User.firstName} ${post.User.lastName}`
       )
     ).toBeInTheDocument();
-
   });
 
-    it('Check time for exactly 1 day ago', () => {
+  it('Check time for exactly 1 day ago', () => {
     jest.useFakeTimers('modern');
     jest.setSystemTime(new Date('2021-11-02T02:41:01'));
 
@@ -114,7 +137,6 @@ describe('Post Preview correctly displayed', () => {
         `1 day(s) ago by ${post.User.firstName} ${post.User.lastName}`
       )
     ).toBeInTheDocument();
-
   });
 
   it('Check time for exactly 30 days ago', () => {
@@ -141,7 +163,6 @@ describe('Post Preview correctly displayed', () => {
         `30 day(s) ago by ${post.User.firstName} ${post.User.lastName}`
       )
     ).toBeInTheDocument();
-
   });
 
   it('Ensure long text is truncated', () => {

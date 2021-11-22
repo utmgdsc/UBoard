@@ -304,7 +304,7 @@ export default function ViewPostDialog(props: {
         {/* Top information (author, date, tags..) */}
         <Stack sx={{ pl: 4 }}>
           <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
-            Posted on {new Date(props.postUser.createdAt).toDateString()} by{' '}
+            Posted on {new Date(props.postUser.createdAt).toString()} by {" "}
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}

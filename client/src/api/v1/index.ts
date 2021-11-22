@@ -11,10 +11,10 @@ export default class ServerApi {
     this.api = axios.create({ baseURL: `api/v1` });
   }
 
-  protected async post<T, R>(
+  protected async post<RequestDataType, ResponseType>(
     path: string,
-    form: T
-  ): Promise<{ status: number; data?: R }> {
+    form: RequestDataType
+  ): Promise<{ status: number; data: ResponseType }> {
     try {
       const response = await this.api.post(path, form);
       return { status: response.status, data: response.data };

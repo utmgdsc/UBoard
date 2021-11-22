@@ -13,7 +13,7 @@ docker run -p 80:80 -e PORT=80 -e JWT_SECRET=test uoftboard
 
 Setup needs to be done in order to use the type definitions from the server in our client files.
 
-Make sure that `"declaration": true` is set in server tsconfig and perform `yarn build` in server dir
+Before continuing, make sure you `git pull` and then run `yarn build` in server directory.
 
 Then in the root directory of the project run this:
 
@@ -23,12 +23,12 @@ Windows:
 
 `mklink /D "%cd%/client/node_modules/@types/models" "%cd%/server/build/types/models"`
 
-Unix:
+Linux/Mac:
 
 `ln -s "$PWD/server/build/models" "$PWD/client/node_modules/models"`
 
 `ln -s "$PWD/server/build/types/models" "$PWD/client/node_modules/@types/models"`
 
-Then, types should be picked up from the import path server/..., which allows us to import like so:
+Then, types should be picked up from the import path models/..., which allows us to import like so:
 
 `import { UserAttributes } from "models/user"`

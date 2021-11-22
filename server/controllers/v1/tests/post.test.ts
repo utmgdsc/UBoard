@@ -1,18 +1,26 @@
 import db from '../../../models';
-import {dbSync, makeUser, makeValidPost, makeValidUser} from '../../../models/tests/testHelpers';
+import {
+  dbSync,
+  makeUser,
+  makeValidPost,
+  makeValidUser,
+} from '../../../models/tests/testHelpers';
 import PostController from '../post';
 
 const postController = new PostController(db.Post);
 
 beforeEach(async () => {
-  await dbSync().catch(err => fail(err));
+  await dbSync().catch((err) => fail(err));
 });
 
 describe('Test v1 - Post Controller', () => {
   describe('test post fecthing', () => {
     it('should return a list of posts', async () => {
       const author = await makeValidUser();
-      const posts = [await makeValidPost(author.id), await makeValidPost(author.id)];
+      const posts = [
+        await makeValidPost(author.id),
+        await makeValidPost(author.id),
+      ];
 
       const result = await postController.getPosts(100, 0);
 
@@ -21,6 +29,7 @@ describe('Test v1 - Post Controller', () => {
       expect(result.data.result![0].id).toBe(posts[1].id);
       expect(result.data.result![1].id).toBe(posts[0].id);
       expect(result.data.result![1].User.firstName).toBe(author.firstName);
+      expect(result.data.total).toBe(2);
     });
 
     it('should return valid post details', async () => {
@@ -75,7 +84,11 @@ describe('Test v1 - Post Controller', () => {
       const post = await makeValidPost(author.id);
       const newTitle = 'A different post title!';
 
-      const result = await postController.updatePost(author.id, post.id, newTitle);
+      const result = await postController.updatePost(
+        author.id,
+        post.id,
+        newTitle
+      );
 
       expect(result.status).toBe(200);
       expect(result.data!.result!.title).toBe(newTitle);
@@ -88,7 +101,11 @@ describe('Test v1 - Post Controller', () => {
 
       const badUser = await makeUser('bad', 'bad@mail.utoronto.ca');
 
-      const result = await postController.updatePost(badUser.id, post.id, newTitle);
+      const result = await postController.updatePost(
+        badUser.id,
+        post.id,
+        newTitle
+      );
 
       expect(result.status).toBe(401);
     });
@@ -142,6 +159,19 @@ describe('Test v1 - Post Controller', () => {
       expect(result.status).toBe(204);
       await post.reload();
       expect(post.feedbackScore).toBe(9);
+    });
+
+    it('get posts should return valid count when a post is deleted', async () => {
+      const author = await makeValidUser();
+      const posts = [
+        await makeValidPost(author.id),
+        await makeValidPost(author.id),
+      ];
+      expect(await postController.deletePost(author.id, posts[0].id)).toBe(200);
+
+      const result = await postController.getPosts(100, 0);
+
+      expect(result.data.total).toBe(1);
     });
   });
 });

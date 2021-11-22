@@ -1,8 +1,8 @@
-import { Post } from '../../models/post';
+import {Post} from '../../models/post';
 import db from '../../models';
 
 // The return type of a Post associated with the Post's User.
-export type PostUser = Post & { User: { firstName: string; lastName: string } };
+export type PostUser = Post & {User: {firstName: string; lastName: string}};
 
 // The maximum number of results to return.
 const MAX_RESULTS = 50;
@@ -24,7 +24,7 @@ export default class PostController {
   async getPosts(
     limit: number,
     offset: number
-  ): Promise<{ status: number; data: { result?: PostUser[]; count: number } }> {
+  ): Promise<{status: number; data: {result?: PostUser[]; count: number}}> {
     const data = await this.postsRepo.findAndCountAll({
       limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
       // Since we are returning multiple results, we want to limit the data. This data will be shown
@@ -42,7 +42,7 @@ export default class PostController {
 
     return {
       status: data.count > 0 ? 200 : 204,
-      data: { result: data.rows as PostUser[], count: data.count },
+      data: {result: data.rows as PostUser[], count: data.count},
     };
   }
 
@@ -52,10 +52,9 @@ export default class PostController {
    * @param postID - The identifier used to find the specific post.
    * @returns The details of the post
    */
-  async getPost(postID: string): Promise<{
-    status: number;
-    data: { result?: PostUser; message?: string };
-  }> {
+  async getPost(
+    postID: string
+  ): Promise<{status: number; data: {result?: PostUser; message?: string}}> {
     const data = (await this.postsRepo.findByPk(postID, {
       include: [
         {
@@ -68,12 +67,12 @@ export default class PostController {
     if (!data) {
       return {
         status: 404,
-        data: { message: `Post ${postID} could not be found` },
+        data: {message: `Post ${postID} could not be found`},
       };
     }
     return {
       status: 200,
-      data: { result: data },
+      data: {result: data},
     };
   }
 
@@ -86,22 +85,16 @@ export default class PostController {
   async deletePost(
     userId: string,
     postID: string
-  ): Promise<{ status: number; data?: { message?: string } }> {
-    const result = await this.postsRepo.findOne({ where: { id: postID } });
+  ): Promise<{status: number; data?: {message?: string}}> {
+    const result = await this.postsRepo.findOne({where: {id: postID}});
 
     if (!result) {
-      return {
-        status: 404,
-        data: { message: `Post ${postID} could not be deleted.` },
-      };
+      return {status: 404, data: {message: `Post ${postID} could not be deleted.`}};
     } else if (result.UserId != userId) {
-      return {
-        status: 401,
-        data: { message: 'Unauthorized to delete the post.' },
-      };
+      return {status: 401, data: {message: 'Unauthorized to delete the post.'}};
     }
     await result.destroy();
-    return { status: 204 };
+    return {status: 204};
   }
 
   /**
@@ -113,7 +106,7 @@ export default class PostController {
   private async vote(
     postID: string,
     amount: 1 | -1
-  ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
+  ): Promise<{status: number; data?: {result?: Post; message?: string}}> {
     // TODO: We should track which users voted and how frequently, and take action to prevent vote
     // spamming.
     const data = await this.getPost(postID);
@@ -125,16 +118,12 @@ export default class PostController {
     try {
       (data.data.result!.feedbackScore as number) += amount;
       await data.data.result!.save();
-      return { status: 204, data: { result: data.data.result } };
+      return {status: 204, data: {result: data.data.result}};
     } catch (err) {
       console.error(`Could not change vote for: ${postID}`);
       return {
         status: 400,
-        data: {
-          message: `Could not ${
-            amount == 1 ? 'upvote' : 'report'
-          } post: ${postID}`,
-        },
+        data: {message: `Could not ${amount == 1 ? 'upvote' : 'report'} post: ${postID}`},
       };
     }
   }
@@ -147,7 +136,7 @@ export default class PostController {
    */
   async report(
     postID: string
-  ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
+  ): Promise<{status: number; data?: {result?: Post; message?: string}}> {
     return this.vote(postID, -1);
   }
 
@@ -158,7 +147,7 @@ export default class PostController {
    */
   async upVote(
     postID: string
-  ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
+  ): Promise<{status: number; data?: {result?: Post; message?: string}}> {
     return this.vote(postID, 1);
   }
 
@@ -171,9 +160,9 @@ export default class PostController {
     body?: string,
     location?: string,
     capacity?: number
-  ): Promise<{ status: number; data: { result?: Post; message?: string } }> {
+  ): Promise<{status: number; data: {result?: Post; message?: string}}> {
     if (!title || !body || !location || capacity == undefined) {
-      return { status: 400, data: { message: 'Missing fields.' } };
+      return {status: 400, data: {message: 'Missing fields.'}};
     }
 
     const post = await this.postsRepo.create({
@@ -185,13 +174,10 @@ export default class PostController {
     });
 
     if (!post) {
-      return {
-        status: 500,
-        data: { message: 'Could not create the new post' },
-      };
+      return {status: 500, data: {message: 'Could not create the new post'}};
     }
 
-    return { status: 200, data: { result: post } };
+    return {status: 200, data: {result: post}};
   }
 
   /**
@@ -206,7 +192,7 @@ export default class PostController {
     body?: string,
     location?: string,
     capacity?: number
-  ): Promise<{ status: number; data?: { message?: string; result?: Post } }> {
+  ): Promise<{status: number; data?: {message?: string; result?: Post}}> {
     const post = (await this.getPost(postID)).data.result;
 
     if (post && post.UserId == currentUserId) {
@@ -216,17 +202,14 @@ export default class PostController {
         post.location = location || post.location;
         post.capacity = capacity || post.capacity;
         await post.save();
-        return { status: 200, data: { result: post } };
+        return {status: 200, data: {result: post}};
       } catch (err) {
         console.error(`Could not update post ${postID}\n`, err);
-        return { status: 500, data: { message: 'Could not update the post.' } };
+        return {status: 500, data: {message: 'Could not update the post.'}};
       }
     } else if (post) {
-      return {
-        status: 401,
-        data: { message: 'Not authorized to edit this post.' },
-      };
+      return {status: 401, data: {message: 'Not authorized to edit this post.'}};
     }
-    return { status: 404, data: { message: 'Could not find post.' } };
+    return {status: 404, data: {message: 'Could not find post.'}};
   }
 }

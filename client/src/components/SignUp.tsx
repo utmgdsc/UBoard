@@ -1,38 +1,38 @@
-import React, { useState } from 'react';
-import Grid from '@mui/material/Grid';
-import Avatar from '@mui/material/Avatar';
-import TextField from '@mui/material/TextField';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import CircleOutlined from '@mui/icons-material/AddCircleOutlineOutlined';
-import Link from '@mui/material/Link';
-import Typography from '@mui/material/Typography';
+import React, { useState } from "react";
+import Grid from "@mui/material/Grid";
+import Avatar from "@mui/material/Avatar";
+import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import CircleOutlined from "@mui/icons-material/AddCircleOutlineOutlined";
+import Link from "@mui/material/Link";
+import Typography from "@mui/material/Typography";
 
-import ServerApi from '../api/v1/index';
+import ServerApi from "../api/v1/index";
 
 function SignUp(props: { handleChange: Function; showAlert: Function }) {
   const api = new ServerApi();
 
   // create hooks for inputs and errors associated
   const [signupForm, setSignupForm] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    userName: '',
-    password: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    userName: "",
+    password: "",
   });
 
   const [signupFormErrors, setSignupFormErrors] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    userName: '',
-    password: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    userName: "",
+    password: "",
   });
 
   const isFormMissingFields = () => {
     for (const key in signupForm) {
-      if (signupForm[key as keyof typeof signupForm] === '') {
+      if (signupForm[key as keyof typeof signupForm] === "") {
         return true;
       }
     }
@@ -40,10 +40,10 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
   };
 
   const getErrorMessages = () => {
-    let msg = '';
+    let msg = "";
     for (const key in signupFormErrors) {
       const err = signupFormErrors[key as keyof typeof signupFormErrors];
-      msg += err === '' ? err : `${err}.\n`;
+      msg += err === "" ? err : `${err}.\n`;
     }
     if (!validateConfirmPass()) {
       msg += `Passwords must be matching.\n`;
@@ -52,48 +52,45 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
     return msg;
   };
 
-  const [confirmPass, setConfirmPass] = useState('');
-  const [confirmPassError, setConfirmPassError] = useState('');
+  const [confirmPass, setConfirmPass] = useState("");
+  const [confirmPassError, setConfirmPassError] = useState("");
 
   // handle function
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
     const msg = getErrorMessages();
-    if (msg !== '') {
+    if (msg !== "") {
       console.warn(msg);
-      props.showAlert('warning', msg);
+      props.showAlert("warning", msg);
       return;
     }
 
     if (isFormMissingFields()) {
-      const msg = 'Please fill in all the fields.';
+      const msg = "Please fill in all the fields.";
       console.warn(msg);
-      props.showAlert('warning', msg);
+      props.showAlert("warning", msg);
       return;
     }
 
     try {
       const result = await api.signUp(signupForm);
       if (!result) {
-        throw new Error('Error occurred during signup.');
+        throw new Error("Error occurred during signup.");
       }
       if (result.error) {
         if (!result.error.response) {
-          throw new Error('Missing error response.');
+          throw new Error("Missing error response.");
         }
         const msg = result.error.response.data.message;
         console.error(msg);
-        props.showAlert('error', msg);
+        props.showAlert("error", msg);
       } else {
-        props.showAlert('success', 'Email confirmation sent!');
+        props.showAlert("success", "Email confirmation sent!");
       }
     } catch (error) {
       console.error(error);
-      props.showAlert(
-        'error',
-        'An error occurred creating your account. Please try again later.'
-      );
+      props.showAlert("error", "An error occurred creating your account. Please try again later.");
     }
   };
 
@@ -112,11 +109,11 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
 
   const validateConfirmPass = (): boolean => {
     if (signupForm.password !== confirmPass) {
-      const errMsg = 'Passwords must be matching';
+      const errMsg = "Passwords must be matching";
       setConfirmPassError(errMsg);
       return false;
     } else {
-      setConfirmPassError('');
+      setConfirmPassError("");
       return true;
     }
   };
@@ -139,182 +136,182 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
     if (!regexPattern.test(checkString)) {
       setHook(errorMessage);
     } else {
-      setHook('');
+      setHook("");
     }
   };
 
   return (
     <Box
-      data-testid='SignUpTab'
+      data-testid="SignUpTab"
       sx={{
         mx: 2,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
       }}
-      overflow='auto'
-      maxHeight='70vh'
+      overflow="auto"
+      maxHeight="70vh"
     >
-      <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+      <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
         <CircleOutlined />
       </Avatar>
-      <Typography component='h1' variant='h5'>
+      <Typography component="h1" variant="h5">
         Sign up
       </Typography>
       <Box
-        component='form'
+        component="form"
         noValidate
-        autoComplete='off'
+        autoComplete="off"
         onSubmit={handleSubmit}
-        data-testid='form'
+        data-testid="form"
         sx={{ mt: 3 }}
       >
         <Grid container spacing={2}>
           <Grid item xs={12} sm={6}>
             <TextField
-              name='firstName'
-              label='First Name'
-              size='small'
-              variant='standard'
+              name="firstName"
+              label="First Name"
+              size="small"
+              variant="standard"
               onChange={handleFormInput}
               fullWidth
               required
-              data-testid='firstNameForm'
+              data-testid="firstNameForm"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
                   signupForm.firstName,
                   handleError(e),
-                  'Please enter a valid first name'
+                  "Please enter a valid first name"
                 )
               }
-              error={signupFormErrors.firstName !== ''}
+              error={signupFormErrors.firstName !== ""}
               helperText={signupFormErrors.firstName}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
-              name='lastName'
-              label='Last Name'
-              size='small'
-              variant='standard'
+              name="lastName"
+              label="Last Name"
+              size="small"
+              variant="standard"
               onChange={handleFormInput}
               fullWidth
               required
-              data-testid='lastNameForm'
+              data-testid="lastNameForm"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z]+$/,
                   signupForm.lastName,
                   handleError(e),
-                  'Please enter a valid last name'
+                  "Please enter a valid last name"
                 )
               }
-              error={signupFormErrors.lastName !== ''}
+              error={signupFormErrors.lastName !== ""}
               helperText={signupFormErrors.lastName}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
-              name='email'
-              label='Email Address'
-              placeholder='john@mail.utoronto.ca'
+              name="email"
+              label="Email Address"
+              placeholder="john@mail.utoronto.ca"
               onChange={handleFormInput}
               fullWidth
               required
-              data-testid='emailForm'
-              type='email'
-              size='small'
-              variant='standard'
+              data-testid="emailForm"
+              type="email"
+              size="small"
+              variant="standard"
               onBlur={(e) =>
                 validateBlur(
                   /..*@(mail\.|alum\.){0,}utoronto.ca$/,
                   signupForm.email,
                   handleError(e),
-                  'Invalid email, only utoronto emails allowed'
+                  "Invalid email, only utoronto emails allowed"
                 )
               }
-              error={signupFormErrors.email !== ''}
+              error={signupFormErrors.email !== ""}
               helperText={signupFormErrors.email}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
-              name='userName'
-              label='Username'
+              name="userName"
+              label="Username"
               onChange={handleFormInput}
               fullWidth
               required
-              data-testid='userNameForm'
-              size='small'
-              variant='standard'
+              data-testid="userNameForm"
+              size="small"
+              variant="standard"
               onBlur={(e) =>
                 validateBlur(
                   /^[a-zA-Z0-9]+$/,
                   signupForm.userName,
                   handleError(e),
-                  'Please enter a valid username'
+                  "Please enter a valid username"
                 )
               }
-              error={signupFormErrors.userName !== ''}
+              error={signupFormErrors.userName !== ""}
               helperText={signupFormErrors.userName}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
-              name='password'
-              label='Password'
+              name="password"
+              label="Password"
               onChange={handleFormInput}
               fullWidth
               required
-              type='password'
-              size='small'
-              variant='standard'
-              data-testid='passwordForm'
+              type="password"
+              size="small"
+              variant="standard"
+              data-testid="passwordForm"
               onBlur={(e) => {
                 validateBlur(
                   /.{8,}/,
                   signupForm.password,
                   handleError(e),
-                  'Ensure password is 8 characters or longer'
+                  "Ensure password is 8 characters or longer"
                 );
               }}
-              error={signupFormErrors.password !== ''}
+              error={signupFormErrors.password !== ""}
               helperText={signupFormErrors.password}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
-              label='Confirm Password'
-              size='small'
-              variant='standard'
+              label="Confirm Password"
+              size="small"
+              variant="standard"
               onChange={(e) => setConfirmPass(e.target.value)}
               fullWidth
               required
-              data-testid='confirmPassForm'
-              type='password'
+              data-testid="confirmPassForm"
+              type="password"
               onBlur={(e) => validateConfirmPass()}
-              error={confirmPassError !== ''}
+              error={confirmPassError !== ""}
               helperText={confirmPassError}
             />
           </Grid>
         </Grid>
         <Button
-          type='submit'
-          variant='contained'
+          type="submit"
+          variant="contained"
           fullWidth
-          data-testid='submitButton'
+          data-testid="submitButton"
           sx={{ mt: 3, mb: 2 }}
         >
           Sign Up
         </Button>
-        <Grid container justifyContent='flex-end'>
+        <Grid container justifyContent="flex-end">
           <Grid item>
             <Link
-              href='#'
-              variant='body2'
+              href="#"
+              variant="body2"
               onClick={(e) => props.handleChange(e, 0)}
-              data-testid='GoToSignIn'
+              data-testid="GoToSignIn"
             >
               Already have an account? Log In
             </Link>

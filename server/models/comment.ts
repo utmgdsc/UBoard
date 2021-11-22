@@ -1,4 +1,4 @@
-import { Sequelize, Model, DataTypes, UUIDV4 } from 'sequelize';
+import { Sequelize, Model, DataTypes, UUIDV4 } from "sequelize";
 
 interface CommentAttribute {
   id: string;
@@ -36,13 +36,13 @@ module.exports = (sequelize: Sequelize) => {
         allowNull: false,
         validate: {
           len: [25, 200],
-          msg: 'Length Validation Failed',
+          msg: "Length Validation Failed",
         },
       },
     },
     {
       sequelize,
-      modelName: 'Comment',
+      modelName: "Comment",
     }
   );
   return Comment;

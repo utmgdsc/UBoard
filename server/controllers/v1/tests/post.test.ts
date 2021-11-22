@@ -1,26 +1,18 @@
 import db from '../../../models';
-import {
-  dbSync,
-  makeUser,
-  makeValidPost,
-  makeValidUser,
-} from '../../../models/tests/testHelpers';
+import {dbSync, makeUser, makeValidPost, makeValidUser} from '../../../models/tests/testHelpers';
 import PostController from '../post';
 
 const postController = new PostController(db.Post);
 
 beforeEach(async () => {
-  await dbSync().catch((err) => fail(err));
+  await dbSync().catch(err => fail(err));
 });
 
 describe('Test v1 - Post Controller', () => {
   describe('test post fecthing', () => {
     it('should return a list of posts', async () => {
       const author = await makeValidUser();
-      const posts = [
-        await makeValidPost(author.id),
-        await makeValidPost(author.id),
-      ];
+      const posts = [await makeValidPost(author.id), await makeValidPost(author.id)];
 
       const result = await postController.getPosts(100, 0);
 
@@ -83,11 +75,7 @@ describe('Test v1 - Post Controller', () => {
       const post = await makeValidPost(author.id);
       const newTitle = 'A different post title!';
 
-      const result = await postController.updatePost(
-        author.id,
-        post.id,
-        newTitle
-      );
+      const result = await postController.updatePost(author.id, post.id, newTitle);
 
       expect(result.status).toBe(200);
       expect(result.data!.result!.title).toBe(newTitle);
@@ -100,11 +88,7 @@ describe('Test v1 - Post Controller', () => {
 
       const badUser = await makeUser('bad', 'bad@mail.utoronto.ca');
 
-      const result = await postController.updatePost(
-        badUser.id,
-        post.id,
-        newTitle
-      );
+      const result = await postController.updatePost(badUser.id, post.id, newTitle);
 
       expect(result.status).toBe(401);
     });

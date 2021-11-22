@@ -1,18 +1,14 @@
-import argon2 from 'argon2';
-import db from '../../../models';
-import {
-  dbSync,
-  makeUser,
-  makeUserWithPass,
-} from '../../../models/tests/testHelpers';
-import { User } from '../../../models/user';
-import UserController, { TOKEN_TYPE } from '../user';
-import EmailService from '../../../services/emailService';
+import argon2 from "argon2";
+import db from "../../../models";
+import { dbSync, makeUser, makeUserWithPass } from "../../../models/tests/testHelpers";
+import { User } from "../../../models/user";
+import UserController, { TOKEN_TYPE } from "../user";
+import EmailService from "../../../services/emailService";
 
 /* Setup mock email service */
 const fakeSendConfirmEmail = jest.fn(() => true);
 const fakeSendResetEmail = jest.fn(() => true);
-jest.mock('../../../services/emailService', () => {
+jest.mock("../../../services/emailService", () => {
   return jest.fn().mockImplementation(() => {
     return {
       sendConfirmEmail: fakeSendConfirmEmail,
@@ -50,33 +46,33 @@ beforeEach(async () => {
   fakeSendResetEmail.mockClear();
 });
 
-describe('v1 - User Controller', () => {
+describe("v1 - User Controller", () => {
   beforeAll(async () => {
     createUserDate = new Date();
     createUserResponse = await uContr.createUser(
-      'email@mail.utoronto.ca',
-      'userName',
-      'password',
-      'firstName',
-      'lastName'
+      "email@mail.utoronto.ca",
+      "userName",
+      "password",
+      "firstName",
+      "lastName"
     );
     createdUser = (await userRepo.findOne({
       where: {
-        userName: 'userName',
+        userName: "userName",
       },
     })) as User;
   });
-  describe('createUser method', () => {
-    describe('On success', () => {
-      test('Status code 204 should be returned', () => {
+  describe("createUser method", () => {
+    describe("On success", () => {
+      test("Status code 204 should be returned", () => {
         expect(createUserResponse.status).toBe(204);
       });
 
-      test('User Model should contain user', () => {
+      test("User Model should contain user", () => {
         expect(createdUser).toBeDefined();
       });
 
-      test('Email token should be generated', () => {
+      test("Email token should be generated", () => {
         expect(createdUser.confirmationToken).toContain(TOKEN_TYPE.CONF);
         expect(createdUser.confirmationTokenExpires.getTime()).toBeGreaterThan(
           createUserDate.getTime()
@@ -84,55 +80,55 @@ describe('v1 - User Controller', () => {
       });
     });
 
-    test('If user already exists, should return status 400', async () => {
+    test("If user already exists, should return status 400", async () => {
       createUserResponse = await uContr.createUser(
-        'email@mail.utoronto.ca',
-        'userName',
-        'password',
-        'firstName',
-        'lastName'
+        "email@mail.utoronto.ca",
+        "userName",
+        "password",
+        "firstName",
+        "lastName"
       );
       expect(createUserResponse.status).toBe(400);
     });
   });
 
-  describe('signIn method', () => {
-    test('If email has not been confirmed, should return status 403', async () => {
-      signInResponse = await uContr.signIn('userName', 'password');
+  describe("signIn method", () => {
+    test("If email has not been confirmed, should return status 403", async () => {
+      signInResponse = await uContr.signIn("userName", "password");
       expect(signInResponse.status).toBe(403);
     });
 
-    test('If user does not exist, should return status 404', async () => {
-      const invalidResponse = await uContr.signIn('whoDis', 'password');
+    test("If user does not exist, should return status 404", async () => {
+      const invalidResponse = await uContr.signIn("whoDis", "password");
       expect(invalidResponse.status).toBe(404);
     });
 
-    test('If password is incorrect, should return status 400', async () => {
-      const invalidResponse = await uContr.signIn('userName', 'wrongPassword');
+    test("If password is incorrect, should return status 400", async () => {
+      const invalidResponse = await uContr.signIn("userName", "wrongPassword");
       expect(invalidResponse.status).toBe(400);
     });
 
-    describe('On success', () => {
+    describe("On success", () => {
       beforeAll(async () => {
         signedInUser = (await userRepo.findOne({
           where: {
-            userName: 'userName',
+            userName: "userName",
           },
         })) as User;
         signedInUser.confirmed = true;
         signedInUser.save();
         signInDate = new Date();
-        signInResponse = await uContr.signIn('userName', 'password');
+        signInResponse = await uContr.signIn("userName", "password");
       });
 
-      test('Status code 204 should be returned', async () => {
+      test("Status code 204 should be returned", async () => {
         expect(signInResponse.status).toBe(204);
       });
 
-      test('Last login date should be updated', async () => {
+      test("Last login date should be updated", async () => {
         signedInUser = (await userRepo.findOne({
           where: {
-            userName: 'userName',
+            userName: "userName",
           },
         })) as User;
         expect(signedInUser.lastLogin.getTime()).toBeGreaterThan(
@@ -140,25 +136,25 @@ describe('v1 - User Controller', () => {
         );
       });
 
-      test('Password should not be included in serialized result', () => {
+      test("Password should not be included in serialized result", () => {
         expect(signInResponse.data.result.password).not.toBeDefined();
       });
     });
   });
 
   let rawToken: string;
-  describe('Email Confirmations', () => {
-    test('Generating CONF properly updates User entry', async () => {
-      testPerson = await makeUser('constPers1', 'lol@utoronto.ca'); // initial test user
+  describe("Email Confirmations", () => {
+    test("Generating CONF properly updates User entry", async () => {
+      testPerson = await makeUser("constPers1", "lol@utoronto.ca"); // initial test user
 
       if (!testPerson) {
-        fail('nullperson'); // required to appease TS
+        fail("nullperson"); // required to appease TS
       }
       expect(testPerson.confirmed).toBeFalsy();
       const status = await uContr.sendEmailConfirmation(testPerson.email);
       await testPerson.reload(); // refresh data from db
       rawToken = testPerson.confirmationToken;
-      rawToken = rawToken.substring(rawToken.indexOf(':') + 1); // ignore the type part of "type:<token>"
+      rawToken = rawToken.substring(rawToken.indexOf(":") + 1); // ignore the type part of "type:<token>"
 
       // Service functions called properly
       expect(fakeSendConfirmEmail).toBeCalledTimes(1);
@@ -178,11 +174,11 @@ describe('v1 - User Controller', () => {
       );
     });
 
-    test('Ensure the conf token cannot be used for password reset', async () => {
-      await expect(uContr.resetPassword(rawToken, '', '')).resolves.toBeFalsy();
+    test("Ensure the conf token cannot be used for password reset", async () => {
+      await expect(uContr.resetPassword(rawToken, "", "")).resolves.toBeFalsy();
     });
 
-    test('Consume token and confirm the user account', async () => {
+    test("Consume token and confirm the user account", async () => {
       const status: boolean = await uContr.confirmEmail(rawToken);
       expect(status).toBeTruthy();
       await testPerson.reload();
@@ -191,25 +187,25 @@ describe('v1 - User Controller', () => {
       expect(testPerson.confirmationTokenExpires).toBeNull();
     });
 
-    test('Ensure the token cannot be used again', async () => {
+    test("Ensure the token cannot be used again", async () => {
       await expect(uContr.confirmEmail(rawToken)).resolves.toBeFalsy();
     });
   });
 
-  describe('Password Resets', () => {
-    test('Generating password reset updates the user entry', async () => {
-      testPerson = await makeUserWithPass('constPers2', 'lol2@utoronto.ca');
+  describe("Password Resets", () => {
+    test("Generating password reset updates the user entry", async () => {
+      testPerson = await makeUserWithPass("constPers2", "lol2@utoronto.ca");
       expect(testPerson).toBeDefined();
 
       if (!testPerson) {
-        fail('nullperson');
+        fail("nullperson");
       }
 
       expect(testPerson.confirmed).toBeFalsy();
       const status = await uContr.sendResetEmail(testPerson.email);
       await testPerson.reload();
       rawToken = testPerson.confirmationToken;
-      rawToken = rawToken.substring(rawToken.indexOf(':') + 1); // ignore the type part of "type:<token>"
+      rawToken = rawToken.substring(rawToken.indexOf(":") + 1); // ignore the type part of "type:<token>"
 
       expect(fakeSendConfirmEmail).toBeCalledTimes(0);
       expect(fakeSendResetEmail).toBeCalledTimes(1);
@@ -230,13 +226,13 @@ describe('v1 - User Controller', () => {
       );
     });
 
-    test('Ensure the reset token cannot be used for confirmations', async () => {
+    test("Ensure the reset token cannot be used for confirmations", async () => {
       await expect(uContr.confirmEmail(rawToken)).resolves.toBeFalsy();
     });
 
-    test('Ensure nothing happens if the new password is invalid', async () => {
+    test("Ensure nothing happens if the new password is invalid", async () => {
       const pass = testPerson.password;
-      const status: boolean = await uContr.resetPassword(rawToken, 'abc', 'vv');
+      const status: boolean = await uContr.resetPassword(rawToken, "abc", "vv");
       expect(status).toBeFalsy();
       await testPerson.reload();
       expect(testPerson.password).toEqual(pass);
@@ -244,18 +240,15 @@ describe('v1 - User Controller', () => {
       expect(testPerson.confirmationTokenExpires).not.toBeNull();
     });
 
-    test('Ensure token is consumed and new password is set', async () => {
+    test("Ensure token is consumed and new password is set", async () => {
       const status: boolean = await uContr.resetPassword(
         rawToken,
-        'newPassword',
-        'newPassword'
+        "newPassword",
+        "newPassword"
       );
       expect(status).toBeTruthy();
       await testPerson.reload();
-      const check = await argon2.verify(
-        testPerson.password as string,
-        'newPassword'
-      );
+      const check = await argon2.verify(testPerson.password as string, "newPassword");
 
       expect(check).toBeTruthy();
       expect(testPerson.confirmationToken).toHaveLength(0);

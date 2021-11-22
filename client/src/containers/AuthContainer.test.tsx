@@ -1,15 +1,15 @@
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { AxiosError, AxiosResponse } from 'axios';
+import React from "react";
+import { act } from "react-dom/test-utils";
+import { render, screen, fireEvent } from "@testing-library/react";
+import { AxiosError, AxiosResponse } from "axios";
 
-import AuthContainer from './AuthContainer';
-import ServerApi from '../api/v1';
+import AuthContainer from "./AuthContainer";
+import ServerApi from "../api/v1";
 
 const mockNavigate = jest.fn();
 
-jest.mock('react-router-dom', () => ({
-  ...(jest.requireActual('react-router-dom') as any),
+jest.mock("react-router-dom", () => ({
+  ...(jest.requireActual("react-router-dom") as any),
   useNavigate: () => mockNavigate,
   useLocation: () =>
     jest.fn().mockReturnValue({ state: { from: { pathname: undefined } } }),
@@ -19,96 +19,96 @@ beforeEach(() => {
   render(<AuthContainer />);
 });
 
-describe('test Auth Pages', () => {
-  it('should switch pages between SignIn and Sign up on Tab Response', () => {
+describe("test Auth Pages", () => {
+  it("should switch pages between SignIn and Sign up on Tab Response", () => {
     // test if auth container has been rendered
-    const inputSignIn = screen.getByTestId('SignInTab');
+    const inputSignIn = screen.getByTestId("SignInTab");
     expect(inputSignIn).toBeInTheDocument();
 
     // toggle to sign up
-    screen.getByTestId('SignUpTabButton').click();
-    const checkSignUp = screen.getByTestId('SignUpTab');
+    screen.getByTestId("SignUpTabButton").click();
+    const checkSignUp = screen.getByTestId("SignUpTab");
     expect(checkSignUp).toBeInTheDocument();
 
     // toggle to signin
-    screen.getByTestId('SignInTabButton').click();
-    const checkSignIn = screen.getByTestId('SignInTab');
+    screen.getByTestId("SignInTabButton").click();
+    const checkSignIn = screen.getByTestId("SignInTab");
     expect(checkSignIn).toBeInTheDocument();
   });
 
-  it('should switch pages between SignIn and Sign up inside form button clicks', () => {
+  it("should switch pages between SignIn and Sign up inside form button clicks", () => {
     // test if auth container has been rendered
-    const inputSignIn = screen.getByTestId('SignInTab');
+    const inputSignIn = screen.getByTestId("SignInTab");
     expect(inputSignIn).toBeInTheDocument();
 
     // toggle to sign up from in-form button
-    screen.getByTestId('CreateAccountButton').click();
-    const checkSignUp = screen.getByTestId('SignUpTab');
+    screen.getByTestId("CreateAccountButton").click();
+    const checkSignUp = screen.getByTestId("SignUpTab");
     expect(checkSignUp).toBeInTheDocument();
 
     // toggle to log in from in-form button
-    screen.getByTestId('GoToSignIn').click();
-    const checkSignIn = screen.getByTestId('SignInTab');
+    screen.getByTestId("GoToSignIn").click();
+    const checkSignIn = screen.getByTestId("SignInTab");
     expect(checkSignIn).toBeInTheDocument();
   });
 });
 
-describe('verifying valid input for signup page', () => {
-  it('only allows valid uToronto email addresses', () => {
-    screen.getByTestId('SignUpTabButton').click();
-    const emailForm = screen.getByPlaceholderText('john@mail.utoronto.ca');
+describe("verifying valid input for signup page", () => {
+  it("only allows valid uToronto email addresses", () => {
+    screen.getByTestId("SignUpTabButton").click();
+    const emailForm = screen.getByPlaceholderText("john@mail.utoronto.ca");
 
     const invalidCases = [
-      'firstname@gmail.com',
-      'gurvir@utoronto.com',
-      'bob@....utoronto.ca',
+      "firstname@gmail.com",
+      "gurvir@utoronto.com",
+      "bob@....utoronto.ca",
     ];
     invalidCases.forEach((emailToCheck) => {
       fireEvent.change(emailForm, { target: { value: emailToCheck } });
       fireEvent.blur(emailForm);
       expect(
-        screen.getByText('Invalid email, only utoronto emails allowed')
+        screen.getByText("Invalid email, only utoronto emails allowed")
       ).toBeInTheDocument();
     });
 
     const validCases = [
-      'bob.vance@alum.utoronto.ca',
-      'andy.c@mail.utoronto.ca',
-      'bob@utoronto.ca',
+      "bob.vance@alum.utoronto.ca",
+      "andy.c@mail.utoronto.ca",
+      "bob@utoronto.ca",
     ];
 
     validCases.forEach((emailToCheck) => {
       fireEvent.change(emailForm, { target: { value: emailToCheck } });
       fireEvent.blur(emailForm);
       expect(
-        screen.queryByText('Invalid email, only utoronto emails allowed')
+        screen.queryByText("Invalid email, only utoronto emails allowed")
       ).toBeNull();
     });
   });
 });
 
-describe('signup component', () => {
-  describe('on error', () => {
-    it('should not sign up if form is missing fields', async () => {
-      screen.getByTestId('SignUpTabButton').click();
+describe("signup component", () => {
+  describe("on error", () => {
+    it("should not sign up if form is missing fields", async () => {
+      screen.getByTestId("SignUpTabButton").click();
 
-      const form = screen.getByTestId('form');
+      const form = screen.getByTestId("form");
       const mockSignUp = jest
-        .spyOn(ServerApi.prototype, 'signUp')
+        .spyOn(ServerApi.prototype, "signUp")
         .mockImplementation();
 
       fireEvent.submit(form);
       expect(mockSignUp).not.toBeCalled();
     });
 
-    it('should not sign up if fields are invalid', async () => {
-      screen.getByTestId('SignUpTabButton').click();
+    it("should not sign up if fields are invalid", async () => {
+      screen.getByTestId("SignUpTabButton").click();
 
-      const form = screen.getByTestId('form');
+      const form = screen.getByTestId("form");
       const mockSignUp = jest
-        .spyOn(ServerApi.prototype, 'signUp')
+        .spyOn(ServerApi.prototype, "signUp")
         .mockImplementation();
-      const passwordForm = screen.getByTestId('passwordForm');
+      const passwordForm = screen.getByTestId("passwordForm");
 
       fireEvent.blur(passwordForm);
       fireEvent.submit(form);
@@ -124,37 +124,37 @@ describe('signup component', () => {
     });
   });
 
-  describe('on success', () => {
-    it('should sign up if fields are valid', async () => {
-      screen.getByTestId('SignUpTabButton').click();
+  describe("on success", () => {
+    it("should sign up if fields are valid", async () => {
+      screen.getByTestId("SignUpTabButton").click();
 
       const fields = {
-        emailForm: 'daniel.zingaro@mail.utoronto.ca',
-        userNameForm: 'zingarod',
-        passwordForm: 'password',
-        confirmPassForm: 'password',
-        firstNameForm: 'Daniel',
-        lastNameForm: 'Zingaro',
+        emailForm: "daniel.zingaro@mail.utoronto.ca",
+        userNameForm: "zingarod",
+        passwordForm: "password",
+        confirmPassForm: "password",
+        firstNameForm: "Daniel",
+        lastNameForm: "Zingaro",
       };
       Object.keys(fields).forEach((key) => {
         fireEvent.change(
-          screen.getByTestId(key).querySelector('input') as HTMLInputElement,
+          screen.getByTestId(key).querySelector("input") as HTMLInputElement,
           { target: { value: fields[key as keyof typeof fields] } }
         );
       });
 
-      const form = screen.getByTestId('form');
+      const form = screen.getByTestId("form");
       const mockSignUp = jest
-        .spyOn(ServerApi.prototype, 'signUp')
+        .spyOn(ServerApi.prototype, "signUp")
         .mockImplementation(() =>
           Promise.resolve({ response: {} as AxiosResponse })
         );
       const formData = {
-        email: 'daniel.zingaro@mail.utoronto.ca',
-        userName: 'zingarod',
-        password: 'password',
-        firstName: 'Daniel',
-        lastName: 'Zingaro',
+        email: "daniel.zingaro@mail.utoronto.ca",
+        userName: "zingarod",
+        password: "password",
+        firstName: "Daniel",
+        lastName: "Zingaro",
       };
 
       await act(async () => {
@@ -166,28 +166,28 @@ describe('signup component', () => {
   });
 });
 
-describe('signin component', () => {
-  describe('on error', () => {
-    it('should not sign in if form is missing fields', async () => {
-      screen.getByTestId('SignInTabButton').click();
+describe("signin component", () => {
+  describe("on error", () => {
+    it("should not sign in if form is missing fields", async () => {
+      screen.getByTestId("SignInTabButton").click();
 
-      const form = screen.getByTestId('form');
+      const form = screen.getByTestId("form");
       const mockSignIn = jest
-        .spyOn(ServerApi.prototype, 'signIn')
+        .spyOn(ServerApi.prototype, "signIn")
         .mockImplementation();
 
       fireEvent.submit(form);
       expect(mockSignIn).not.toBeCalled();
     });
 
-    it('should not sign in if fields are invalid', async () => {
-      screen.getByTestId('SignInTabButton').click();
+    it("should not sign in if fields are invalid", async () => {
+      screen.getByTestId("SignInTabButton").click();
 
-      const form = screen.getByTestId('form');
+      const form = screen.getByTestId("form");
       const mockSignIn = jest
-        .spyOn(ServerApi.prototype, 'signIn')
+        .spyOn(ServerApi.prototype, "signIn")
         .mockImplementation();
-      const passwordForm = screen.getByTestId('passwordForm');
+      const passwordForm = screen.getByTestId("passwordForm");
 
       fireEvent.blur(passwordForm);
       fireEvent.submit(form);
@@ -202,30 +202,30 @@ describe('signin component', () => {
       expect(mockSignIn).not.toBeCalled();
     });
 
-    it('should not navigate on backend error', async () => {
-      screen.getByTestId('SignInTabButton').click();
+    it("should not navigate on backend error", async () => {
+      screen.getByTestId("SignInTabButton").click();
 
       const fields = {
-        userNameForm: 'zingarod',
-        passwordForm: 'wrongPass',
+        userNameForm: "zingarod",
+        passwordForm: "wrongPass",
       };
       Object.keys(fields).forEach((key) => {
         fireEvent.change(
-          screen.getByTestId(key).querySelector('input') as HTMLInputElement,
+          screen.getByTestId(key).querySelector("input") as HTMLInputElement,
           { target: { value: fields[key as keyof typeof fields] } }
         );
       });
 
-      const form = screen.getByTestId('form');
-      const msg = 'Invalid credentials.';
+      const form = screen.getByTestId("form");
+      const msg = "Invalid credentials.";
       const mockSignIn = jest
-        .spyOn(ServerApi.prototype, 'signIn')
+        .spyOn(ServerApi.prototype, "signIn")
         .mockResolvedValue({
           error: { response: { data: { message: msg } } } as AxiosError,
         });
       const formData = {
-        userName: 'zingarod',
-        password: 'wrongPass',
+        userName: "zingarod",
+        password: "wrongPass",
       };
 
       await act(async () => {
@@ -237,30 +237,30 @@ describe('signin component', () => {
     });
   });
 
-  describe('on success', () => {
-    it('should navigate to dashboard', async () => {
-      screen.getByTestId('SignInTabButton').click();
+  describe("on success", () => {
+    it("should navigate to dashboard", async () => {
+      screen.getByTestId("SignInTabButton").click();
 
       const fields = {
-        userNameForm: 'zingarod',
-        passwordForm: 'password',
+        userNameForm: "zingarod",
+        passwordForm: "password",
       };
       Object.keys(fields).forEach((key) => {
         fireEvent.change(
-          screen.getByTestId(key).querySelector('input') as HTMLInputElement,
+          screen.getByTestId(key).querySelector("input") as HTMLInputElement,
           { target: { value: fields[key as keyof typeof fields] } }
         );
       });
 
-      const form = screen.getByTestId('form');
+      const form = screen.getByTestId("form");
       const mockSignIn = jest
-        .spyOn(ServerApi.prototype, 'signIn')
+        .spyOn(ServerApi.prototype, "signIn")
         .mockImplementation(() =>
           Promise.resolve({ response: {} as AxiosResponse })
         );
       const formData = {
-        userName: 'zingarod',
-        password: 'password',
+        userName: "zingarod",
+        password: "password",
       };
 
       fireEvent.submit(form);

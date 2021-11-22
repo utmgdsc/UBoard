@@ -1,4 +1,4 @@
-import { Sequelize, Model, UUIDV4, DataTypes, Optional } from "sequelize";
+import { Sequelize, Model, UUIDV4, DataTypes, Optional } from 'sequelize';
 
 interface PostAttributes {
   id: string;
@@ -15,7 +15,7 @@ interface PostAttributes {
 interface PostCreationAttributes
   extends Optional<
     PostAttributes,
-    "id" | "thumbnail" | "location" | "capacity" | "feedbackScore" | "UserId"
+    'id' | 'thumbnail' | 'location' | 'capacity' | 'feedbackScore' | 'UserId'
   > {}
 
 export class Post
@@ -35,7 +35,7 @@ export class Post
   static associate(model: any) {
     Post.belongsTo(model.User);
     Post.belongsToMany(model.Tag, {
-      through: "PostTags",
+      through: 'PostTags',
     }); /* Junction table for Post & Tags relationship */
   }
 }
@@ -60,7 +60,7 @@ module.exports = (sequelize: Sequelize) => {
         validate: {
           len: {
             args: [25, 1000],
-            msg: "Length Validation Failed", // Error handling
+            msg: 'Length Validation Failed', // Error handling
           },
         },
       },
@@ -90,7 +90,7 @@ module.exports = (sequelize: Sequelize) => {
     },
     {
       sequelize,
-      modelName: "Post",
+      modelName: 'Post',
     }
   );
   return Post;

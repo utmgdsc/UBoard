@@ -1,4 +1,4 @@
-import { Sequelize, Model, UUIDV4, DataTypes, Optional } from "sequelize";
+import { Sequelize, Model, UUIDV4, DataTypes, Optional } from 'sequelize';
 
 export interface UserAttributes {
   /* Login Specific */
@@ -20,12 +20,12 @@ export interface UserAttributes {
 interface UserCreationAttributes
   extends Optional<
     UserAttributes,
-    | "id"
-    | "confirmed"
-    | "confirmationToken"
-    | "confirmationTokenExpires"
-    | "lastLogin"
-    | "karma"
+    | 'id'
+    | 'confirmed'
+    | 'confirmationToken'
+    | 'confirmationTokenExpires'
+    | 'lastLogin'
+    | 'karma'
   > {}
 
 export class User
@@ -47,7 +47,7 @@ export class User
 
   static associate(model: any) {
     User.hasMany(model.Post, {
-      foreignKey: { name: "UserId", allowNull: false },
+      foreignKey: { name: 'UserId', allowNull: false },
     });
     User.hasMany(model.Comment, { foreignKey: { allowNull: false } });
     /* Userid is stored inside of respective Post, and Comment */
@@ -96,7 +96,7 @@ module.exports = (sequelize: Sequelize) => {
         unique: true,
         validate: {
           isEmail: true /* Check for valid email format */,
-          is: [".*@(mail.|alum.|)utoronto.ca"] /* Check for utoronto domain */,
+          is: ['.*@(mail.|alum.|)utoronto.ca'] /* Check for utoronto domain */,
         },
       },
       confirmed: {
@@ -121,8 +121,8 @@ module.exports = (sequelize: Sequelize) => {
       indexes: [
         {
           unique: true,
-          name: "unique_username", // validate case sensitive username
-          fields: [Sequelize.fn("lower", Sequelize.col("userName"))],
+          name: 'unique_username', // validate case sensitive username
+          fields: [Sequelize.fn('lower', Sequelize.col('userName'))],
         },
       ],
       hooks: {
@@ -138,9 +138,9 @@ module.exports = (sequelize: Sequelize) => {
       scopes: {
         withPassword: {
           attributes: { exclude: [] },
-        }
+        },
       },
-      modelName: "User",
+      modelName: 'User',
       sequelize,
     }
   );

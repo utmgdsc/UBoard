@@ -1,25 +1,25 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
-import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Divider from "@mui/material/Divider";
-import Typography from "@mui/material/Typography";
-import Tooltip from "@mui/material/Tooltip";
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import Container from '@mui/material/Container';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
 
-import PreviewPopUp from "./PreviewPopUp";
+import PreviewPopUp from './PreviewPopUp';
 
 function CreatePost() {
   // create hooks for input fields
   const [form, setForm] = useState({
-    title: "",
-    body: "",
-    file: "",
-    tags: "",
-    eventCapacity: "",
-    eventLocation: "",
+    title: '',
+    body: '',
+    file: '',
+    tags: '',
+    eventCapacity: '',
+    eventLocation: '',
   });
 
   const [openPopup, setOpenPopup] = useState(false);
@@ -38,29 +38,29 @@ function CreatePost() {
   };
 
   return (
-    <Container component="main" maxWidth="md">
+    <Container component='main' maxWidth='md'>
       <Box
         sx={{
           marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
         }}
       >
-        <Typography component="h3" variant="h3" fontWeight="bold">
+        <Typography component='h3' variant='h3' fontWeight='bold'>
           Create Post
         </Typography>
         {/* form  begins*/}
-        <Box component="form" noValidate sx={{ mt: 2 }}>
+        <Box component='form' noValidate sx={{ mt: 2 }}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
                 required
                 fullWidth
-                label="Title"
-                placeholder="title"
-                size="small"
-                data-testid="titleTextField"
+                label='Title'
+                placeholder='title'
+                size='small'
+                data-testid='titleTextField'
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
               />
             </Grid>
@@ -69,9 +69,9 @@ function CreatePost() {
               <TextField
                 required
                 fullWidth
-                label="Body"
-                data-testid="bodyTextField"
-                placeholder="description"
+                label='Body'
+                data-testid='bodyTextField'
+                placeholder='description'
                 multiline
                 rows={6}
                 onChange={(e) => setForm({ ...form, body: e.target.value })}
@@ -81,22 +81,22 @@ function CreatePost() {
             <Grid item xs={12} md={4}>
               <TextField
                 required
-                label="Upload Thumbnail"
-                type="file"
+                label='Upload Thumbnail'
+                type='file'
                 fullWidth
-                data-testid="fileField"
+                data-testid='fileField'
                 InputLabelProps={{ shrink: true }}
-                size="small"
+                size='small'
                 onChange={(e) => handleImageUpload(e)}
               />
             </Grid>
 
             <Grid item xs={12} md={3}>
               <TextField
-                label="Event Capacity"
-                placeholder="40"
+                label='Event Capacity'
+                placeholder='40'
                 fullWidth
-                size="small"
+                size='small'
                 onChange={(e) =>
                   setForm({ ...form, eventCapacity: e.target.value })
                 }
@@ -106,9 +106,9 @@ function CreatePost() {
             <Grid item xs={12} md={5}>
               <TextField
                 fullWidth
-                label="Location"
-                placeholder="Deerfield Hall"
-                size="small"
+                label='Location'
+                placeholder='Deerfield Hall'
+                size='small'
                 onChange={(e) =>
                   setForm({ ...form, eventLocation: e.target.value })
                 }
@@ -118,9 +118,9 @@ function CreatePost() {
             <Grid item xs={12}>
               <TextField
                 fullWidth
-                label="Tags (Separate tags by a comma)"
-                placeholder="Clubs, Math, MCS"
-                size="small"
+                label='Tags (Separate tags by a comma)'
+                placeholder='Clubs, Math, MCS'
+                size='small'
                 onChange={(e) => setForm({ ...form, tags: e.target.value })}
               />
             </Grid>
@@ -131,19 +131,19 @@ function CreatePost() {
             <Divider />
           </Box>
 
-          <Grid container spacing={2} justifyContent="center">
+          <Grid container spacing={2} justifyContent='center'>
             <Grid item xs={5} md={3}>
-              <Tooltip title="Enter all required fields!">
+              <Tooltip title='Enter all required fields!'>
                 <Box>
                   <Button
                     fullWidth
-                    variant="contained"
+                    variant='contained'
                     sx={{ mt: 3, mb: 2 }}
-                    color="secondary"
+                    color='secondary'
                     onClick={handleClickOpen}
-                    data-testid="previewButton"
-                    size="large"
-                    disabled={!(form.title !== "" && form.body !== "")}
+                    data-testid='previewButton'
+                    size='large'
+                    disabled={!(form.title !== '' && form.body !== '')}
                   >
                     Preview
                   </Button>
@@ -153,9 +153,9 @@ function CreatePost() {
             <Grid item xs={7} md={5}>
               <Button
                 fullWidth
-                variant="contained"
+                variant='contained'
                 sx={{ mt: 3, mb: 2 }}
-                size="large"
+                size='large'
               >
                 Create
               </Button>

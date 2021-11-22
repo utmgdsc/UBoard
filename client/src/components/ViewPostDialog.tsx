@@ -17,6 +17,7 @@ import TextField from '@mui/material/TextField';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
+import Grid from '@mui/material/Grid';
 
 import { UserContext } from '../containers/PostDashboard';
 
@@ -59,9 +60,9 @@ function MoreOptions(props: {
         }
       })
       .catch((err) => {
-          setMsg('Failed to delete post');
-          showAlert(true);
-          console.error(err);
+        setMsg('Failed to delete post');
+        showAlert(true);
+        console.error(err);
       });
 
     closeMenu();
@@ -70,19 +71,21 @@ function MoreOptions(props: {
   const reportPost = () => {
     // TODO need to fix spam / backend interactions
 
-    api.reportPost(props.postID).then((res) => {
-      if (res.status === 204) {
-          setMsg("Post has been reported.");
-      } else {
-        setMsg("Failed to report post. ");;
-      }
-      showAlert(true);
-    }).catch(() => {
-      setMsg("Failed to report post.");
-      showAlert(true)
-    })
-
-  }
+    api
+      .reportPost(props.postID)
+      .then((res) => {
+        if (res.status === 204) {
+          setMsg('Post has been reported.');
+        } else {
+          setMsg('Failed to report post. ');
+        }
+        showAlert(true);
+      })
+      .catch(() => {
+        setMsg('Failed to report post.');
+        showAlert(true);
+      });
+  };
 
   return (
     <>
@@ -148,7 +151,7 @@ function LikeButton(props: { numLikes: number }) {
   return (
     <Stack direction='row'>
       {likeButton}
-      <Typography sx={{ pt: 0.5, px: 1, pl: 1}}>{numLikes}</Typography>
+      <Typography sx={{ pt: 0.5, px: 1, pl: 1 }}>{numLikes}</Typography>
     </Stack>
   );
 }
@@ -206,7 +209,7 @@ function CapacityBar(props: { maxCapacity: number }) {
 export default function ViewPostDialog(props: {
   postUser: PostUserPreview;
   tags: JSX.Element;
-  setOpenedPost: React.Dispatch<React.SetStateAction<boolean>>
+  setOpenedPost: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isOpen, toggleDialog] = React.useState(false);
   const [postData, setData] = React.useState(props.postUser as any as PostUser);
@@ -217,16 +220,14 @@ export default function ViewPostDialog(props: {
   const fetchData = () => {
     api
       .fetchPost(props.postUser.id)
-      .then(
-        (res) => {
-          if (res.data && res.data.data && res.data.data.result) {
-            setData(res.data.data.result);
-            if (!userContext.isLoading && userContext.data) {
-              setIsAuthor(userContext.data.id === props.postUser.User.id);
-            }
+      .then((res) => {
+        if (res.data && res.data.data && res.data.data.result) {
+          setData(res.data.data.result);
+          if (!userContext.isLoading && userContext.data) {
+            setIsAuthor(userContext.data.id === props.postUser.User.id);
           }
         }
-      )
+      })
       .catch((err) => console.error(`Error making post ${err}`));
   };
 
@@ -285,20 +286,24 @@ export default function ViewPostDialog(props: {
         </AppBar>
 
         {/* Title and Options (3 dots) */}
-        <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
-          <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
-            {postData.title}
-          </Typography>
-          <MoreOptions
-            postID={postData.id}
-            isAuth={isAuthor}
-            closeDialog={closeDialog}
-          />
-        </Stack>
-
+        <Grid>
+          <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
+            <Grid item xs={11}>
+              <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
+                {postData.title}
+              </Typography>
+            </Grid>
+            <MoreOptions
+              postID={postData.id}
+              isAuth={isAuthor}
+              closeDialog={closeDialog}
+            />
+          </Stack>
+        </Grid>
         {/* Top information (author, date, tags..) */}
         <Stack sx={{ pl: 4 }}>
-          <Typography variant='body2' sx={{ mb: 1 }}>
+          <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
+            Posted on {new Date(props.postUser.createdAt).toDateString()} by{' '}
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}

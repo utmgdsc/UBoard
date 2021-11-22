@@ -11,7 +11,7 @@ export type PostUserPreview = {
   thumbnail: string;
   body: string;
   title: string;
-  createdAt: Date;
+  createdAt: string;
 } & {
   User: { id: string; firstName: string; lastName: string; userName: string };
 };

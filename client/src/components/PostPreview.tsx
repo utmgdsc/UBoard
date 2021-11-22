@@ -12,6 +12,37 @@ import ViewPostDialog from "./ViewPostDialog";
 
 import { PostUserPreview } from "../api/v1/index";
 
+  /**
+   * Return a string of the date relative to now in minutes, hours or days. If the date
+   * is over a month, return the date stringified. 
+   * 
+   * @param base - The base date being compared with
+   * @param date - The date converted into relative time
+   * @returns String containing the date relative to now
+   */
+function relativeTime(date: Date) {
+  const diff = Math.floor(Math.abs((new Date().valueOf() - date.valueOf()) / 1000)); // seconds
+  const mins = Math.floor(diff / 60);
+  const hrs = Math.floor(mins / 60);
+  const days = Math.floor(hrs / 24);
+
+  if (diff < 60) {
+    return diff <= 2 ? `A moment ago` : `${diff} seconds ago`
+  }
+  else if (mins < 60) { // Less than 60 mins (display minutes)
+    return `${mins} minutes ago`
+  }
+  else if (hrs < 24){ // Less than 24 hrs (display hours)
+    return `${hrs} hours ago`
+  }
+  else if (days < 30) { // Less than a month (display days)
+    return `${days} days ago`
+  }
+  else {
+    return `${date.toDateString()}`
+  }
+}
+
 
 export default function PostPreview(props: { postUser: PostUserPreview, 
   setOpenedPost: React.Dispatch<React.SetStateAction<boolean>> }) {
@@ -39,7 +70,7 @@ export default function PostPreview(props: { postUser: PostUserPreview,
             {props.postUser.title.substring(0, 28) + "..."}
           </Typography>
           <Typography sx={{ fontStyle: "italic" }} style={{ wordWrap: 'break-word' }}>
-            By {props.postUser.User.firstName} {props.postUser.User.lastName}
+            { relativeTime(new Date(props.postUser.createdAt))} by {props.postUser.User.firstName} {props.postUser.User.lastName}
           </Typography>
           <Typography sx={{ py: 1 }} style={{ wordWrap: 'break-word' }}>
             { props.postUser.body.substring(0, 150) + "..." }

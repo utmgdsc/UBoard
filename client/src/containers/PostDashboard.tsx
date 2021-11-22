@@ -32,27 +32,26 @@ function RecentPosts(props: {
 
   /* Fetch new posts by polling */
   React.useEffect(() => {
-      const interval = setInterval(() => {
-        if (!openedPost) { 
-          api
-            .fetchRecentPosts(
-              POSTS_PER_PAGE,
-              POSTS_PER_PAGE * (props.pageNum - 1)
-            )
-            .then((res) => {
-              if (res.data && res.data.data.result) {
-                updateRecent(res.data.data.result);
-                props.setPageCount(
-                  Math.ceil(res.data.data.count / POSTS_PER_PAGE)
-                );
-              }
-            })
-            .catch((err) => console.log(err));
-        }
-      }, 500);
+    const interval = setInterval(() => {
+      if (!openedPost) {
+        api
+          .fetchRecentPosts(
+            POSTS_PER_PAGE,
+            POSTS_PER_PAGE * (props.pageNum - 1)
+          )
+          .then((res) => {
+            if (res.data && res.data.data.result) {
+              updateRecent(res.data.data.result);
+              props.setPageCount(
+                Math.ceil(res.data.data.count / POSTS_PER_PAGE)
+              );
+            }
+          })
+          .catch((err) => console.log(err));
+      }
+    }, 500);
 
-      return () => clearInterval(interval);
-    
+    return () => clearInterval(interval);
   });
 
   /* Fetch posts triggered by page-change or post dialog close */

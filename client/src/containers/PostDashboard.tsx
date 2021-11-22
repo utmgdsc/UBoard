@@ -10,9 +10,9 @@ import { User } from 'models/user';
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
+import { useNavigate } from 'react-router-dom';
 
 import ServerApi, { PostUserPreview } from '../api/v1';
-import { useNavigate } from 'react-router-dom';
 
 const POSTS_PER_PAGE = 25; // Maximum (previewable) posts per page
 
@@ -174,7 +174,7 @@ export default function PostDashboard() {
             color='text.secondary'
             component='p'
           >
-            You"re all up to date!
+            You're all up to date!
           </Typography>
         </Box>
       </footer>

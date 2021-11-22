@@ -16,7 +16,7 @@ export type PostUserPreview = {
   User: { id: string; firstName: string; lastName: string; userName: string };
 };
 
-export class ApiError extends Error {}
+class ApiError extends Error {}
 
 export default class ServerApi {
   protected api: AxiosInstance;

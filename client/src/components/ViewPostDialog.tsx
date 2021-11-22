@@ -77,12 +77,13 @@ function MoreOptions(props: {
         if (res.status === 204) {
           setMsg('Post has been reported.');
         } else {
-          setMsg('Failed to report post. ');
+          setMsg('Failed to report post.');
         }
-        showAlert(true);
       })
       .catch(() => {
         setMsg('Failed to report post.');
+      })
+      .finally(() => {
         showAlert(true);
       });
   };

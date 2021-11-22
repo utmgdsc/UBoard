@@ -16,7 +16,6 @@ import { PostUserPreview } from "../api/v1/index";
    * Return a string of the date relative to now in minutes, hours or days. If the date
    * is over a month, return the date stringified. 
    * 
-   * @param base - The base date being compared with
    * @param date - The date converted into relative time
    * @returns String containing the date relative to now
    */
@@ -30,13 +29,13 @@ function relativeTime(date: Date) {
     return diff <= 2 ? `A moment ago` : `${diff} seconds ago`
   }
   else if (mins < 60) { // Less than 60 mins (display minutes)
-    return `${mins} minutes ago`
+    return `${mins} minute(s) ago`
   }
   else if (hrs < 24){ // Less than 24 hrs (display hours)
-    return `${hrs} hours ago`
+    return `${hrs} hour(s) ago`
   }
-  else if (days < 30) { // Less than a month (display days)
-    return `${days} days ago`
+  else if (days < 31) { // Less than a month (display days)
+    return `${days} day(s) ago`
   }
   else {
     return `${date.toDateString()}`

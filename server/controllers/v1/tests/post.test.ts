@@ -161,13 +161,15 @@ describe('Test v1 - Post Controller', () => {
       expect(post.feedbackScore).toBe(9);
     });
 
-    it('get posts should return valid count when a post is deleted', async () => {
+    it('deleting a post is reflected on the total count returned by getposts', async () => {
       const author = await makeValidUser();
       const posts = [
         await makeValidPost(author.id),
         await makeValidPost(author.id),
       ];
-      expect(await postController.deletePost(author.id, posts[0].id)).toBe(200);
+      expect(
+        (await postController.deletePost(author.id, posts[0].id)).status
+      ).toBe(204);
 
       const result = await postController.getPosts(100, 0);
 

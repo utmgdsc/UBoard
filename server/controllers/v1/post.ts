@@ -52,9 +52,7 @@ export default class PostController {
    * @param postID - The identifier used to find the specific post.
    * @returns The details of the post
    */
-  async getPost(
-    postID: string
-  ): Promise<{
+  async getPost(postID: string): Promise<{
     status: number;
     data: { result?: PostUser; message?: string };
   }> {

@@ -50,11 +50,12 @@ function CreatePost() {
         } else {
           setMsg('Failed to create post');
         }
-        showAlert(true);
       })
       .catch((err) => {
         console.error(err);
         setMsg('Failed to create post. Ensure all the fields are correct');
+      })
+      .finally(() => {
         showAlert(true);
       });
   };

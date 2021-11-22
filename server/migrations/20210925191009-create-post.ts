@@ -1,8 +1,8 @@
-import { Sequelize, QueryInterface, DataTypes, UUIDV4 } from 'sequelize';
+import { Sequelize, QueryInterface, DataTypes, UUIDV4 } from "sequelize";
 
 module.exports = {
   up: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
-    await queryInterface.createTable('Posts', {
+    await queryInterface.createTable("Posts", {
       id: {
         type: DataTypes.UUID,
         defaultValue: UUIDV4,
@@ -20,7 +20,7 @@ module.exports = {
         validate: {
           len: {
             args: [25, 1000],
-            msg: 'Length Validation Failed', // Error handling
+            msg: "Length Validation Failed", // Error handling
           },
         },
       },
@@ -58,6 +58,6 @@ module.exports = {
     });
   },
   down: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
-    await queryInterface.dropTable('Posts');
+    await queryInterface.dropTable("Posts");
   },
 };

@@ -1,3 +1,3 @@
-import AuthContainer from './AuthContainer';
+import AuthContainer from "./AuthContainer";
 
 export { AuthContainer };

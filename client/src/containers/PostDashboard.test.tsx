@@ -1,7 +1,9 @@
 import PostDashboard from '../containers/PostDashboard';
-import { render, screen, cleanup } from '@testing-library/react';
+import { render, screen, cleanup, act } from '@testing-library/react';
 import PostPreview from '../components/PostPreview';
-import { PostUserPreview, ServerApi } from '../api/v1';
+import ServerApi, { PostUserPreview } from '../api/v1';
+import axios, { AxiosResponse } from 'axios';
+import { User } from 'models/user';
 
 function fakePostPreview(
   title: string,
@@ -18,45 +20,99 @@ function fakePostPreview(
       id: 'user-123',
       firstName: 'John',
       lastName: 'Locke',
-      userName: 'johnlocke',
     },
   };
 }
 
-const mockNavigate = jest.fn();
-jest.mock('react-router-dom', () => ({
-  ...(jest.requireActual('react-router-dom') as any),
-  useNavigate: () => mockNavigate,
-}));
-
-let posts = [] as any as PostUserPreview[];
-
-const fakeRecent = jest.fn(() => {
+function mockFetchPosts(mockPosts: PostUserPreview[]) {
   return {
     status: 200,
     data: {
-      data: {
-        result: posts,
-        count: posts.length,
-        total: posts.length,
-        message: 'Success',
-      },
+      result: mockPosts,
+      count: mockPosts.length,
+      total: mockPosts.length,
+      message: 'Success',
     },
   };
-});
+}
 
-// might break the types?
+jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom') as any),
+  useNavigate: () => jest.fn(),
+}));
 
-// jest.mock("../api/v1/index", () => {
+const posts = [
+  fakePostPreview(
+    'fake title',
+    'fake body post hello aaaaa lolllll',
+    '2021-11-20'
+  ),
+    ];
+
+const mockPost = {
+      status: 200,
+      data: {
+        data: { result: posts, count: posts.length, total: posts.length },
+      },
+    };
+
+// jest.mock('../api/v1/index', () => {
 //   return jest.fn().mockImplementation(() => {
+//     return {
+//       ...jest.requireActual('../api/v1/index'),
+//       fetchRecentPosts: jest.fn(() => Promise.resolve({ data: { status: 200, data: { mockPost } } })),
+//       me: jest.fn(() => Promise.resolve({ status: 200 }))
+//     }
+//   });
+// });
 
-//   })
 
-
-})
 
 afterEach(() => {
   cleanup();
+});
+
+
+describe('Dashboard Interaction', () => {
+  it('Pagination works as intended', () => {
+
+const mockFetch = jest.spyOn(ServerApi.prototype, 'fetchRecentPosts').mockImplementation((limit, params) => 
+  Promise.resolve({ status: 200, data: {
+        data: {
+          result: [] as PostUserPreview[],
+          count: 1,
+          total: 1,
+          message: "asd",
+        }
+      }}) 
+);
+
+  act (() => {
+    render(<PostDashboard />);
+  });
+    
+
+    expect(screen.getByText('fake title...')).toBeInTheDocument();
+  });
+
+  it('Account Menu properly opens', () => {
+    render(<PostDashboard />);
+    const menuBtn = screen.getByTestId('test-acc-menu-icon');
+    expect(screen.queryByTestId('test-post-settings-menu')).toBeNull();
+    expect(menuBtn).toBeInTheDocument();
+
+    const menuItems = ['My Posts', 'Logout'];
+    // Initially menu items should not show up
+    for (let i = 0; i < menuItems.length; i++) {
+      expect(screen.queryByText(menuItems[i])).not.toBeInTheDocument();
+    }
+
+    // menu open
+    menuBtn.click();
+    for (let i = 0; i < menuItems.length; i++) {
+      expect(screen.getByText(menuItems[i])).toBeInTheDocument();
+    }
+  });
 });
 
 describe('Post Preview correctly displayed', () => {
@@ -181,26 +237,5 @@ describe('Post Preview correctly displayed', () => {
 
     expect(screen.getByText(`${'a'.repeat(28) + '...'}`)).toBeInTheDocument();
     expect(screen.getByText(`${'b'.repeat(150) + '...'}`)).toBeInTheDocument();
-  });
-});
-
-describe('Dashboard Interaction', () => {
-  it('Account Menu properly opens', () => {
-    render(<PostDashboard />);
-    const menuBtn = screen.getByTestId('test-acc-menu-icon');
-    expect(screen.queryByTestId('test-post-settings-menu')).toBeNull();
-    expect(menuBtn).toBeInTheDocument();
-
-    const menuItems = ['My Posts', 'Logout'];
-    // Initially menu items should not show up
-    for (let i = 0; i < menuItems.length; i++) {
-      expect(screen.queryByText(menuItems[i])).not.toBeInTheDocument();
-    }
-
-    // menu open
-    menuBtn.click();
-    for (let i = 0; i < menuItems.length; i++) {
-      expect(screen.getByText(menuItems[i])).toBeInTheDocument();
-    }
   });
 });

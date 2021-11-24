@@ -5,15 +5,11 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
 
-import { User } from 'models/user';
-
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
 
-
 import ServerApi, { PostUserPreview } from '../api/v1';
-import { UserContext } from '../App';
 
 export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page. 
 

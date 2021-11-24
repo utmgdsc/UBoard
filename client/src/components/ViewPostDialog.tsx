@@ -19,7 +19,7 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
 
-import { UserContext } from '../containers/PostDashboard';
+import { UserContext } from '../App';
 
 import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
 
@@ -224,8 +224,8 @@ export default function ViewPostDialog(props: {
       .then((res) => {
         if (res.data && res.data.data && res.data.data.result) {
           setData(res.data.data.result);
-          if (!userContext.isLoading && userContext.data) {
-            setIsAuthor(userContext.data.id === props.postUser.User.id);
+          if (userContext) {
+            setIsAuthor(userContext.id === props.postUser.User.id);
           }
         }
       })

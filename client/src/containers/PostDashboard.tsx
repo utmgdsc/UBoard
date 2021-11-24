@@ -10,18 +10,14 @@ import { User } from 'models/user';
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
-import { useNavigate } from 'react-router-dom';
+
 
 import ServerApi, { PostUserPreview } from '../api/v1';
+import { UserContext } from '../App';
 
 export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page. 
 
 const api = new ServerApi();
-
-export const UserContext: React.Context<{
-  isLoading?: boolean;
-  data?: User | null;
-}> = React.createContext({});
 
 function RecentPosts(props: {
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
@@ -78,45 +74,13 @@ function RecentPosts(props: {
   );
 }
 
-export default function PostDashboard() {
-  const [currentUser, setUser] = React.useState(null);
-  const [isLoading, setLoading] = React.useState(true);
+export default function PostDashboard(props: { setAuthed: React.Dispatch<React.SetStateAction<boolean>> }) {
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
 
-  const navigate = useNavigate();
-
-  const authBarrier = () => {
-    // force a login
-    navigate('/');
-    setUser(null);
-  };
-
-  React.useEffect(() => {
-    if (isLoading) {
-      // Only called once per login. Set to false on logout
-      api
-        .me()
-        .then((res: any) => {
-          // TODO: Fix type after Daniel merge
-          if (res.status === 200) {
-            setUser(res.data);
-            setLoading(false);
-          } else {
-            console.log(`Not Logged in`);
-            authBarrier();
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          authBarrier();
-        });
-    }
-  });
-
   return (
-    <UserContext.Provider value={{ isLoading, data: currentUser }}>
-      <Header setAuthLoading={setLoading} />
+    <>
+      <Header setAuthed={props.setAuthed} />
       <main>
         <Container
           sx={{ py: 5 }}
@@ -179,6 +143,6 @@ export default function PostDashboard() {
           </Typography>
         </Box>
       </footer>
-    </UserContext.Provider>
+    </>
   );
 }

@@ -59,7 +59,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function AccountMenu(props: {
-  setAuthLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setAuthed: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isOpen, openMenu] = React.useState(false);
 
@@ -96,7 +96,7 @@ function AccountMenu(props: {
         <MenuItem
           onClick={() => {
             api.signOut();
-            props.setAuthLoading(true); // Enables reloading auth user from /me
+            props.setAuthed(false);
           }}
         >
           Logout
@@ -107,7 +107,7 @@ function AccountMenu(props: {
 }
 
 export default function Header(props: {
-  setAuthLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setAuthed: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   return (
     <AppBar position='static'>
@@ -124,7 +124,7 @@ export default function Header(props: {
             inputProps={{ 'aria-label': 'search' }}
           />
         </Search>
-        <AccountMenu setAuthLoading={props.setAuthLoading} />
+        <AccountMenu setAuthed={props.setAuthed} />
       </Toolbar>
     </AppBar>
   );

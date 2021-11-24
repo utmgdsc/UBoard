@@ -1,4 +1,4 @@
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { render, screen, cleanup } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 
 import { POSTS_PER_PAGE } from '../containers/PostDashboard';
@@ -38,7 +38,7 @@ beforeEach(() => {
 
 describe('Dashboard Interaction', () => {
   it('Account Menu properly opens', () => {
-    render(<PostDashboard />);
+    render(<PostDashboard setAuthed={{} as React.Dispatch<React.SetStateAction<boolean>>}/>);
     const menuBtn = screen.getByTestId('test-acc-menu-icon');
     expect(screen.queryByTestId('test-post-settings-menu')).toBeNull();
     expect(menuBtn).toBeInTheDocument();
@@ -212,7 +212,6 @@ describe('Post Preview correctly displayed', () => {
               result: results,
               count: results.length,
               total: posts.length,
-              message: 'asd',
             },
           },
         });

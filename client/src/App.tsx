@@ -39,9 +39,8 @@ function ProtectedRoute(props: { isAuth: boolean }) {
       // Only called once per login. Set to false on logout
       api
         .me()
-        .then((res: any) => {
-          // TODO: Fix type after Daniel merge
-          if (res.status === 200) {
+        .then((res) => {
+          if (res.status === 200 && res.data) {
             setUser(res.data);
             setLoading(false);
           }

@@ -93,7 +93,7 @@ export default function PostDashboard(props: { setAuthed: React.Dispatch<React.S
                 alignItems: 'flex-end',
               }}
             >
-              {/*TODO: GURVIR <CreatePost /> */}
+              <CreatePost/>
             </Grid>
 
             <RecentPosts setPageCount={setPageCount} pageNum={page} />

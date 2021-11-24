@@ -181,7 +181,7 @@ describe('Post Preview correctly displayed', () => {
     expect(screen.getByText(`${'b'.repeat(150) + '...'}`)).toBeInTheDocument();
   });
 
-  it('The oldest post is moved to page 2 after max posts per page is reached', async () => {
+  it('Ensure pagination works properly when many posts are made', async () => {
     let posts: PostUserPreview[] = [];
 
     for (let i = 0; i < POSTS_PER_PAGE; i++) {
@@ -191,6 +191,7 @@ describe('Post Preview correctly displayed', () => {
         '2021-11-20'
       );
     }
+    expect(posts.length).toBe(POSTS_PER_PAGE);
 
     posts.push(
       fakePostPreview(
@@ -202,19 +203,20 @@ describe('Post Preview correctly displayed', () => {
 
     const mockFetch = jest
       .spyOn(ServerApi.prototype, 'fetchRecentPosts')
-      .mockImplementation(() =>
-        Promise.resolve({
+      .mockImplementation((limit, offset) => {
+        const results = posts.slice(offset, limit + offset);
+        return Promise.resolve({
           status: 200,
           data: {
             data: {
-              result: posts.slice(0, POSTS_PER_PAGE),
-              count: POSTS_PER_PAGE,
+              result: results,
+              count: results.length,
               total: posts.length,
               message: 'asd',
             },
           },
-        })
-      );
+        });
+      });
 
     await act(async () => {
       render(<PostDashboard />);
@@ -224,10 +226,25 @@ describe('Post Preview correctly displayed', () => {
       expect(screen.getByText(posts[i].title + '...')).toBeInTheDocument();
     }
 
+    // This post exceeds max per page, so it is not here
     expect(screen.queryByText('I will be on pg2...')).not.toBeInTheDocument();
 
-    expect(screen.getByTestId('test-paginate').querySelector('[aria-label="Go to page 2"]')).toBeInTheDocument();
+    // Switch to page 2, this page should only contain 1 post
+    await act(async () => {
+      const btn = screen
+        .getByTestId('test-paginate')
+        .querySelector('[aria-label="Go to page 2"]');
 
+      expect(btn).toBeInTheDocument();
+      (btn as HTMLButtonElement).click();
+    });
+
+    for (let i = 0; i < POSTS_PER_PAGE; i++) {
+      expect(
+        screen.queryByText(posts[i].title + '...')
+      ).not.toBeInTheDocument();
+    }
+    expect(screen.getByText('I will be on pg2...')).toBeInTheDocument();
     mockFetch.mockClear();
   });
 });

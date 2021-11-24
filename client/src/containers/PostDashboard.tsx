@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 
 import ServerApi, { PostUserPreview } from '../api/v1';
 
-const POSTS_PER_PAGE = 25; // Maximum (previewable) posts per page
+export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page. 
 
 const api = new ServerApi();
 
@@ -43,7 +43,7 @@ function RecentPosts(props: {
             if (res.data && res.data.data.result) {
               updateRecent(res.data.data.result);
               props.setPageCount(
-                Math.ceil(res.data.data.count / POSTS_PER_PAGE)
+                Math.ceil(res.data.data.total / POSTS_PER_PAGE)
               );
             }
           })
@@ -62,7 +62,7 @@ function RecentPosts(props: {
         .then((res) => {
           if (res.data && res.data.data.result) {
             updateRecent(res.data.data.result);
-            props.setPageCount(Math.ceil(res.data.data.count / POSTS_PER_PAGE));
+            props.setPageCount(Math.ceil(res.data.data.total / POSTS_PER_PAGE));
           }
         })
         .catch((err) => console.log(err));
@@ -72,7 +72,7 @@ function RecentPosts(props: {
   return (
     <>
       {recentPosts.map((data) => (
-        <PostPreview postUser={data} setOpenedPost={setOpenedPost} />
+        <PostPreview key={data.id} postUser={data} setOpenedPost={setOpenedPost} />
       ))}
     </>
   );
@@ -156,6 +156,7 @@ export default function PostDashboard() {
             onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
               setPage(pg);
             }}
+            data-testid="test-paginate"
             color='primary'
             variant='outlined'
           />

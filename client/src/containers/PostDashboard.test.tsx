@@ -1,9 +1,11 @@
-import PostDashboard from '../containers/PostDashboard';
-import { render, screen, cleanup, act } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
+
+import { POSTS_PER_PAGE } from '../containers/PostDashboard';
 import PostPreview from '../components/PostPreview';
+import PostDashboard from '../containers/PostDashboard';
+
 import ServerApi, { PostUserPreview } from '../api/v1';
-import axios, { AxiosResponse } from 'axios';
-import { User } from 'models/user';
 
 function fakePostPreview(
   title: string,
@@ -11,7 +13,7 @@ function fakePostPreview(
   createdAt: string
 ): PostUserPreview {
   return {
-    id: '123-456',
+    id: (Math.random() * 100).toString(),
     thumbnail: 'placeholder',
     body,
     title,
@@ -24,77 +26,17 @@ function fakePostPreview(
   };
 }
 
-function mockFetchPosts(mockPosts: PostUserPreview[]) {
-  return {
-    status: 200,
-    data: {
-      result: mockPosts,
-      count: mockPosts.length,
-      total: mockPosts.length,
-      message: 'Success',
-    },
-  };
-}
-
 jest.mock('react-router-dom', () => ({
   ...(jest.requireActual('react-router-dom') as any),
   useNavigate: () => jest.fn(),
 }));
 
-const posts = [
-  fakePostPreview(
-    'fake title',
-    'fake body post hello aaaaa lolllll',
-    '2021-11-20'
-  ),
-    ];
-
-const mockPost = {
-      status: 200,
-      data: {
-        data: { result: posts, count: posts.length, total: posts.length },
-      },
-    };
-
-// jest.mock('../api/v1/index', () => {
-//   return jest.fn().mockImplementation(() => {
-//     return {
-//       ...jest.requireActual('../api/v1/index'),
-//       fetchRecentPosts: jest.fn(() => Promise.resolve({ data: { status: 200, data: { mockPost } } })),
-//       me: jest.fn(() => Promise.resolve({ status: 200 }))
-//     }
-//   });
-// });
-
-
-
-afterEach(() => {
+beforeEach(() => {
   cleanup();
+  jest.clearAllMocks();
 });
 
-
 describe('Dashboard Interaction', () => {
-  it('Pagination works as intended', () => {
-
-const mockFetch = jest.spyOn(ServerApi.prototype, 'fetchRecentPosts').mockImplementation((limit, params) => 
-  Promise.resolve({ status: 200, data: {
-        data: {
-          result: [] as PostUserPreview[],
-          count: 1,
-          total: 1,
-          message: "asd",
-        }
-      }}) 
-);
-
-  act (() => {
-    render(<PostDashboard />);
-  });
-    
-
-    expect(screen.getByText('fake title...')).toBeInTheDocument();
-  });
-
   it('Account Menu properly opens', () => {
     render(<PostDashboard />);
     const menuBtn = screen.getByTestId('test-acc-menu-icon');
@@ -237,5 +179,55 @@ describe('Post Preview correctly displayed', () => {
 
     expect(screen.getByText(`${'a'.repeat(28) + '...'}`)).toBeInTheDocument();
     expect(screen.getByText(`${'b'.repeat(150) + '...'}`)).toBeInTheDocument();
+  });
+
+  it('The oldest post is moved to page 2 after max posts per page is reached', async () => {
+    let posts: PostUserPreview[] = [];
+
+    for (let i = 0; i < POSTS_PER_PAGE; i++) {
+      posts[i] = fakePostPreview(
+        `fake title ${i}`,
+        'fake body post hello aaaaa lolllll',
+        '2021-11-20'
+      );
+    }
+
+    posts.push(
+      fakePostPreview(
+        'I will be on pg2',
+        'fake body 33333333 eee',
+        '2021-11-10'
+      )
+    );
+
+    const mockFetch = jest
+      .spyOn(ServerApi.prototype, 'fetchRecentPosts')
+      .mockImplementation(() =>
+        Promise.resolve({
+          status: 200,
+          data: {
+            data: {
+              result: posts.slice(0, POSTS_PER_PAGE),
+              count: POSTS_PER_PAGE,
+              total: posts.length,
+              message: 'asd',
+            },
+          },
+        })
+      );
+
+    await act(async () => {
+      render(<PostDashboard />);
+    });
+
+    for (let i = 0; i < POSTS_PER_PAGE; i++) {
+      expect(screen.getByText(posts[i].title + '...')).toBeInTheDocument();
+    }
+
+    expect(screen.queryByText('I will be on pg2...')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('test-paginate').querySelector('[aria-label="Go to page 2"]')).toBeInTheDocument();
+
+    mockFetch.mockClear();
   });
 });

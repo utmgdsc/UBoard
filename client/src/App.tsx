@@ -74,7 +74,6 @@ function App() {
           <Routes>
             <Route path='/' element={<AuthContainer setAuthed={setAuthed}/>} />
             <Route path='/dashboard' element={<ProtectedRoute isAuth={authed}/>} />
-            {/* TODO: Ensure authenticated then redirect to dashboard */}
           </Routes>
         </BrowserRouter>
       </ThemeProvider>

@@ -13,7 +13,7 @@ export type PostUserPreview = {
   title: string;
   createdAt: Date;
 } & {
-  User: { id: string; firstName: string; lastName: string; userName: string };
+  User: { id: string; firstName: string; lastName: string };
 };
 
 // The maximum number of results to return.

@@ -13,7 +13,7 @@ export type PostUserPreview = {
   title: string;
   createdAt: string;
 } & {
-  User: { id: string; firstName: string; lastName: string; userName: string };
+  User: { id: string; firstName: string; lastName: string };
 };
 
 class ApiError extends Error {}
@@ -52,7 +52,7 @@ export default class ServerApi {
           data: error.response?.data,
         };
       }
-      throw new ApiError(`Could not GET to path: ${path}`);
+      throw new ApiError(`Could not GET to path: ${path} due to ${error}`);
     }
   }
 

@@ -96,7 +96,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
 
     try {
       const { status, data } = await api.signIn(signinForm);
-      if (status < 200 || status >= 300) {
+      if (status !== 204) {
         if (!data) {
           throw new Error("Missing error response.");
         }

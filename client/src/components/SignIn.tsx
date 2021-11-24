@@ -95,15 +95,12 @@ function SignIn(props: { handleChange: Function; showAlert: Function, setAuthed:
     }
 
     try {
-      const result = await api.signIn(signinForm);
-      if (!result) {
-        throw new Error("Error occurred during sign in.");
-      }
-      if (result.error) {
-        if (!result.error.response) {
+      const { status, data } = await api.signIn(signinForm);
+      if (status !== 204) {
+        if (!data) {
           throw new Error("Missing error response.");
         }
-        const msg = result.error.response.data.message;
+        const msg = data.message;
         console.error(msg);
         props.showAlert("error", msg);
       } else {
@@ -112,7 +109,10 @@ function SignIn(props: { handleChange: Function; showAlert: Function, setAuthed:
       }
     } catch (error) {
       console.error(error);
-      props.showAlert("error", "An error occurred logging you in. Please try again later.");
+      props.showAlert(
+        "error",
+        "An error occurred logging you in. Please try again later."
+      );
     }
   };
 

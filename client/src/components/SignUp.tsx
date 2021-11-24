@@ -74,15 +74,12 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
     }
 
     try {
-      const result = await api.signUp(signupForm);
-      if (!result) {
-        throw new Error("Error occurred during signup.");
-      }
-      if (result.error) {
-        if (!result.error.response) {
+      const { status, data } = await api.signUp(signupForm);
+      if (status !== 204) {
+        if (!data) {
           throw new Error("Missing error response.");
         }
-        const msg = result.error.response.data.message;
+        const msg = data.message;
         console.error(msg);
         props.showAlert("error", msg);
       } else {
@@ -90,7 +87,10 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
       }
     } catch (error) {
       console.error(error);
-      props.showAlert("error", "An error occurred creating your account. Please try again later.");
+      props.showAlert(
+        "error",
+        "An error occurred creating your account. Please try again later."
+      );
     }
   };
 

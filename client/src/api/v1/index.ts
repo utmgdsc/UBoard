@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios';
+
 import { Post } from 'models/post';
 import { User } from 'models/user';
 import { UserAttributes } from 'models/user';

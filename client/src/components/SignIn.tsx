@@ -16,7 +16,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import ServerApi from "../api/v1/index";
 
-function SignIn(props: { handleChange: Function; showAlert: Function }) {
+function SignIn(props: { handleChange: Function; showAlert: Function, setAuthed: React.Dispatch<React.SetStateAction<boolean>> }) {
   const api = new ServerApi();
 
   const navigate = useNavigate();
@@ -104,6 +104,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
         console.error(msg);
         props.showAlert("error", msg);
       } else {
+        props.setAuthed(true);
         navigate(previousPath, { replace: true });
       }
     } catch (error) {

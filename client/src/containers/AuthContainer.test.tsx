@@ -15,7 +15,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 beforeEach(() => {
-  render(<AuthContainer />);
+  render(<AuthContainer setAuthed={{} as React.Dispatch<React.SetStateAction<boolean>>}/>);
 });
 
 describe("test Auth Pages", () => {
@@ -262,10 +262,13 @@ describe("signin component", () => {
         password: "password",
       };
 
-      fireEvent.submit(form);
-      await new Promise((r) => setTimeout(r, 1));
-      expect(mockSignIn).toBeCalledWith(formData);
-      expect(mockNavigate).toBeCalled();
+      act (async () => {
+        fireEvent.submit(form);
+        await new Promise((r) => setTimeout(r, 1));
+        expect(mockSignIn).toBeCalledWith(formData);
+        expect(mockNavigate).toBeCalled();
+      })
+
     });
   });
 });

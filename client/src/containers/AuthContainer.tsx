@@ -40,7 +40,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-function AuthContainer() {
+function AuthContainer(props: { setAuthed: React.Dispatch<React.SetStateAction<boolean>>  }) {
   const theme = useTheme();
 
   const useAlert = (): [
@@ -159,7 +159,7 @@ function AuthContainer() {
               </Tabs>
             </Box>
             <TabPanel value={tabIndex} index={0}>
-              <SignIn handleChange={handleChange} showAlert={showAlert} />
+              <SignIn handleChange={handleChange} showAlert={showAlert} setAuthed={props.setAuthed}/>
             </TabPanel>
             <TabPanel value={tabIndex} index={1}>
               <SignUp handleChange={handleChange} showAlert={showAlert} />

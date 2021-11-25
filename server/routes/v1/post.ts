@@ -1,24 +1,25 @@
-import express, {Request, Response} from 'express';
+import express, { Request, Response } from 'express';
 import db from '../../models';
 import PostController from '../../controllers/v1/post';
-import {getAuthUser} from '../../middleware/auth';
+import { getAuthUser } from '../../middleware/auth';
 
 const postRouter = express.Router();
 const postController = new PostController(db.Post);
 
 postRouter.get('', async (req: Request, res: Response) => {
-  const limit = req.body.limit;
-  const offset = req.body.offset;
+  const limit = req.query.limit;
+  const offset = req.query.offset;
+
   if (!limit || offset == undefined) {
     return res.status(400).json({
       code: 400,
-      message: `Missing ${!limit ? 'limit' : ''} ${!limit && !offset ? 'and' : ''} ${
-        !offset ? 'offset' : ''
-      }`,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
     });
   }
 
-  const result = await postController.getPosts(limit, offset);
+  const result = await postController.getPosts(Number(limit), Number(offset));
   return res.status(result.status).json(result);
 });
 
@@ -29,7 +30,10 @@ postRouter.get('/:postid', async (req: Request, res: Response) => {
 
 postRouter.delete('/:postid', async (req: Request, res: Response) => {
   try {
-    const result = await postController.deletePost(getAuthUser(res).id, req.params.postid);
+    const result = await postController.deletePost(
+      getAuthUser(res).id,
+      req.params.postid
+    );
     res.status(result.status).json(result);
   } catch (err) {
     console.error(err);

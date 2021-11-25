@@ -34,6 +34,14 @@ function CreatePost() {
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
 
   const closeDialog = () => {
+    setForm({
+      title: '',
+      body: '',
+      file: '',
+      tags: '',
+      capacity: '',
+      location: '',
+    });
     toggleDialog(false);
   };
   const handleClickOpen = () => {
@@ -252,7 +260,7 @@ function CreatePost() {
               handleClose={() => setOpenPopup(false)}
             ></PreviewPopUp>
           </Box>
-        </Container>{' '}
+        </Container>
       </Dialog>
     </>
   );

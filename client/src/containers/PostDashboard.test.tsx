@@ -38,7 +38,7 @@ beforeEach(() => {
 
 describe('Dashboard Interaction', () => {
   it('Account Menu properly opens', () => {
-    render(<PostDashboard setAuthed={{} as React.Dispatch<React.SetStateAction<boolean>>}/>);
+    render(<PostDashboard/>);
     const menuBtn = screen.getByTestId('test-acc-menu-icon');
     expect(screen.queryByTestId('test-post-settings-menu')).toBeNull();
     expect(menuBtn).toBeInTheDocument();

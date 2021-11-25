@@ -45,7 +45,7 @@ function CreatePost() {
     api
       .createPost(form)
       .then((res) => {
-        if (res.status === 204) {
+        if (res.status === 200) {
           setMsg('Post has been succesfully created.');
         } else {
           setMsg('Failed to create post');

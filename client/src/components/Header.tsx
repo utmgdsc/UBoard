@@ -10,7 +10,10 @@ import Menu from '@mui/material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import IconButton from '@mui/material/IconButton';
 
+import { useNavigate } from 'react-router-dom';
+
 import ServerApi from '../api/v1/index';
+import { UserContext } from '../App';
 
 const api = new ServerApi();
 
@@ -58,10 +61,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function AccountMenu(props: {
-  setAuthed: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+function AccountMenu() {
   const [isOpen, openMenu] = React.useState(false);
+  const authedUser = React.useContext(UserContext);
+  const navigate = useNavigate();
 
   const closeMenu = () => {
     openMenu(false);
@@ -96,7 +99,8 @@ function AccountMenu(props: {
         <MenuItem
           onClick={() => {
             api.signOut();
-            props.setAuthed(false);
+            authedUser.setLoading(true); // force auth to be cleared
+            navigate('/');
           }}
         >
           Logout
@@ -106,9 +110,7 @@ function AccountMenu(props: {
   );
 }
 
-export default function Header(props: {
-  setAuthed: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function Header() {
   return (
     <AppBar position='static'>
       <Toolbar sx={{ alignItems: 'center' }}>
@@ -124,7 +126,7 @@ export default function Header(props: {
             inputProps={{ 'aria-label': 'search' }}
           />
         </Search>
-        <AccountMenu setAuthed={props.setAuthed} />
+        <AccountMenu />
       </Toolbar>
     </AppBar>
   );

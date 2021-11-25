@@ -70,13 +70,13 @@ function RecentPosts(props: {
   );
 }
 
-export default function PostDashboard(props: { setAuthed: React.Dispatch<React.SetStateAction<boolean>> }) {
+export default function PostDashboard() {
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
 
   return (
     <>
-      <Header setAuthed={props.setAuthed} />
+      <Header/>
       <main>
         <Container
           sx={{ py: 5 }}

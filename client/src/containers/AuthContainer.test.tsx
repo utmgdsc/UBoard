@@ -15,7 +15,7 @@ jest.mock("react-router-dom", () => ({
 }));
 
 beforeEach(() => {
-  render(<AuthContainer setAuthed={{} as React.Dispatch<React.SetStateAction<boolean>>}/>);
+  render(<AuthContainer/>);
 });
 
 describe("test Auth Pages", () => {

@@ -9,7 +9,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import Tooltip from '@mui/material/Tooltip';
 import Dialog from '@mui/material/Dialog';
-import { ArrowBack } from '@mui/icons-material';
+import ArrowBack from '@mui/icons-material/ArrowBack';
 import PreviewPopUp from './PreviewPopUp';
 import Snackbar from '@mui/material/Snackbar';
 
@@ -140,7 +140,7 @@ function CreatePost() {
                     fullWidth
                     label='Body'
                     data-testid='bodyTextField'
-                    placeholder='description'
+                    placeholder='Description (minimum 25 characters)'
                     multiline
                     rows={6}
                     onChange={(e) => setForm({ ...form, body: e.target.value })}
@@ -221,7 +221,13 @@ function CreatePost() {
                         onClick={handleClickOpen}
                         data-testid='previewButton'
                         size='large'
-                        disabled={!(form.title !== '' && form.body !== '')}
+                        disabled={
+                          !(
+                            form.title !== '' &&
+                            form.body !== '' &&
+                            form.body.length >= 25
+                          )
+                        }
                       >
                         Preview
                       </Button>
@@ -234,7 +240,13 @@ function CreatePost() {
                     variant='contained'
                     sx={{ mt: 3, mb: 2 }}
                     size='large'
-                    disabled={!(form.title !== '' && form.body !== '')}
+                    disabled={
+                      !(
+                        form.title !== '' &&
+                        form.body !== '' &&
+                        form.body.length >= 25
+                      )
+                    }
                     onClick={handleSubmit}
                   >
                     Create

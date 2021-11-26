@@ -1,13 +1,17 @@
-import { Sequelize, Model, DataTypes, UUIDV4 } from "sequelize";
+import { Sequelize, Model, DataTypes, UUIDV4, Optional } from 'sequelize';
 
-interface CommentAttribute {
+interface CommentAttributes {
   id: string;
   body: string;
+  UserId: string;
+  PostId: string;
 }
 
+interface CommentCreationAttributes extends Optional<CommentAttributes, 'id'> {}
+
 export class Comment
-  extends Model<CommentAttribute>
-  implements CommentAttribute
+  extends Model<CommentAttributes, CommentCreationAttributes>
+  implements CommentAttributes
 {
   id!: string;
   body!: string;
@@ -36,13 +40,27 @@ module.exports = (sequelize: Sequelize) => {
         allowNull: false,
         validate: {
           len: [25, 200],
-          msg: "Length Validation Failed",
+          msg: 'Length Validation Failed',
+        },
+      },
+      UserId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      PostId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
         },
       },
     },
     {
       sequelize,
-      modelName: "Comment",
+      modelName: 'Comment',
     }
   );
   return Comment;

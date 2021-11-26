@@ -101,6 +101,7 @@ export default class PostController {
   /**
    * Delete the post by a given ID.
    *
+   * @param userId - The identifier of the Author of the post to destroy
    * @param postID - The identifier of the post to destroy.
    * @returns A status object indicating the results of the action.
    */

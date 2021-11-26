@@ -1,11 +1,11 @@
-import argon2 from "argon2";
+import argon2 from 'argon2';
 
-import { User, UserAttributes } from "../../models/user";
-import EmailService from "../../services/emailService";
+import { User, UserAttributes } from '../../models/user';
+import EmailService from '../../services/emailService';
 
 export enum TOKEN_TYPE {
-  RESET = "reset",
-  CONF = "conf",
+  RESET = 'reset',
+  CONF = 'conf',
 }
 
 export default class UserController {
@@ -33,9 +33,12 @@ export default class UserController {
   async signIn(
     userName: string,
     password: string
-  ): Promise<{ status: number; data: { result?: UserAttributes; message?: string } }> {
+  ): Promise<{
+    status: number;
+    data: { result?: UserAttributes; message?: string };
+  }> {
     try {
-      let userWithPass = await this.userRepo.scope("withPassword").findOne({
+      let userWithPass = await this.userRepo.scope('withPassword').findOne({
         where: {
           userName: userName,
         },
@@ -52,11 +55,14 @@ export default class UserController {
         }
       );
       if (!isPasswordCorrect) {
-        return { status: 400, data: { message: "Invalid credentials" } };
+        return { status: 400, data: { message: 'Invalid credentials' } };
       }
 
       if (!userWithPass.confirmed) {
-        return { status: 403, data: { message: "Email has not been confirmed" }}
+        return {
+          status: 403,
+          data: { message: 'Email has not been confirmed' },
+        };
       }
 
       this.updateLastLogin(userWithPass);
@@ -68,7 +74,7 @@ export default class UserController {
       return { status: 204, data: { result: user } };
     } catch (error) {
       console.error(error);
-      return { status: 500, data: { message: "Internal server error" } };
+      return { status: 500, data: { message: 'Internal server error' } };
     }
   }
 
@@ -91,7 +97,7 @@ export default class UserController {
         },
       });
       if (user) {
-        return { status: 400, data: { message: "User already exists" } };
+        return { status: 400, data: { message: 'User already exists' } };
       }
 
       const hashedPassword = await argon2.hash(password, {
@@ -111,7 +117,7 @@ export default class UserController {
       return { status: 204, data: {} };
     } catch (error) {
       console.error(error);
-      return { status: 500, data: { message: "Internal server error" } };
+      return { status: 500, data: { message: 'Internal server error' } };
     }
   }
   /* Email Related */
@@ -120,8 +126,8 @@ export default class UserController {
     emails. */
   private generateRandom(): string {
     const alphabet =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    var str = "";
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var str = '';
 
     for (var i = 0; i < alphabet.length; i++) {
       str += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
@@ -212,15 +218,23 @@ export default class UserController {
 
   /** Generate and send the user an email to reset their password.
       Returns the success status. */
-  async sendResetEmail(emailAddress: string): Promise<boolean> {
+  async sendResetEmail(
+    emailAddress: string
+  ): Promise<{ status: number; data?: { message: string } }> {
     const user: User | null = await this.userRepo.findOne({
       where: { email: emailAddress.toLowerCase() },
     });
     if (!user) {
-      return false;
+      return { status: 400, data: { message: 'Invalid email address.' } };
+    }
+    if (!(await this.generateToken(user, TOKEN_TYPE.RESET))) {
+      return {
+        status: 500,
+        data: { message: 'Failed to generate password reset email.' },
+      };
     }
 
-    return await this.generateToken(user, TOKEN_TYPE.RESET);
+    return { status: 204 };
   }
 
   /** Generate and send the user an email to confirm their account.
@@ -247,7 +261,7 @@ export default class UserController {
     try {
       await user.update({
         confirmed: true,
-        confirmationToken: "",
+        confirmationToken: '',
         confirmationTokenExpires: null,
       });
     } catch (err) {
@@ -262,12 +276,11 @@ export default class UserController {
    If the token is expired, or invalid, return false. */
   async resetPassword(
     token: string,
-    newPass: string,
-    newPassConf: string
+    newPass: string
   ): Promise<boolean> {
     const user: User | null = await this.validateToken(token, TOKEN_TYPE.RESET);
 
-    if (!user || newPass !== newPassConf) {
+    if (!user) {
       return false;
     }
 
@@ -280,7 +293,7 @@ export default class UserController {
     try {
       await user.update({
         password: hashed,
-        confirmationToken: "",
+        confirmationToken: '',
         confirmationTokenExpires: null,
       });
     } catch (err) {

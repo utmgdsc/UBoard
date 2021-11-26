@@ -7,12 +7,11 @@ import UserController from "../../controllers/v1/user";
 import { getAuthUser } from "../../middleware/auth";
 
 const userRouter = express.Router();
-const apiRoute = `${process.env.PAGE_URL}api/v1`;
 const cookie_key = "token";
 
 const uContr: UserController = new UserController(
   db.User,
-  new EmailService(apiRoute)
+  new EmailService()
 );
 
 async function signOut(req: Request, res: Response) {
@@ -91,8 +90,19 @@ export async function signUpHandler(req: Request, res: Response) {
   res.status(response.status).json(response.data);
 }
 
+async function sendPassResetHandler(req: Request, res: Response) {
+  const result = await uContr.sendResetEmail(req.body.email);
+  if (result.data) {
+    console.error(result.data.message);
+    res.status(result.status).json(result.data);
+    return;
+  }
+  res.status(result.status).json();
+}
+
+
 async function confirmEmailHandler(req: Request, res: Response) {
-  const token = req.query.c as string;
+  const token = req.body.token as string;
 
   if (!token) {
     res.status(400).json({ code: 400, message: "Missing token." });
@@ -109,18 +119,17 @@ async function confirmEmailHandler(req: Request, res: Response) {
 }
 
 async function resetPassHandler(req: Request, res: Response) {
-  if (!req.query.r || !req.body.password || !req.body.password_confirmation) {
+  if (!req.body.token || !req.body.password) {
     res.status(400).json({
       code: 400,
-      message: "Missing token or password.",
+      data: { message: "Missing token or password." },
     });
     return;
   }
 
   const status = await uContr.resetPassword(
-    req.query.r as string,
-    req.body.password,
-    req.body.password_confirmation
+    req.query.token as string,
+    req.body.password
   );
 
   if (status) {
@@ -128,9 +137,31 @@ async function resetPassHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .json({ code: 400, message: "Token is invalid or expired." });
+      .json({ code: 400, data: { message: "Token is invalid or expired." } });
   }
 }
+
+// async function emailTokenHandler(res: Response, req: Request) {
+//   if (!req.query.c) {
+//     res.status(400).json({
+//       code: 400,
+//       message: "Missing token.",
+//     });
+//     return;
+//   }
+//   res.status(200).json({ token: req.query.c });
+// }
+
+// async function passResetTokenHandler(res: Response, req: Request) {
+//   if (!req.query.r) {
+//     res.status(400).json({
+//       code: 400,
+//       message: "Missing token.",
+//     });
+//     return;
+//   }
+//   res.status(200).json({ token: req.query.r });
+// }
 
 async function me(req: Request, res: Response) {
   try {
@@ -145,8 +176,13 @@ userRouter.post("/signin", signInHandler);
 userRouter.post("/signup", signUpHandler);
 userRouter.post("/signout", signOut);
 
-userRouter.get("/confirm", confirmEmailHandler);
-userRouter.get("/password-reset", resetPassHandler);
+userRouter.put("/send-password-reset", sendPassResetHandler);
+
+userRouter.post("/confirm-email", confirmEmailHandler);
+userRouter.post("/reset-password", resetPassHandler);
+
+// userRouter.get("/email-confirmation", emailTokenHandler);
+// userRouter.get("/password-reset", passResetTokenHandler);
 userRouter.get("/me", me);
 
 export default userRouter;

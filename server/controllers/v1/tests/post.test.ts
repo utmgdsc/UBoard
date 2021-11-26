@@ -7,7 +7,7 @@ import {
 } from '../../../models/tests/testHelpers';
 import PostController from '../post';
 
-const postController = new PostController(db.Post);
+const postController = new PostController(db.Post, db.UserPostLikes);
 
 beforeEach(async () => {
   await dbSync().catch((err) => fail(err));
@@ -21,8 +21,9 @@ describe('Test v1 - Post Controller', () => {
         await makeValidPost(author.id),
         await makeValidPost(author.id),
       ];
+      await db.UserPostLikes.likePost(author.id, posts[0].id);
 
-      const result = await postController.getPosts(100, 0);
+      const result = await postController.getPosts(author.id, 100, 0);
 
       expect(result.status).toBe(200);
       expect(result.data.count).toBe(2);
@@ -30,21 +31,27 @@ describe('Test v1 - Post Controller', () => {
       expect(result.data.result![1].id).toBe(posts[0].id);
       expect(result.data.result![1].User.firstName).toBe(author.firstName);
       expect(result.data.total).toBe(2);
+      expect(result.data.result![1].likeCount).toEqual(1);
+      expect(result.data.result![1].doesUserLike).toBeTruthy();
+      expect(result.data.result![0].doesUserLike).toBeFalsy();
     });
 
     it('should return valid post details', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
+      await db.UserPostLikes.likePost(author.id, post.id);
 
-      const result = await postController.getPost(post.id);
+      const result = await postController.getPost(author.id, post.id);
 
       expect(result.status).toBe(200);
       expect(result.data.result?.body).toBe(post.body);
       expect(result.data.result?.User.lastName).toBe(author.lastName);
+      expect(result.data.result?.likeCount).toBe(1);
+      expect(result.data.result?.doesUserLike).toBeTruthy();
     });
 
     it('should return an error for a missing post', async () => {
-      const result = await postController.getPost('123-123-123');
+      const result = await postController.getPost('123-123-123', '123-123-123');
 
       expect(result.status).toBe(404);
     });
@@ -117,7 +124,7 @@ describe('Test v1 - Post Controller', () => {
       const result = await postController.deletePost(author.id, post.id);
       expect(result.status).toBe(204);
 
-      const findResult = await postController.getPost(post.id);
+      const findResult = await postController.getPost(author.id, post.id);
       expect(findResult.status).toBe(404);
     });
 
@@ -129,7 +136,7 @@ describe('Test v1 - Post Controller', () => {
       const result = await postController.deletePost(badUser.id, post.id);
       expect(result.status).toBe(401);
 
-      const findResult = await postController.getPost(post.id);
+      const findResult = await postController.getPost(author.id, post.id);
       expect(findResult.status).toBe(200);
     });
 
@@ -143,11 +150,47 @@ describe('Test v1 - Post Controller', () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
 
-      const result = await postController.upVote(post.id);
+      const result = await postController.upVote(author.id, post.id);
 
       expect(result.status).toBe(204);
-      await post.reload();
-      expect(post.feedbackScore).toBe(11);
+
+      expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(1);
+    });
+
+    it('should not allow multiple upvotes on a post', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+
+      await postController.upVote(author.id, post.id);
+      const result = await postController.upVote(author.id, post.id);
+
+      expect(result.status).toBe(204);
+
+      expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(1);
+    });
+
+    it('should downvote a post', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+
+      await postController.upVote(author.id, post.id);
+      expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(1);
+
+      await postController.downVote(author.id, post.id);
+      expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(0);
+    });
+
+    it('should not downvote if user has not voted', async () => {
+      const author = await makeValidUser();
+      const voter = await makeUser('voter', 'voter@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      await postController.upVote(voter.id, post.id);
+      const result = await postController.downVote(author.id, post.id);
+
+      expect(result.status).toBe(500);
+
+      expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(1);
     });
 
     it('should report a post', async () => {
@@ -171,7 +214,7 @@ describe('Test v1 - Post Controller', () => {
         (await postController.deletePost(author.id, posts[0].id)).status
       ).toBe(204);
 
-      const result = await postController.getPosts(100, 0);
+      const result = await postController.getPosts(author.id, 100, 0);
 
       expect(result.data.total).toBe(1);
     });

@@ -7,11 +7,12 @@ import UserController from "../../controllers/v1/user";
 import { getAuthUser } from "../../middleware/auth";
 
 const userRouter = express.Router();
+const apiRoute = `${process.env.PAGE_URL}api/v1`;
 const cookie_key = "token";
 
 const uContr: UserController = new UserController(
   db.User,
-  new EmailService()
+  new EmailService(apiRoute)
 );
 
 async function signOut(req: Request, res: Response) {

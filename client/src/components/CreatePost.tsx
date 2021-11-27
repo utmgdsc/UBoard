@@ -18,13 +18,12 @@ import ServerApi from '../api/v1/index';
 const api = new ServerApi();
 
 function CreatePost() {
-  // hooks
   const [form, setForm] = useState({
     title: '',
     body: '',
     file: '',
     tags: '',
-    capacity: '',
+    capacity: -1,
     location: '',
   });
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
@@ -39,7 +38,7 @@ function CreatePost() {
       body: '',
       file: '',
       tags: '',
-      capacity: '',
+      capacity: -1,
       location: '',
     });
     toggleDialog(false);
@@ -48,7 +47,6 @@ function CreatePost() {
     setOpenPopup(true);
   };
 
-  // handling
   const handleSubmit = () => {
     api
       .createPost(form)
@@ -139,7 +137,7 @@ function CreatePost() {
                     required
                     fullWidth
                     label='Body'
-                    data-testid='bodyTextField'
+                    inputProps={{ 'data-testid': 'bodyTextField' }}
                     placeholder='Description (minimum 25 characters)'
                     multiline
                     rows={6}
@@ -167,10 +165,10 @@ function CreatePost() {
                     fullWidth
                     size='small'
                     onChange={(e) =>
-                      setForm({ ...form, capacity: e.target.value })
+                      setForm({ ...form, capacity: Number(e.target.value) })
                     }
                     onBlur={() => {
-                      if (!/^[0-9]*$/.test(form.capacity)) {
+                      if (!/^[0-9]*$/.test(form.capacity.toString())) {
                         setCapacityError('Only numbers allowed!');
                       } else {
                         setCapacityError('');

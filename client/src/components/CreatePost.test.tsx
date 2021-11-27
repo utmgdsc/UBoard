@@ -36,9 +36,7 @@ describe('verifying launch of create post component', () => {
     const titleTextField = screen.getByPlaceholderText('title');
     fireEvent.change(titleTextField, { target: { value: 'Test Club' } });
     // input body
-    const bodyTextField = screen.getByPlaceholderText(
-      'Description (minimum 25 characters)'
-    );
+    const bodyTextField = screen.getByTestId('bodyTextField');
     fireEvent.change(bodyTextField, {
       target: { value: 'This should be at least 25 characters long' },
     });
@@ -52,9 +50,7 @@ describe('verifying launch of create post component', () => {
       target: { value: 'Test Club' },
     });
     // input body
-    const bodyTextField = screen.getByPlaceholderText(
-      'Description (minimum 25 characters)'
-    );
+    const bodyTextField = screen.getByTestId('bodyTextField');
     fireEvent.change(bodyTextField, {
       target: { value: 'This should be at least 25 characters long' },
     });

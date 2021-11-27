@@ -17,7 +17,7 @@ export default function PreviewPopUp(props: {
   body: string;
   img: string;
   tags: string;
-  eventCapacity: string;
+  eventCapacity: Number;
   location: string;
   openPopup: boolean;
   handleClose: () => void;

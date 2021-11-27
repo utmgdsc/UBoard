@@ -126,14 +126,14 @@ export default class ServerApi {
       {},
       { data: { result?: PostUser }; message?: string }
     >(`/posts/${postID}`, {});
-    }
+  }
 
   async createPost(form: {
     title: string;
     body: string;
     file: string;
     tags: string;
-    capacity: string;
+    capacity: number;
     location: string;
   }) {
     return await this.post<typeof form, { result?: Post; message?: string }>(

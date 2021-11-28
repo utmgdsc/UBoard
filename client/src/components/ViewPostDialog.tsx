@@ -18,10 +18,13 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
+import Switch from '@mui/material/Switch'
 
 import { UserContext } from '../App';
+import { LocationMap } from './LocationMap';
 
 import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
+
 
 const api = new ServerApi();
 
@@ -206,6 +209,29 @@ function CapacityBar(props: { maxCapacity: number }) {
   );
 }
 
+function LocationHandler(props: { lat: number, lng: number, location: string }) {
+  const [isMapVisible, toggleMap] = React.useState(true);
+
+  return (
+    <>
+      <Typography variant="body2" sx={{ pt: 2 }}>
+        Location: {props.location}
+      <Switch
+        checked={isMapVisible}
+        onChange={() => toggleMap((prev) => !prev)}
+        size="medium"
+      />
+      </Typography>
+
+      <LocationMap
+        visible={isMapVisible}
+        lat={props.lat}
+        lng={props.lng}
+      />
+    </>
+  );
+}
+
 /* Opens a full screen dialog containing a post. */
 export default function ViewPostDialog(props: {
   postUser: PostUserPreview;
@@ -308,10 +334,7 @@ export default function ViewPostDialog(props: {
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}
-          <Typography variant='body2' sx={{ pt: 2 }}>
-            Location: {postData.location}
-          </Typography>
-          {/* TODO: Implement Google Maps API */}
+          <LocationHandler lat={0} lng={0} location={postData.location}/>
         </Stack>
 
         {/* Post image and body */}

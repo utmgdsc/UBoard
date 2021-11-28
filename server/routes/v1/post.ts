@@ -4,7 +4,7 @@ import PostController from '../../controllers/v1/post';
 import { getAuthUser } from '../../middleware/auth';
 
 const postRouter = express.Router();
-const postController = new PostController(db.Post, db.userPostLikes);
+const postController = new PostController(db.Post, db.UserPostLikes);
 
 postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.query.limit;
@@ -31,8 +31,15 @@ postRouter.get('', async (req: Request, res: Response) => {
 });
 
 postRouter.get('/:postid', async (req: Request, res: Response) => {
-  const result = await postController.getPost(req.params.postid);
-  res.status(result.status).json(result);
+  try {
+    const result = await postController.getPost(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.delete('/:postid', async (req: Request, res: Response) => {

@@ -23,7 +23,7 @@ function CreatePost() {
     body: '',
     file: '',
     tags: '',
-    capacity: -1,
+    capacity: 0,
     location: '',
   });
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
@@ -38,7 +38,7 @@ function CreatePost() {
       body: '',
       file: '',
       tags: '',
-      capacity: -1,
+      capacity: 0,
       location: '',
     });
     toggleDialog(false);

@@ -1,4 +1,3 @@
-import { BelongsToManyCreateAssociationMixinOptions } from 'sequelize';
 import {
   Sequelize,
   Model,
@@ -21,7 +20,7 @@ interface PostAttributes {
   location: string;
   capacity: Number;
   feedbackScore: Number;
-
+  Tags?: string[];
   UserId: string;
 }
 
@@ -43,6 +42,7 @@ export class Post
   capacity!: Number;
   feedbackScore!: Number;
   UserId!: string; /* Foreign Key from UserId */
+  Tags?: string[];
 
   public getTags!: BelongsToManyGetAssociationsMixin<Tag>;
   public addTag!: BelongsToManyAddAssociationMixin<Tag, string>;

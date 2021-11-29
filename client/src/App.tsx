@@ -79,7 +79,8 @@ function App() {
         <Routes>
           <Route path='/' element={<AuthContainer />} />
           <Route path='/dashboard' element={<ProtectedRoute />} />
-          <Route path='/api/v1/users/password-reset' element={<PassResetContainer />} /> {/* make sure this matches with conf email */}
+          <Route path='/password-reset' element={<PassResetContainer />} /> {/* make sure this matches with conf email */}
+          <Route path='/email-confirmation' element={<PassResetContainer />} /> {/* make sure this matches with conf email */}
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

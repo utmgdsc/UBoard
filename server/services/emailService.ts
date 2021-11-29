@@ -1,6 +1,6 @@
 import sgMail from "@sendgrid/mail";
 export default class EmailService {
-  private apiRoute: string;
+  private apiRoute: string; // remove in future PR
 
   constructor(apiRoute: string) {
     this.apiRoute = apiRoute;
@@ -39,7 +39,7 @@ export default class EmailService {
     lastName: string,
     emailAddress: string
   ): Promise<boolean> {
-    const confirmURL = `${this.apiRoute}/users/email-confirmation?c=${confToken}`; // this will be our route
+    const confirmURL = `${process.env.PAGE_URL}email-confirmation?c=${confToken}`; // this will be our route
     const subjectLine = "UBoard - Confirm your Email Address";
 
     const body = `Thank you for signing up to UBoard, ${firstName} ${lastName}.
@@ -63,7 +63,7 @@ export default class EmailService {
     userName: string,
     emailAddress: string
   ): Promise<boolean> {
-    const resetURL = `${this.apiRoute}/users/password-reset?r=${confToken}`;
+    const resetURL = `${process.env.PAGE_URL}password-reset?r=${confToken}`;
     const subjectLine = "UBoard - Password Reset Requested";
     const body = `Hello,  ${firstName} ${lastName}.
         A password reset has been requested for the account with username: ${userName}. To reset your password, click the link below. 

@@ -155,7 +155,7 @@ export default function PassResetContainer() {
     }
 
     try {
-      const { status, data } = await api.resetPass(passResetForm);
+      const { status, data } = await api.resetPass({...passResetForm, token: token });
       if (status !== 204) {
         if (!data) {
           throw new Error("Missing error response.");
@@ -171,7 +171,7 @@ export default function PassResetContainer() {
       console.error(error);
       showAlert(
         "error",
-        "An error occurred logging you in. Please try again later."
+        "An error occurred while resetting your password. Please try again later."
       );
     }
   };
@@ -236,7 +236,6 @@ export default function PassResetContainer() {
             error={confirmPassError !== ""}
             helperText={confirmPassError}
           />
-          <input type='hidden' id='token' name='token' value={token} />
           <Button
             type='submit'
             fullWidth

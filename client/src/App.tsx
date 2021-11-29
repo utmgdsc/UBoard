@@ -5,7 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 import PostDashboard from './containers/PostDashboard';
-import { AuthContainer, PassResetContainer } from './containers';
+import { AuthContainer, EmailConfirmContainer, PassResetContainer } from './containers';
 import './App.css';
 
 import { User } from 'models/user';
@@ -79,8 +79,8 @@ function App() {
         <Routes>
           <Route path='/' element={<AuthContainer />} />
           <Route path='/dashboard' element={<ProtectedRoute />} />
+          <Route path='/email-confirmation' element={<EmailConfirmContainer />} /> {/* make sure this matches with conf email */}
           <Route path='/password-reset' element={<PassResetContainer />} /> {/* make sure this matches with conf email */}
-          <Route path='/email-confirmation' element={<PassResetContainer />} /> {/* make sure this matches with conf email */}
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

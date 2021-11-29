@@ -69,26 +69,26 @@ export default function EmailConfirmContainer() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    try {
-      const { status, data } = await api.confirmEmail({ token: token });
-      if (status !== 204) {
-        if (!data) {
-          throw new Error("Missing error response.");
-        }
-        const msg = data.message;
-        console.error(msg);
-        showAlert("error", msg);
-      } else {
-        showAlert("success", "Email has been confirmed! You may now close this tab.");
-        // navigate to a new page that displays this message instead of using alert
-      }
-    } catch (error) {
-      console.error(error);
-      showAlert(
-        "error",
-        "An error occurred while confirming your email. Please try again later."
-      );
-    }
+    // try {
+    //   const { status, data } = await api.confirmEmail({ token: token });
+    //   if (status !== 204) {
+    //     if (!data) {
+    //       throw new Error("Missing error response.");
+    //     }
+    //     const msg = data.message;
+    //     console.error(msg);
+    //     showAlert("error", msg);
+    //   } else {
+    //     showAlert("success", "Email has been confirmed! You may now close this tab.");
+    //     // navigate to a new page that displays this message instead of using alert
+    //   }
+    // } catch (error) {
+    //   console.error(error);
+    //   showAlert(
+    //     "error",
+    //     "An error occurred while confirming your email. Please try again later."
+    //   );
+    // }
   };
 
   return (

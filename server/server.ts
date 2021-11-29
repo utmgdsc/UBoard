@@ -19,7 +19,7 @@ app.use(express.urlencoded({extended: true}));
 app.use(cookieParser());
 
 // The list of paths which should skip authentication.
-const noAuthPaths = ["/signin", "/signup", "/signout", "/confirm", "/password-reset"];
+const noAuthPaths = ["/signin", "/signup", "/signout", "/send-password-reset", "/confirm-email", "/reset-password"];
 app.use(
   auth(
     db.User,

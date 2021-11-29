@@ -169,10 +169,14 @@ export default class ServerApi {
   }
 
   async sendPassReset(form: { email: string }) {
-    return await this.put<{ message: string }, typeof form>('/send-password-reset', form);
+    return await this.post<typeof form, { message: string }>('/users/send-password-reset', form);
   }
 
-  async resetPass(form: { password: string }) {
-    return await this.put<{ message: string }, typeof form>('/reset-password', form);
+  async confirmEmail(form: { token: string }) {
+    return await this.put<{ message: string }, typeof form>('/users/confirm-email', form);
+  }
+
+  async resetPass(form: { password: string, token: string }) {
+    return await this.put<{ message: string }, typeof form>('/users/reset-password', form);
   }
 }

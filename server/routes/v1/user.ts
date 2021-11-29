@@ -106,7 +106,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   const token = req.body.token as string;
 
   if (!token) {
-    res.status(400).json({ code: 400, message: "Missing token." });
+    res.status(400).json({ code: 400, data: { message: "Missing token." } });
     return;
   }
 
@@ -115,7 +115,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .json({ code: 400, message: "Token is invalid or expired." });
+      .json({ code: 400, data: { message: "Token is invalid or expired." } });
   }
 }
 
@@ -176,11 +176,10 @@ async function me(req: Request, res: Response) {
 userRouter.post("/signin", signInHandler);
 userRouter.post("/signup", signUpHandler);
 userRouter.post("/signout", signOut);
+userRouter.post("/send-password-reset", sendPassResetHandler);
 
-userRouter.put("/send-password-reset", sendPassResetHandler);
-
-userRouter.post("/confirm-email", confirmEmailHandler);
-userRouter.post("/reset-password", resetPassHandler);
+userRouter.put("/confirm-email", confirmEmailHandler);
+userRouter.put("/reset-password", resetPassHandler);
 
 // userRouter.get("/email-confirmation", emailTokenHandler);
 // userRouter.get("/password-reset", passResetTokenHandler);

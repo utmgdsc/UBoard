@@ -1,8 +1,8 @@
-import { Sequelize, QueryInterface, DataTypes } from "sequelize";
+import { Sequelize, QueryInterface, DataTypes } from 'sequelize';
 
 module.exports = {
   up: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
-    await queryInterface.createTable("PostComments", {
+    await queryInterface.createTable('PostComments', {
       id: {
         allowNull: false,
         primaryKey: true,
@@ -13,7 +13,7 @@ module.exports = {
         type: DataTypes.STRING(200),
         validate: {
           len: [25, 200],
-          msg: "Length Validation Failed",
+          msg: 'Length Validation Failed',
         },
         allowNull: false,
       },
@@ -28,6 +28,6 @@ module.exports = {
     });
   },
   down: async (queryInterface: QueryInterface, Sequelize: Sequelize) => {
-    await queryInterface.dropTable("PostComments");
+    await queryInterface.dropTable('PostComments');
   },
 };

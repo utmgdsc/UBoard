@@ -1,14 +1,14 @@
-import express, { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import express, { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 
-import EmailService from "../../services/emailService";
-import db from "../../models";
-import UserController from "../../controllers/v1/user";
-import { getAuthUser } from "../../middleware/auth";
+import EmailService from '../../services/emailService';
+import db from '../../models';
+import UserController from '../../controllers/v1/user';
+import { getAuthUser } from '../../middleware/auth';
 
 const userRouter = express.Router();
 const baseRoute = `${process.env.PAGE_URL}`;
-const cookie_key = "token";
+const cookie_key = 'token';
 
 const uContr: UserController = new UserController(
   db.User,
@@ -33,9 +33,9 @@ export async function signInHandler(req: Request, res: Response) {
         message:
           (!userName
             ? !password
-              ? "Username and password"
-              : "Username"
-            : "Password") + " not provided",
+              ? 'Username and password'
+              : 'Username'
+            : 'Password') + ' not provided',
       });
       return;
     }
@@ -47,7 +47,7 @@ export async function signInHandler(req: Request, res: Response) {
       const token = jwt.sign(
         { username: user.userName, id: user.id },
         process.env.JWT_SECRET as string,
-        { expiresIn: "1h" }
+        { expiresIn: '1h' }
       );
 
       const getDateOffset = (hours: number) => {
@@ -68,7 +68,7 @@ export async function signInHandler(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
@@ -76,7 +76,7 @@ export async function signUpHandler(req: Request, res: Response) {
   const { email, userName, password, firstName, lastName } = req.body;
 
   if (!email || !userName || !password || !firstName || !lastName) {
-    res.status(400).json({ message: "Missing values in request body" });
+    res.status(400).json({ message: 'Missing values in request body' });
     return;
   }
 
@@ -101,28 +101,25 @@ async function sendPassResetHandler(req: Request, res: Response) {
   res.status(result.status).json();
 }
 
-
 async function confirmEmailHandler(req: Request, res: Response) {
   const token = req.body.token as string;
 
   if (!token) {
-    res.status(400).json({ message: "Missing token." });
+    res.status(400).json({ message: 'Missing token.' });
     return;
   }
 
   if (await uContr.confirmEmail(token)) {
     res.status(204).json();
   } else {
-    res
-      .status(400)
-      .json({ message: "Token is invalid or expired." });
+    res.status(400).json({ message: 'Token is invalid or expired.' });
   }
 }
 
 async function resetPassHandler(req: Request, res: Response) {
   if (!req.body.token || !req.body.password) {
     res.status(400).json({
-      message: "Missing token or password.",
+      message: 'Missing token or password.',
     });
     return;
   }
@@ -135,9 +132,7 @@ async function resetPassHandler(req: Request, res: Response) {
   if (status) {
     res.status(204).json();
   } else {
-    res
-      .status(400)
-      .json({ message: "Token is invalid or expired." });
+    res.status(400).json({ message: 'Token is invalid or expired.' });
   }
 }
 
@@ -150,14 +145,14 @@ async function me(req: Request, res: Response) {
   }
 }
 
-userRouter.post("/signin", signInHandler);
-userRouter.post("/signup", signUpHandler);
-userRouter.post("/signout", signOut);
-userRouter.post("/send-password-reset", sendPassResetHandler);
+userRouter.post('/signin', signInHandler);
+userRouter.post('/signup', signUpHandler);
+userRouter.post('/signout', signOut);
+userRouter.post('/send-password-reset', sendPassResetHandler);
 
-userRouter.put("/confirm-email", confirmEmailHandler);
-userRouter.put("/reset-password", resetPassHandler);
+userRouter.put('/confirm-email', confirmEmailHandler);
+userRouter.put('/reset-password', resetPassHandler);
 
-userRouter.get("/me", me);
+userRouter.get('/me', me);
 
 export default userRouter;

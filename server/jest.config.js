@@ -5,4 +5,4 @@ module.exports = {
   modulePathIgnorePatterns: ["build"]
 };
 
-require("dotenv").config();
+require('dotenv').config();

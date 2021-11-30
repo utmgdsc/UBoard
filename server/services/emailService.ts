@@ -2,8 +2,8 @@ import sgMail from "@sendgrid/mail";
 export default class EmailService {
   private baseRoute: string;
 
-  constructor(apiRoute: string) { // remove parameter in future commit
-    this.baseRoute = `${process.env.PAGE_URL}`;
+  constructor(baseRoute: string) {
+    this.baseRoute = baseRoute;
     sgMail.setApiKey(<string>process.env.SENDGRID_API);
   }
 

@@ -16,7 +16,7 @@ jest.mock("../../../services/emailService", () => {
     };
   });
 });
-const apiRoute = `${process.env.PAGE_URL}api/v1`;
+const baseRoute = `${process.env.PAGE_URL}api/v1`;
 
 const userRepo: typeof User = db.User;
 const EmailServiceMock = EmailService as jest.MockedClass<typeof EmailService>;
@@ -37,7 +37,7 @@ let signInDate: Date;
 
 beforeAll(async () => {
   await dbSync().catch((err) => fail(err));
-  uContr = new UserController(db.User, new EmailServiceMock(apiRoute));
+  uContr = new UserController(db.User, new EmailServiceMock(baseRoute));
 });
 
 beforeEach(async () => {
@@ -201,7 +201,9 @@ describe("v1 - User Controller", () => {
         fail("nullperson");
       }
 
-      expect(testPerson.confirmed).toBeFalsy();
+      testPerson.confirmed = true;
+      await testPerson.save();
+      expect(testPerson.confirmed).toBeTruthy();
       const status = await uContr.sendResetEmail(testPerson.email);
       await testPerson.reload();
       rawToken = testPerson.confirmationToken;

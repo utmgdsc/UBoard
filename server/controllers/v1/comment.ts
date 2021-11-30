@@ -27,7 +27,7 @@ export default class CommentController {
    * @param postID  - The identifier used to find the specific post.
    * @param limit   - Limit the comments to a number of results.
    * @param offset  - Offset the results
-   * @returns A data object containing the results.
+   * @returns A data object containing the results along.
    */
   async getComments(
     postID: string,
@@ -38,6 +38,7 @@ export default class CommentController {
     data: { result?: CommentsUser[]; total?: number; message?: string };
   }> {
     const data = await Promise.all([
+      // [0] contains the comments and the user it belongs to
       this.commentsRepo.findByPk(postID, {
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
@@ -51,7 +52,8 @@ export default class CommentController {
         order: [['createdAt', 'DESC']],
         offset: offset,
       }),
-      this.commentsRepo.count(),
+      // [1] returning the number of comments under this post
+      this.commentsRepo.count({ where: { PostId: postID } }),
     ]);
 
     if (!data) {
@@ -70,7 +72,7 @@ export default class CommentController {
   }
 
   /**
-   * Search for the comment if it exists
+   * Search for a specific comment if it exists
    *
    * @param commentID - The identifer used to find the specific comment
    * @returns The details of the post
@@ -104,16 +106,9 @@ export default class CommentController {
   /**
    * Delete the post by a given ID.
    *
-   * @param postID - The identifier of the post to destroy.
+   * @param userId - The identifier of author of the comment to destroy.
+   * @param commentId - The identifier of the comment to destroy.
    * @returns A status object indicating the results of the action.
-   */
-
-  /**
-   * Delete the post by a given ID.
-   *
-   * @param userId - The identifier of the post to destroy.
-   * @param commentId
-   * @returns
    */
   async deleteComment(
     userId: string,
@@ -141,7 +136,12 @@ export default class CommentController {
   }
 
   /**
-   * @returns Create a new comment and return it.
+   * Create a new comment
+   *
+   * @param body  - The content of the comment.
+   * @param userID - The identifier of the author of the comment.
+   * @param postID - The identifier of the post that the comment is written to.
+   * @returns create  a new comment and return it if successful or message if not.
    */
   async createComment(
     body: string,
@@ -169,8 +169,12 @@ export default class CommentController {
   }
 
   /**
-   * Update the post by ID.
-   * @returns A result object indicating whether the update was successful, with the updated post if
+   * Update the commend by ID
+   *
+   * @param currentUserId - user trying to make the update
+   * @param commentID - comment's ID
+   * @param body - udpated comment body
+   * @returns A result object indicating whether the update was successful, with the updated comment if
    * it was updated.
    */
   async updateComment(

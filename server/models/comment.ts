@@ -15,13 +15,14 @@ export class Comment
 {
   id!: string;
   body!: string;
-  UserId?: string;
-  PostId?: string;
+  UserId!: string;
+  PostId!: string;
 
   static associate(models: any) {
     Comment.belongsTo(models.Post, {
       foreignKey: { allowNull: false },
     }); /* Postid will be in Comment */
+    Comment.belongsTo(models.User);
   }
 }
 

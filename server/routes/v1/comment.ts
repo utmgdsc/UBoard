@@ -10,7 +10,7 @@ commentRouter.get('', async (req: Request, res: Response) => {
   try {
     const limit = req.body.limit;
     const offset = req.body.offset;
-    const postID = req.params.postid; // TODO: is this the correct way?
+    const postID = req.params.postid;
     if (!limit || offset == undefined) {
       return res.status(400).json({
         code: 400,

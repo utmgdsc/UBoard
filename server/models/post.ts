@@ -9,8 +9,10 @@ import {
   BelongsToManyCountAssociationsMixin,
   BelongsToManyCreateAssociationMixin,
   BelongsToManyGetAssociationsMixin,
+  BelongsToManyAddAssociationsMixin,
 } from 'sequelize';
 import { Tag } from './tags';
+import { PostTag } from './PostTags';
 
 interface PostAttributes {
   id: string;
@@ -20,7 +22,6 @@ interface PostAttributes {
   location: string;
   capacity: Number;
   feedbackScore: Number;
-  Tags?: string[];
   UserId: string;
 }
 
@@ -42,10 +43,10 @@ export class Post
   capacity!: Number;
   feedbackScore!: Number;
   UserId!: string; /* Foreign Key from UserId */
-  Tags?: string[];
 
-  public getTags!: BelongsToManyGetAssociationsMixin<Tag>;
+  public getTags!: BelongsToManyGetAssociationsMixin<Tag & PostTag>;
   public addTag!: BelongsToManyAddAssociationMixin<Tag, string>;
+  public addTags!: BelongsToManyAddAssociationsMixin<Tag, string>;
   public hasTag!: BelongsToManyHasAssociationMixin<Tag, string>;
   public countTags!: BelongsToManyCountAssociationsMixin;
   public createTag!: BelongsToManyCreateAssociationMixin<Tag>;

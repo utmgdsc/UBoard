@@ -1,9 +1,12 @@
 import db from '../index';
-import {Post} from '../post';
-import {User} from '../user';
+import { Post } from '../post';
+import { PostTag } from '../PostTags';
+import { Tag } from '../tags';
+import { User } from '../user';
 
 const UserModel: typeof User = db.User;
 const PostModel: typeof Post = db.Post;
+const TagModel: typeof Tag = db.Tag;
 
 /* 
 Create a User entry in our database with the given user and email string. Returns
@@ -28,7 +31,10 @@ Create a User entry in our database with the given user and email string
 with the password as part of the serialized object. Returns
 the entry that was created on success, or throws an error on failure.
 */
-export async function makeUserWithPass(user: string, email: string): Promise<User> {
+export async function makeUserWithPass(
+  user: string,
+  email: string
+): Promise<User> {
   const testUser: User = await UserModel.scope('withPassword')
     .create({
       firstName: 'test',
@@ -54,7 +60,11 @@ export async function makeValidUser(): Promise<User> {
 /* Create a (basic) Post entry in our database with the provided userid of the author, 
 title, and body. Return the post on success, or throw an error on failure. 
 */
-export async function makePost(authorid: string, title: string, body: string): Promise<Post> {
+export async function makePost(
+  authorid: string,
+  title: string,
+  body: string
+): Promise<Post> {
   return await PostModel.create({
     title: title,
     body: body,
@@ -67,11 +77,27 @@ export async function makePost(authorid: string, title: string, body: string): P
 }
 
 export async function makeValidPost(authorID: string): Promise<Post> {
-  return makePost(authorID, 'This is a new post!', 'This is a new post!This is a new post!');
+  return makePost(
+    authorID,
+    'This is a new post!',
+    'This is a new post!This is a new post!'
+  );
+}
+
+export async function getAllTags(): Promise<Tag[]> {
+  return await TagModel.findAll();
+}
+
+export async function getPostTags(
+  postId: string
+): Promise<(Tag & PostTag)[] | undefined> {
+  const post = await PostModel.findByPk(postId);
+
+  return await post?.getTags();
 }
 
 /* Ensure that the database is synchronized properly. The sync is forced, so any existing tables
 are dropped and re-made. */
 export async function dbSync() {
-  await db.sequelize.sync({force: true});
+  await db.sequelize.sync({ force: true });
 }

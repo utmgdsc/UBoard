@@ -1,6 +1,8 @@
 import sequelize from 'sequelize';
 import { Post } from '../../models/post';
+import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
+import { PostTag } from '../../models/PostTags';
 import db from '../../models';
 
 // The return type of a Post associated with the Post's User.
@@ -8,6 +10,9 @@ export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
   User: { id: string; firstName: string; lastName: string };
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
 };
 
 export type PostUserPreview = {
@@ -19,6 +24,7 @@ export type PostUserPreview = {
   likeCount: number;
   doesUserLike: boolean;
 } & {
+  Tags: string[];
   User: { id: string; firstName: string; lastName: string };
 };
 
@@ -28,10 +34,16 @@ const MAX_RESULTS = 50;
 export default class PostController {
   protected postsRepo: typeof Post;
   protected userPostLikesRepo: typeof UserPostLikes;
+  protected tagsRepo: typeof Tag;
 
-  constructor(postsRepo: typeof Post, userPostLikesRepo: typeof UserPostLikes) {
+  constructor(
+    postsRepo: typeof Post,
+    userPostLikesRepo: typeof UserPostLikes,
+    tagsRepo: typeof Tag
+  ) {
     this.postsRepo = postsRepo;
     this.userPostLikesRepo = userPostLikesRepo;
+    this.tagsRepo = tagsRepo;
   }
 
   /**
@@ -81,8 +93,11 @@ export default class PostController {
             model: db.User,
             attributes: ['firstName', 'lastName', 'id'],
           },
+          {
+            model: db.Tag,
+            attributes: ['text'],
+          },
         ],
-
         order: [['createdAt', 'DESC']],
         offset: offset,
       }),
@@ -150,6 +165,10 @@ export default class PostController {
         {
           model: db.User,
           attributes: ['firstName', 'lastName', 'userName'],
+        },
+        {
+          model: db.Tag,
+          attributes: ['text'],
         },
       ],
     })) as PostUser;
@@ -293,8 +312,12 @@ export default class PostController {
     title?: string,
     body?: string,
     location?: string,
-    capacity?: number
-  ): Promise<{ status: number; data: { result?: Post; message?: string } }> {
+    capacity?: number,
+    tags?: string[]
+  ): Promise<{
+    status: number;
+    data: { result?: Post; message?: string };
+  }> {
     if (!title || !body || !location || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
@@ -314,7 +337,37 @@ export default class PostController {
       };
     }
 
+    if (tags) {
+      // could not get adding (multiple) tags to work any other way
+      const tagObjs = await Promise.all(
+        tags.map(async (text) => {
+          return this.setupTag(text.trim());
+        })
+      );
+      await post.addTags(tagObjs);
+    }
+
     return { status: 200, data: { result: post } };
+  }
+
+  /**
+   * Find, or create, a specific tag entry
+   *
+   * @param text  - The text to be in the tag
+   * @returns The tag object
+   */
+  async setupTag(text: string): Promise<Tag> {
+    // findOrCreate is broken when using sqlite, so I had to make this function.
+    // https://github.com/sequelize/sequelize/issues/5535
+    const data = await this.tagsRepo.findByPk(text);
+
+    if (data) {
+      return data;
+    }
+
+    return await this.tagsRepo.create({
+      text,
+    });
   }
 
   /**

@@ -4,7 +4,7 @@ import PostController from '../../controllers/v1/post';
 import { getAuthUser } from '../../middleware/auth';
 
 const postRouter = express.Router();
-const postController = new PostController(db.Post, db.UserPostLikes);
+const postController = new PostController(db.Post, db.UserPostLikes, db.Tag);
 
 postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.query.limit;
@@ -85,12 +85,15 @@ postRouter.put('/:postid/report', async (req: Request, res: Response) => {
 
 postRouter.post('/', async (req: Request, res: Response) => {
   try {
+    // TODO: UPDATE F/E AND VALIDATE INPUT
+    const tags = req.body.tags.split(',');
     const result = await postController.createPost(
       getAuthUser(res).id,
       req.body.title,
       req.body.body,
       req.body.location,
-      req.body.capacity
+      req.body.capacity,
+      tags
     );
     res.status(result.status).json(result);
   } catch (err) {

@@ -15,7 +15,6 @@ import ServerApi from "../api/v1/index";
 function PassReset(props: { handleChange: Function; showAlert: Function }) {
   const api = new ServerApi();
 
-  // create hooks for username and password
   const [passResetForm, setPassResetForm] = useState({
     email: "",
   });
@@ -56,7 +55,6 @@ function PassReset(props: { handleChange: Function; showAlert: Function }) {
     setHook: Function,
     errorMessage: string
   ) => {
-    // only check for the confirm password field
 
     if (!regexPattern.test(checkString)) {
       setHook(errorMessage);
@@ -65,7 +63,6 @@ function PassReset(props: { handleChange: Function; showAlert: Function }) {
     }
   };
 
-  // handle function for submitting username and password
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 

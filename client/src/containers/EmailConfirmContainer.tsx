@@ -57,13 +57,13 @@ export default function EmailConfirmContainer() {
   
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const r = urlParams.get('c');
-    if (!r) {
+    const c = urlParams.get('c');
+    if (!c) {
       console.error('Missing token.');
       navigate('/');
       return;
     }
-    setToken(r);
+    setToken(c);
   }, [navigate]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {

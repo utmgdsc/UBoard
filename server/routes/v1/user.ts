@@ -127,10 +127,8 @@ async function resetPassHandler(req: Request, res: Response) {
     return;
   }
 
-  console.error(req.body.token);
-
   const status = await uContr.resetPassword(
-    req.query.token as string,
+    req.body.token as string,
     req.body.password
   );
 
@@ -142,28 +140,6 @@ async function resetPassHandler(req: Request, res: Response) {
       .json({ message: "Token is invalid or expired." });
   }
 }
-
-// async function emailTokenHandler(res: Response, req: Request) {
-//   if (!req.query.c) {
-//     res.status(400).json({
-//       code: 400,
-//       message: "Missing token.",
-//     });
-//     return;
-//   }
-//   res.status(200).json({ token: req.query.c });
-// }
-
-// async function passResetTokenHandler(res: Response, req: Request) {
-//   if (!req.query.r) {
-//     res.status(400).json({
-//       code: 400,
-//       message: "Missing token.",
-//     });
-//     return;
-//   }
-//   res.status(200).json({ token: req.query.r });
-// }
 
 async function me(req: Request, res: Response) {
   try {
@@ -182,8 +158,6 @@ userRouter.post("/send-password-reset", sendPassResetHandler);
 userRouter.put("/confirm-email", confirmEmailHandler);
 userRouter.put("/reset-password", resetPassHandler);
 
-// userRouter.get("/email-confirmation", emailTokenHandler);
-// userRouter.get("/password-reset", passResetTokenHandler);
 userRouter.get("/me", me);
 
 export default userRouter;

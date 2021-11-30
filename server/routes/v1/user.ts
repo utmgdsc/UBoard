@@ -106,7 +106,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   const token = req.body.token as string;
 
   if (!token) {
-    res.status(400).json({ code: 400, data: { message: "Missing token." } });
+    res.status(400).json({ message: "Missing token." });
     return;
   }
 
@@ -115,15 +115,14 @@ async function confirmEmailHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .json({ code: 400, data: { message: "Token is invalid or expired." } });
+      .json({ message: "Token is invalid or expired." });
   }
 }
 
 async function resetPassHandler(req: Request, res: Response) {
   if (!req.body.token || !req.body.password) {
     res.status(400).json({
-      code: 400,
-      data: { message: "Missing token or password." },
+      message: "Missing token or password.",
     });
     return;
   }
@@ -138,7 +137,7 @@ async function resetPassHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .json({ code: 400, data: { message: "Token is invalid or expired." } });
+      .json({ message: "Token is invalid or expired." });
   }
 }
 

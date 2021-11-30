@@ -143,6 +143,20 @@ export default class ServerApi {
   async reportPost(postID: string) {
     return await this.put<{ status: number }>(`/posts/${postID}/report`);
   }
+  
+  async createPost(form: {
+    title: string;
+    body: string;
+    file: string;
+    tags: string;
+    capacity: number;
+    location: string;
+  }) {
+    return await this.post<typeof form, { result?: Post; message?: string }>(
+      '/posts/',
+      form
+    );
+  }
 
   async signUp(form: {
     email: string;

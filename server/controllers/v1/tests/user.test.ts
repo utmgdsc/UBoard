@@ -16,7 +16,7 @@ jest.mock("../../../services/emailService", () => {
     };
   });
 });
-const baseRoute = `${process.env.PAGE_URL}api/v1`;
+const baseRoute = `${process.env.PAGE_URL}`;
 
 const userRepo: typeof User = db.User;
 const EmailServiceMock = EmailService as jest.MockedClass<typeof EmailService>;

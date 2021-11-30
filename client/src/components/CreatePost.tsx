@@ -12,37 +12,45 @@ import Dialog from '@mui/material/Dialog';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import PreviewPopUp from './PreviewPopUp';
 import Snackbar from '@mui/material/Snackbar';
-
+import { TagCreator } from './Tags';
 import ServerApi from '../api/v1/index';
 
 const api = new ServerApi();
 
 function CreatePost() {
-  const [form, setForm] = useState({
-    title: '',
-    body: '',
-    file: '',
-    tags: '',
-    capacity: 0,
-    location: '',
-  });
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
   const [alertMsg, setMsg] = useState('An error has occurred'); // for snackbar message
   const [capacityError, setCapacityError] = useState(''); // for capacity input validation
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
+  const [allowTagInput, toggleTagInput] = React.useState(true);
+  const [form, setForm] = useState({
+    title: '',
+    body: '',
+    file: '',
+    tags: [] as string[],
+    capacity: 0,
+    location: '',
+});
+
+  const handleTagDelete = (value: string) => {
+    setForm({...form, tags: form.tags.filter((val) => val !== value)});
+    toggleTagInput(true);
+  }
 
   const closeDialog = () => {
     setForm({
       title: '',
       body: '',
       file: '',
-      tags: '',
+      tags: [],
       capacity: 0,
       location: '',
     });
     toggleDialog(false);
+    toggleTagInput(true);
   };
+  
   const handleClickOpen = () => {
     setOpenPopup(true);
   };
@@ -136,7 +144,7 @@ function CreatePost() {
                   <TextField
                     required
                     fullWidth
-                    label='Body'
+                    label='Body (Minimum 25 characters)'
                     inputProps={{ 'data-testid': 'bodyTextField' }}
                     placeholder='Description (minimum 25 characters)'
                     multiline
@@ -190,14 +198,39 @@ function CreatePost() {
                     }
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label='Tags (Separate tags by a comma)'
-                    placeholder='Clubs, Math, MCS'
+                    label='Tags (Seperated by a space. Max of 3 tags)'
+                    placeholder='Clubs Math MCS'
+                    disabled={!allowTagInput}
+                    InputProps={{
+                      startAdornment: (
+                        <Box sx={{  display: 'flex', pt: 0.5}}>
+                          {form.tags.map((t)=> {
+                            return <Box sx={{pr: 1}}> <TagCreator key={t} tag={t} del={handleTagDelete}/> </Box>
+                          })}
+                        </Box>
+                      ),
+                    }}
                     size='small'
-                    onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                    onChange={(e) => {
+                      const newTag = e.target.value;
+                      if (newTag.trim().length > 0 && newTag.charAt(newTag.length - 1) === ' '){
+                        if (!form.tags.includes(newTag.trim())) {
+                          setForm({...form, tags: [...form.tags, e.target.value.trim()]});
+                        } // new tag input for each space
+                        e.target.value = '';
+                      }
+                      if (form.tags.length >= 3) {
+                        toggleTagInput(false);
+                      }
+                    }}
+                    onKeyDown={(e) => { // backspace to delete last tag
+                      if (e.key === 'Backspace' && form.tags.length > 0) {
+                        handleTagDelete(form.tags[form.tags.length - 1]);
+                      }
+                    }}
                   />
                 </Grid>
               </Grid>
@@ -233,6 +266,7 @@ function CreatePost() {
                   </Tooltip>
                 </Grid>
                 <Grid item xs={7} md={5}>
+                  <Tooltip title='Enter all required fields!'>
                   <Button
                     fullWidth
                     variant='contained'
@@ -249,13 +283,15 @@ function CreatePost() {
                   >
                     Create
                   </Button>
+                  </Tooltip>
                   <Snackbar
                     open={isAlertOpen}
                     autoHideDuration={6000}
                     onClose={() => showAlert(false)}
                     message={alertMsg}
-                  />
+                  />      
                 </Grid>
+                
               </Grid>
             </Box>
 

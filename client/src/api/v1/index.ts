@@ -3,9 +3,15 @@ import axios, { AxiosInstance } from 'axios';
 import { Post } from 'models/post';
 import { User } from 'models/user';
 import { UserAttributes } from 'models/user';
+import { PostTag } from 'models/PostTags';
 
 export type PostUser = Post & {
+  likeCount: number;
+  doesUserLike: boolean;
   User: { id: string; firstName: string; lastName: string };
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
 };
 
 export type PostUserPreview = {
@@ -13,8 +19,13 @@ export type PostUserPreview = {
   thumbnail: string;
   body: string;
   title: string;
-  createdAt: string;
+  createdAt: Date;
+  likeCount: number;
+  doesUserLike: boolean;
 } & {
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
   User: { id: string; firstName: string; lastName: string };
 };
 
@@ -132,7 +143,7 @@ export default class ServerApi {
     title: string;
     body: string;
     file: string;
-    tags: string;
+    tags: string[];
     capacity: number;
     location: string;
   }) {

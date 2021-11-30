@@ -85,15 +85,13 @@ postRouter.put('/:postid/report', async (req: Request, res: Response) => {
 
 postRouter.post('/', async (req: Request, res: Response) => {
   try {
-    // TODO: UPDATE F/E AND VALIDATE INPUT
-    const tags = req.body.tags.split(',');
     const result = await postController.createPost(
       getAuthUser(res).id,
       req.body.title,
       req.body.body,
       req.body.location,
       req.body.capacity,
-      tags
+      req.body.tags.slice(0, 3) // max of 3 tags allowed
     );
     res.status(result.status).json(result);
   } catch (err) {

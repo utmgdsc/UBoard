@@ -24,7 +24,9 @@ export type PostUserPreview = {
   likeCount: number;
   doesUserLike: boolean;
 } & {
-  Tags: string[];
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
   User: { id: string; firstName: string; lastName: string };
 };
 
@@ -360,14 +362,11 @@ export default class PostController {
     // findOrCreate is broken when using sqlite, so I had to make this function.
     // https://github.com/sequelize/sequelize/issues/5535
     const data = await this.tagsRepo.findByPk(text);
-
-    if (data) {
-      return data;
-    }
-
-    return await this.tagsRepo.create({
-      text,
-    });
+    return data
+      ? data
+      : await this.tagsRepo.create({
+          text,
+        });
   }
 
   /**

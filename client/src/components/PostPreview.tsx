@@ -46,7 +46,9 @@ function relativeTime(date: Date) {
 export default function PostPreview(props: { postUser: PostUserPreview, 
   setOpenedPost: React.Dispatch<React.SetStateAction<boolean>> }) {
     
-  const tags = GenerateTags((props.postUser.Tags).map((t) => t.text.trim()));
+  // convert to tags list of strings (if there are any)
+  const tags = GenerateTags(props.postUser.Tags ? 
+    (props.postUser.Tags).map((t) => t.text.trim()) : []);
 
   return (
     <Grid data-testid="test-postpreview" item xs={12} sm={6} md={4} lg={4}>

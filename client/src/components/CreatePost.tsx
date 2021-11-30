@@ -266,7 +266,6 @@ function CreatePost() {
                   </Tooltip>
                 </Grid>
                 <Grid item xs={7} md={5}>
-                  <Tooltip title='Enter all required fields!'>
                   <Button
                     fullWidth
                     variant='contained'
@@ -283,7 +282,6 @@ function CreatePost() {
                   >
                     Create
                   </Button>
-                  </Tooltip>
                   <Snackbar
                     open={isAlertOpen}
                     autoHideDuration={6000}

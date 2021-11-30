@@ -19,7 +19,7 @@ export type PostUserPreview = {
   thumbnail: string;
   body: string;
   title: string;
-  createdAt: Date;
+  createdAt: string;
   likeCount: number;
   doesUserLike: boolean;
 } & {

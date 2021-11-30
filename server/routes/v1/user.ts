@@ -1,14 +1,14 @@
-import express, { Request, Response } from "express";
-import jwt from "jsonwebtoken";
+import express, { Request, Response } from 'express';
+import jwt from 'jsonwebtoken';
 
-import EmailService from "../../services/emailService";
-import db from "../../models";
-import UserController from "../../controllers/v1/user";
-import { getAuthUser } from "../../middleware/auth";
+import EmailService from '../../services/emailService';
+import db from '../../models';
+import UserController from '../../controllers/v1/user';
+import { getAuthUser } from '../../middleware/auth';
 
 const userRouter = express.Router();
 const apiRoute = `${process.env.PAGE_URL}api/v1`;
-const cookie_key = "token";
+const cookie_key = 'token';
 
 const uContr: UserController = new UserController(
   db.User,
@@ -33,9 +33,9 @@ export async function signInHandler(req: Request, res: Response) {
         message:
           (!userName
             ? !password
-              ? "Username and password"
-              : "Username"
-            : "Password") + " not provided",
+              ? 'Username and password'
+              : 'Username'
+            : 'Password') + ' not provided',
       });
       return;
     }
@@ -47,7 +47,7 @@ export async function signInHandler(req: Request, res: Response) {
       const token = jwt.sign(
         { username: user.userName, id: user.id },
         process.env.JWT_SECRET as string,
-        { expiresIn: "1h" }
+        { expiresIn: '1h' }
       );
 
       const getDateOffset = (hours: number) => {
@@ -68,7 +68,7 @@ export async function signInHandler(req: Request, res: Response) {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 
@@ -76,7 +76,7 @@ export async function signUpHandler(req: Request, res: Response) {
   const { email, userName, password, firstName, lastName } = req.body;
 
   if (!email || !userName || !password || !firstName || !lastName) {
-    res.status(400).json({ message: "Missing values in request body" });
+    res.status(400).json({ message: 'Missing values in request body' });
     return;
   }
 
@@ -95,7 +95,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   const token = req.query.c as string;
 
   if (!token) {
-    res.status(400).json({ code: 400, message: "Missing token." });
+    res.status(400).json({ code: 400, message: 'Missing token.' });
     return;
   }
 
@@ -104,7 +104,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .json({ code: 400, message: "Token is invalid or expired." });
+      .json({ code: 400, message: 'Token is invalid or expired.' });
   }
 }
 
@@ -112,7 +112,7 @@ async function resetPassHandler(req: Request, res: Response) {
   if (!req.query.r || !req.body.password || !req.body.password_confirmation) {
     res.status(400).json({
       code: 400,
-      message: "Missing token or password.",
+      message: 'Missing token or password.',
     });
     return;
   }
@@ -128,7 +128,7 @@ async function resetPassHandler(req: Request, res: Response) {
   } else {
     res
       .status(400)
-      .json({ code: 400, message: "Token is invalid or expired." });
+      .json({ code: 400, message: 'Token is invalid or expired.' });
   }
 }
 
@@ -141,12 +141,12 @@ async function me(req: Request, res: Response) {
   }
 }
 
-userRouter.post("/signin", signInHandler);
-userRouter.post("/signup", signUpHandler);
-userRouter.post("/signout", signOut);
+userRouter.post('/signin', signInHandler);
+userRouter.post('/signup', signUpHandler);
+userRouter.post('/signout', signOut);
 
-userRouter.get("/confirm", confirmEmailHandler);
-userRouter.get("/password-reset", resetPassHandler);
-userRouter.get("/me", me);
+userRouter.get('/confirm', confirmEmailHandler);
+userRouter.get('/password-reset', resetPassHandler);
+userRouter.get('/me', me);
 
 export default userRouter;

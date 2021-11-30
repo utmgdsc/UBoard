@@ -127,6 +127,8 @@ async function resetPassHandler(req: Request, res: Response) {
     return;
   }
 
+  console.error(req.body.token);
+
   const status = await uContr.resetPassword(
     req.query.token as string,
     req.body.password

@@ -197,17 +197,22 @@ export default class UserController {
     const dbTokenFormat = `${type}:${token}`;
     var user: User | null = null;
 
+    console.error(dbTokenFormat);
+
     try {
       user = await this.userRepo.findOne({
         where: { confirmationToken: dbTokenFormat },
       });
       const currTime = new Date().getTime();
+      console.error(user);
+      console.error(currTime);
       if (
         !user ||
         user.confirmationToken !== dbTokenFormat ||
         user.confirmationTokenExpires.getTime() <= currTime
-      )
+      ) {
         return null;
+      }
     } catch (err) {
       console.error(`validateToken failed: ${err}`);
       return null;

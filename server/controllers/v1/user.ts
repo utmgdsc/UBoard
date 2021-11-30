@@ -197,15 +197,11 @@ export default class UserController {
     const dbTokenFormat = `${type}:${token}`;
     var user: User | null = null;
 
-    console.error(dbTokenFormat);
-
     try {
       user = await this.userRepo.findOne({
         where: { confirmationToken: dbTokenFormat },
       });
       const currTime = new Date().getTime();
-      console.error(user);
-      console.error(currTime);
       if (
         !user ||
         user.confirmationToken !== dbTokenFormat ||
@@ -227,7 +223,7 @@ export default class UserController {
     emailAddress: string
   ): Promise<{ status: number; data?: { message: string } }> {
     const user: User | null = await this.userRepo.findOne({
-      where: { email: emailAddress.toLowerCase() },
+      where: { email: emailAddress.toLowerCase(), confirmed: true },
     });
     if (!user) {
       return { status: 400, data: { message: 'Invalid email address.' } };

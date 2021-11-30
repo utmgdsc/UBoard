@@ -5,8 +5,8 @@ import Avatar from "@mui/material/Avatar";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import Checkbox from "@mui/material/Checkbox";
+// import FormControlLabel from "@mui/material/FormControlLabel";
+// import Checkbox from "@mui/material/Checkbox";
 import Link from "@mui/material/Link";
 import Typography from "@mui/material/Typography";
 
@@ -193,10 +193,11 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
           error={signinFormErrors.password !== ""}
           helperText={signinFormErrors.password}
         />
-        <FormControlLabel
+        {/* will be implemented in future PR (after search) */}
+        {/* <FormControlLabel
           control={<Checkbox value="remember" color="primary" />}
           label="Remember me"
-        />
+        /> */}
         <Button
           type="submit"
           variant="contained"

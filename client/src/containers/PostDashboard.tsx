@@ -27,11 +27,20 @@ function RecentPosts(props: {
   React.useEffect(() => {
     const interval = setInterval(() => {
       if (!openedPost) {
-        api
-          .fetchRecentPosts(
+        let result;
+        if (!props.query) {
+          result = api.fetchRecentPosts(
             POSTS_PER_PAGE,
             POSTS_PER_PAGE * (props.pageNum - 1)
-          )
+          );
+        } else {
+          result = api.fetchPostsBySearch(
+            props.query,
+            POSTS_PER_PAGE,
+            POSTS_PER_PAGE * (props.pageNum - 1)
+          );
+        }
+        result
           .then((res) => {
             if (res.data && res.data.data.result) {
               updateRecent(res.data.data.result);
@@ -42,15 +51,15 @@ function RecentPosts(props: {
           })
           .catch((err) => console.log(err));
       }
-    }, 500);
+    }, 5000);
 
     return () => clearInterval(interval);
   });
 
   /* Fetch posts triggered by page-change or post dialog close */
   React.useEffect(() => {
-    let result;
     if (!openedPost) {
+      let result;
       if (!props.query) {
         result = api.fetchRecentPosts(
           POSTS_PER_PAGE,

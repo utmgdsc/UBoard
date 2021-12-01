@@ -162,8 +162,8 @@ export default class PostController {
         result: data[0].map((p) => {
           // Must case to `any` as dataValues is not typed at the moment.
           // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
-          p.likeCount = (p as any).dataValues.likeCount;
-          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          // p.likeCount = (p as any).dataValues.likeCount;
+          // p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
           return p;
         }),
         count: data[0].length,

@@ -115,4 +115,30 @@ postRouter.put('/:postid', async (req: Request, res: Response) => {
   }
 });
 
+postRouter.get('/search', async (req: Request, res: Response) => {
+  const query = req.query.query as string;
+  const limit = req.query.limit;
+  const offset = req.query.offset;
+
+  if (!limit || offset == undefined) {
+    return res.status(400).json({
+      code: 400,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
+    });
+  }
+  try {
+    const result = await postController.getPostsByQuery(
+      getAuthUser(res).id,
+      query,
+      Number(limit),
+      Number(offset)
+    );
+    return res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 export default postRouter;

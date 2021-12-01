@@ -110,7 +110,19 @@ function AccountMenu() {
   );
 }
 
-export default function Header() {
+export default function Header(props: { setEscapedQuery: Function }) {
+  const [search, setSearch] = React.useState('');
+
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      props.setEscapedQuery(search);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  });
+
   return (
     <AppBar position='static'>
       <Toolbar sx={{ alignItems: 'center' }}>
@@ -124,6 +136,14 @@ export default function Header() {
           <StyledInputBase
             placeholder='Search'
             inputProps={{ 'aria-label': 'search' }}
+            onChange={(e) => {
+              setSearch(e.target.value);
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                props.setEscapedQuery(search);
+              }
+            }}
           />
         </Search>
         <AccountMenu />

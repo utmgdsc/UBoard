@@ -2,6 +2,7 @@ import sequelize from 'sequelize';
 import { Post } from '../../models/post';
 import { UserPostLikes } from '../../models/userPostLikes';
 import db from '../../models';
+import { QueryTypes } from 'sequelize';
 
 // The return type of a Post associated with the Post's User.
 export type PostUser = Post & {
@@ -89,6 +90,72 @@ export default class PostController {
       }),
       this.postsRepo.count(),
     ]);
+
+    return {
+      status: data[0].count > 0 ? 200 : 204,
+      data: {
+        result: (data[0].rows as any as PostUserPreview[]).map((p) => {
+          // Must case to `any` as dataValues is not typed at the moment.
+          // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
+          p.likeCount = (p as any).dataValues.likeCount;
+          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          return p;
+        }),
+        count: data[0].count,
+        total: data[1],
+      },
+    };
+  }
+
+  async getPostsByQuery(
+    userID: string,
+    query: string,
+    limit: number,
+    offset: number
+  ): Promise<{
+    status: number;
+    data: { result?: PostUserPreview[]; count: number; total: number };
+  }> {
+    await db.sequelize.query(
+      `CREATE TABLE "PostSearches" AS 
+      SELECT *, (
+        setweight(to_tsvector(coalesce("title",'')), 'A') || 
+        setweight(to_tsvector(coalesce("location",'')), 'C') || 
+        setweight(to_tsvector(coalesce("body",'')), 'D')
+      ) as "tsvector" 
+      FROM "Posts";`
+    );
+    const data = await Promise.all([
+      db.sequelize.query(
+        `SELECT 
+          "PostSearch"."id", 
+          "PostSearch"."body", 
+          "PostSearch"."title", 
+          "PostSearch"."createdAt", 
+          "PostSearch"."thumbnail", 
+          (SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+            WHERE "Likes"."postID" = "PostSearch"."id") AS "likeCount", 
+          (SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+            WHERE "Likes"."postID" = "PostSearch"."id" AND "Likes"."userID" = $1) AS "doesUserLike", 
+          "User"."firstName" AS "User.firstName", 
+          "User"."lastName" AS "User.lastName", 
+          "User"."id" AS "User.id", 
+          ts_rank_cd("tsvector", "query", 1|4) as "rank" 
+        FROM "PostSearches" AS "PostSearch" 
+        LEFT OUTER JOIN "Users" AS "User" ON "PostSearch"."UserId" = "PostSearch"."id" 
+        CROSS JOIN to_tsquery($2) AS "query" 
+        WHERE "query" @@ "tsvector" 
+        ORDER BY "PostSearch"."createdAt" DESC 
+        LIMIT $3 
+        OFFSET $4;`,
+        {
+          bind: [userID, query, limit, offset],
+          type: QueryTypes.SELECT,
+        }
+      ),
+      this.postsRepo.count(),
+    ]);
+    await db.sequelize.query(`DROP TABLE "PostSearches";`);
 
     return {
       status: data[0].count > 0 ? 200 : 204,

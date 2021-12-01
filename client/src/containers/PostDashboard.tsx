@@ -16,6 +16,7 @@ export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page.
 const api = new ServerApi();
 
 function RecentPosts(props: {
+  query: string;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
   pageNum: number;
 }) {
@@ -48,9 +49,21 @@ function RecentPosts(props: {
 
   /* Fetch posts triggered by page-change or post dialog close */
   React.useEffect(() => {
+    let result;
     if (!openedPost) {
-      api
-        .fetchRecentPosts(POSTS_PER_PAGE, POSTS_PER_PAGE * (props.pageNum - 1))
+      if (!props.query) {
+        result = api.fetchRecentPosts(
+          POSTS_PER_PAGE,
+          POSTS_PER_PAGE * (props.pageNum - 1)
+        );
+      } else {
+        result = api.fetchPostsBySearch(
+          props.query,
+          POSTS_PER_PAGE,
+          POSTS_PER_PAGE * (props.pageNum - 1)
+        );
+      }
+      result
         .then((res) => {
           if (res.data && res.data.data.result) {
             updateRecent(res.data.data.result);
@@ -78,9 +91,22 @@ export default function PostDashboard() {
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
 
+  const useQuery = (): [string, (q: string) => void] => {
+    const [query, setQuery] = React.useState('');
+
+    const setEscapedQuery = (q: string) => {
+      // escape stuff
+      setQuery(q);
+    };
+
+    return [query, setEscapedQuery];
+  };
+
+  const [query, setEscapedQuery] = useQuery();
+
   return (
     <>
-      <Header />
+      <Header setEscapedQuery={setEscapedQuery} />
       <main>
         <Container
           sx={{ py: 5 }}
@@ -100,7 +126,11 @@ export default function PostDashboard() {
               <CreatePost />
             </Grid>
 
-            <RecentPosts setPageCount={setPageCount} pageNum={page} />
+            <RecentPosts
+              query={query}
+              setPageCount={setPageCount}
+              pageNum={page}
+            />
           </Grid>
         </Container>
       </main>

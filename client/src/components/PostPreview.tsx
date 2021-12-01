@@ -47,9 +47,14 @@ export default function PostPreview(props: {
   postUser: PostUserPreview;
   setOpenedPost: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  // convert to tags list of strings (if there are any)
-  const tags = GenerateTags(
-    props.postUser.Tags ? props.postUser.Tags.map((t) => t.text.trim()) : []
+  // generate tags (if the post has any)
+  const tags = (
+    <GenerateTags
+      tags={
+        props.postUser.Tags ? props.postUser.Tags.map((t) => t.text.trim()) : []
+      }
+      spacing={3}
+    />
   );
 
   return (

@@ -64,51 +64,79 @@ describe('verifying launch of create post component', () => {
     expect(screen.getByTestId('newPostButton')).toBeInTheDocument();
   });
 
-  // it('entering a tag and hitting space will add tag styling and empty the field', () => {
-  //   const tagTextField = screen.getByPlaceholderText('Clubs Math MCS');
-    
+  it('entering a tag and hitting space will add tag styling and empty the field', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
 
-  //   fireEvent.change(tagTextField, {
-  //     target: { value: 'tag1 '},
-  //   });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
 
-  //   expect(screen.getByText('test-tag1')).toBeInTheDocument();
-    
+    // ensure input is cleared, and tag elem is added
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+  });
 
-  // });
+  it('verify that more than 3 tags disable the tag input box', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
 
-  // it('verify that more than 3 tags disable the tag input box', () => {
-  //   const tagTextField = screen.getByTestId('tagsInput');
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag2 ' },
+    });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag3 ' },
+    });
 
-  //   fireEvent.change(tagTextField, {
-  //     target: { value: 'tag1 tag2 tag3'},
-  //   });
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+    expect(screen.getByText('tag2')).toBeInTheDocument();
+    expect(screen.getByText('tag3')).toBeInTheDocument();
+  });
 
-  //   expect(screen.getByTestId('test-tag1')).toBeInTheDocument();
-  //   expect(screen.getByTestId('test-tag2')).toBeInTheDocument();
-  //   expect(screen.getByTestId('test-tag3')).toBeInTheDocument();
+  it('ensure more than 3 tags cannot be added', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
 
-  //   // expect(tagTextField.)
-  // });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag2 ' },
+    });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag3 ' },
+    });
+    expect(tagTextField.disabled).toBeTruthy();
+  });
 
-  // it('backspace will delete the last tag', (  ) => {
-  //   const tagTextField = screen.getByTestId('tagsInput');
-    
-  //   fireEvent.change(tagTextField, {
-  //     target: { value: 'tag1 tag2 '},
-  //   });
+  it('pressing backspace will delete the last tag', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
 
-  //   expect(screen.getByTestId('test-tag1')).toBeInTheDocument();
-  //   expect(screen.getByTestId('tag-test2')).toBeInTheDocument();
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
 
-  //   fireEvent.keyDown(tagTextField,{      
-  //       key: 'Backspace',
-  //   });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag2 ' },
+    });
 
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+    expect(screen.getByText('tag2')).toBeInTheDocument();
 
-  //   expect(screen.getByTestId('test-tag1')).toBeInTheDocument();
-  //   expect(screen.queryByText('tag-test2')).not.toBeInTheDocument();
-    
-  // })
+    fireEvent.keyDown(tagTextField, {
+      key: 'Backspace',
+    });
+    expect(screen.queryByText('tag2')).not.toBeInTheDocument();
+  });
 
 });

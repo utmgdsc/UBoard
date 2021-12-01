@@ -35,7 +35,7 @@ module.exports = (sequelize: Sequelize) => {
   Tag.init(
     {
       text: {
-        type: DataTypes.STRING(24),
+        type: DataTypes.STRING(15),
         allowNull: false,
         primaryKey: true,
         unique: true,

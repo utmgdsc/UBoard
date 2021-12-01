@@ -7,10 +7,10 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 /* Generate pre-formatted TagItems based on an array of provided tags */
-export default function GenerateTags(tags: string[]) {
+export default function GenerateTags(props: {tags: string[], spacing: number }) {
   return (
-    <Stack direction='row' spacing={3} style={{ alignItems: 'center' }}>
-      {tags.map((tag: string) => (
+    <Stack direction='row' spacing={props.spacing} style={{ alignItems: 'center' }}>
+      {props.tags.map((tag: string) => (
         <Tag tag={tag} key={tag} />
       ))}
     </Stack>
@@ -25,7 +25,7 @@ export function Tag(props: { tag: string }) {
   );
 }
 
-export function TagCreator(props: {
+export function PostCreationTags(props: {
   tag: string;
   del: (value: string) => void;
 }) {
@@ -45,13 +45,13 @@ export function TagCreator(props: {
         <Typography variant='caption' sx={{ pl: 1 }}>
           {props.tag}
         </Typography>
-        <Cancel
+        {<Cancel
           sx={{ cursor: 'pointer' }}
           fontSize='small'
           onClick={() => {
             props.del(props.tag);
           }}
-        />
+        /> }
       </Stack>
     </Box>
   );

@@ -12,7 +12,7 @@ import Dialog from '@mui/material/Dialog';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import PreviewPopUp from './PreviewPopUp';
 import Snackbar from '@mui/material/Snackbar';
-import { TagCreator } from './Tags';
+import { PostCreationTags } from './Tags';
 import ServerApi from '../api/v1/index';
 
 const api = new ServerApi();
@@ -205,6 +205,7 @@ function CreatePost() {
                     label='Tags (Seperated by a space. Max of 3 tags)'
                     placeholder='Clubs Math MCS'
                     data-testid='tagsInput'
+                    id='tagsInput'
                     disabled={!allowTagInput}
                     InputProps={{
                       startAdornment: (
@@ -217,7 +218,7 @@ function CreatePost() {
                                 key={t}
                               >
                                 {' '}
-                                <TagCreator
+                                <PostCreationTags
                                   tag={t}
                                   del={handleTagDelete}
                                 />{' '}
@@ -227,6 +228,7 @@ function CreatePost() {
                         </Box>
                       ),
                     }}
+                    inputProps={{maxLength: 15}}
                     size='small'
                     onChange={(e) => {
                       const newTag = e.target.value;
@@ -235,7 +237,7 @@ function CreatePost() {
                         newTag.charAt(newTag.length - 1) === ' '
                       ) {
                         if (!form.tags.includes(newTag.trim())) {
-                          if (form.tags.length == 2) {
+                          if (form.tags.length === 2) {
                             // about to add 3rd tag. Disable input
                             toggleTagInput(false);
                           }

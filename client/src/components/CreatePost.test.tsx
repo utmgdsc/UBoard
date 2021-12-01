@@ -64,18 +64,18 @@ describe('verifying launch of create post component', () => {
     expect(screen.getByTestId('newPostButton')).toBeInTheDocument();
   });
 
-  it('entering a tag and hitting space will add tag styling and empty the field', () => {
-    const tagTextField = screen.getByPlaceholderText('Clubs Math MCS');
+  // it('entering a tag and hitting space will add tag styling and empty the field', () => {
+  //   const tagTextField = screen.getByPlaceholderText('Clubs Math MCS');
     
 
-    fireEvent.change(tagTextField, {
-      target: { value: 'tag1 '},
-    });
+  //   fireEvent.change(tagTextField, {
+  //     target: { value: 'tag1 '},
+  //   });
 
-    expect(screen.getByText('test-tag1')).toBeInTheDocument();
+  //   expect(screen.getByText('test-tag1')).toBeInTheDocument();
     
 
-  });
+  // });
 
   // it('verify that more than 3 tags disable the tag input box', () => {
   //   const tagTextField = screen.getByTestId('tagsInput');

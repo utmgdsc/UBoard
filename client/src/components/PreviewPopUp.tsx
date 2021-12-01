@@ -70,7 +70,7 @@ export default function PreviewPopUp(props: {
               </Grid>
               <Grid item xs={12}>
                 <Typography>Tags: </Typography>
-                <GenerateTags tags={tags} spacing={1}/>
+                <GenerateTags tags={tags}/>
               </Grid>
             </Grid>
           </CardContent>

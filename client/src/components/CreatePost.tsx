@@ -24,6 +24,8 @@ function CreatePost() {
   const [capacityError, setCapacityError] = useState(''); // for capacity input validation
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
   const [allowTagInput, toggleTagInput] = React.useState(true);
+  const [tagInputValue, setTagInputValue] = React.useState('');
+
   const [form, setForm] = useState({
     title: '',
     body: '',
@@ -206,6 +208,7 @@ function CreatePost() {
                     placeholder='Clubs Math MCS'
                     data-testid='tagsInput'
                     id='tagsInput'
+                    value={tagInputValue}
                     disabled={!allowTagInput}
                     InputProps={{
                       startAdornment: (
@@ -248,10 +251,11 @@ function CreatePost() {
                         } // new tag input for each space
                         e.target.value = '';
                       }
+                      setTagInputValue(e.target.value);
                     }}
-                    onKeyDown={(e) => {
+                    onKeyDown={(e) => { // TODO bug
                       // backspace to delete last tag
-                      if (e.key === 'Backspace' && form.tags.length > 0) {
+                      if (e.key === 'Backspace' && form.tags.length > 0 && tagInputValue.length === 0) {
                         handleTagDelete(form.tags[form.tags.length - 1]);
                       }
                     }}

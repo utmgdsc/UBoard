@@ -53,7 +53,6 @@ export default function PostPreview(props: {
       tags={
         props.postUser.Tags ? props.postUser.Tags.map((t) => t.text.trim()) : []
       }
-      spacing={3}
     />
   );
 

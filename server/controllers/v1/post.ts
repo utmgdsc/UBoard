@@ -45,8 +45,7 @@ export default class PostController {
   async getPosts(
     userID: string,
     limit: number,
-    offset: number,
-    query?: string
+    offset: number
   ): Promise<{
     status: number;
     data: { result?: PostUserPreview[]; count: number; total: number };
@@ -145,29 +144,29 @@ export default class PostController {
         LEFT OUTER JOIN "Users" AS "User" ON "PostSearch"."UserId" = "PostSearch"."id" 
         CROSS JOIN to_tsquery($2) AS "query" 
         WHERE "query" @@ "tsvector" 
-        ORDER BY "PostSearch"."createdAt" DESC 
+        ORDER BY "rank" DESC 
         LIMIT $3 
         OFFSET $4;`,
         {
           bind: [userID, query, limit, offset],
           type: QueryTypes.SELECT,
         }
-      ),
+      ) as PostUserPreview[],
       this.postsRepo.count(),
     ]);
     await db.sequelize.query(`DROP TABLE "PostSearches";`);
 
     return {
-      status: data[0].count > 0 ? 200 : 204,
+      status: data[0].length > 0 ? 200 : 204,
       data: {
-        result: (data[0].rows as any as PostUserPreview[]).map((p) => {
+        result: data[0].map((p) => {
           // Must case to `any` as dataValues is not typed at the moment.
           // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
           p.likeCount = (p as any).dataValues.likeCount;
           p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
           return p;
         }),
-        count: data[0].count,
+        count: data[0].length,
         total: data[1],
       },
     };

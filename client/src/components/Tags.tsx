@@ -11,7 +11,7 @@ export default function GenerateTags(tags: string[]) {
   return (
     <Stack direction='row' spacing={3} style={{ alignItems: 'center' }}>
       {tags.map((tag: string) => (
-        <Tag tag={tag} />
+        <Tag tag={tag} key={tag} />
       ))}
     </Stack>
   );
@@ -42,7 +42,9 @@ export function TagCreator(props: {
       }}
     >
       <Stack direction='row' gap={1}>
-        <Typography variant='caption' sx={{pl: 1}}>{props.tag}</Typography>
+        <Typography variant='caption' sx={{ pl: 1 }}>
+          {props.tag}
+        </Typography>
         <Cancel
           sx={{ cursor: 'pointer' }}
           fontSize='small'

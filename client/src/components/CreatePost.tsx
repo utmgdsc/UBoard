@@ -31,12 +31,12 @@ function CreatePost() {
     tags: [] as string[],
     capacity: 0,
     location: '',
-});
+  });
 
   const handleTagDelete = (value: string) => {
-    setForm({...form, tags: form.tags.filter((val) => val !== value)});
+    setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
     toggleTagInput(true);
-  }
+  };
 
   const closeDialog = () => {
     setForm({
@@ -48,9 +48,10 @@ function CreatePost() {
       location: '',
     });
     toggleDialog(false);
+    showAlert(false);
     toggleTagInput(true);
   };
-  
+
   const handleClickOpen = () => {
     setOpenPopup(true);
   };
@@ -203,12 +204,25 @@ function CreatePost() {
                     fullWidth
                     label='Tags (Seperated by a space. Max of 3 tags)'
                     placeholder='Clubs Math MCS'
+                    data-testid='tagsInput'
                     disabled={!allowTagInput}
                     InputProps={{
                       startAdornment: (
-                        <Box sx={{  display: 'flex', pt: 0.5}}>
-                          {form.tags.map((t)=> {
-                            return <Box sx={{pr: 1}}> <TagCreator key={t} tag={t} del={handleTagDelete}/> </Box>
+                        <Box sx={{ display: 'flex', pt: 0.5 }}>
+                          {form.tags.map((t) => {
+                            return (
+                              <Box
+                                data-testid={`test-${t}`}
+                                sx={{ pr: 1 }}
+                                key={t}
+                              >
+                                {' '}
+                                <TagCreator
+                                  tag={t}
+                                  del={handleTagDelete}
+                                />{' '}
+                              </Box>
+                            );
                           })}
                         </Box>
                       ),
@@ -216,17 +230,25 @@ function CreatePost() {
                     size='small'
                     onChange={(e) => {
                       const newTag = e.target.value;
-                      if (newTag.trim().length > 0 && newTag.charAt(newTag.length - 1) === ' '){
+                      if (
+                        newTag.trim().length > 0 &&
+                        newTag.charAt(newTag.length - 1) === ' '
+                      ) {
                         if (!form.tags.includes(newTag.trim())) {
-                          setForm({...form, tags: [...form.tags, e.target.value.trim()]});
+                          if (form.tags.length == 2) {
+                            // about to add 3rd tag. Disable input
+                            toggleTagInput(false);
+                          }
+                          setForm({
+                            ...form,
+                            tags: [...form.tags, e.target.value.trim()],
+                          });
                         } // new tag input for each space
                         e.target.value = '';
                       }
-                      if (form.tags.length >= 3) {
-                        toggleTagInput(false);
-                      }
                     }}
-                    onKeyDown={(e) => { // backspace to delete last tag
+                    onKeyDown={(e) => {
+                      // backspace to delete last tag
                       if (e.key === 'Backspace' && form.tags.length > 0) {
                         handleTagDelete(form.tags[form.tags.length - 1]);
                       }
@@ -287,9 +309,8 @@ function CreatePost() {
                     autoHideDuration={6000}
                     onClose={() => showAlert(false)}
                     message={alertMsg}
-                  />      
+                  />
                 </Grid>
-                
               </Grid>
             </Box>
 

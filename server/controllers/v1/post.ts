@@ -44,7 +44,8 @@ export default class PostController {
   async getPosts(
     userID: string,
     limit: number,
-    offset: number
+    offset: number,
+    query?: string
   ): Promise<{
     status: number;
     data: { result?: PostUserPreview[]; count: number; total: number };
@@ -61,15 +62,15 @@ export default class PostController {
           'thumbnail',
           [
             sequelize.literal(
-              `(SELECT COUNT(*) FROM UserPostLikes as Likes WHERE Likes.postID = Post.id)`
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
             ),
             'likeCount',
           ],
           [
             sequelize.literal(
               // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-              `(SELECT COUNT(*) FROM UserPostLikes as Likes 
-                  WHERE Likes.postID = Post.id AND Likes.userID = ${db.sequelize.escape(
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                  WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
                     `${userID}`
                   )})`
             ),
@@ -131,17 +132,17 @@ export default class PostController {
         'UserId',
         [
           sequelize.literal(
-            `(SELECT COUNT(*) FROM UserPostLikes as Likes WHERE Likes.postID = Post.id)`
+            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
           ),
           'likeCount',
         ],
         [
           sequelize.literal(
             // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-            `(SELECT COUNT(*) FROM UserPostLikes as Likes 
-            WHERE Likes.postID = Post.id AND Likes.userID = ${db.sequelize.escape(
-              `${userID}`
-            )})`
+            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
+                  `${userID}`
+                )})`
           ),
           'doesUserLike',
         ],

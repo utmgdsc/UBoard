@@ -115,8 +115,9 @@ export default class PostController {
     status: number;
     data: { result?: PostUserPreview[]; count: number; total: number };
   }> {
+    await db.sequelize.query(`DROP TABLE IF EXISTS "PostSearches";`);
     await db.sequelize.query(
-      `CREATE TABLE "PostSearches" AS 
+      `CREATE TEMP TABLE "PostSearches" AS 
       SELECT *, (
         setweight(to_tsvector(coalesce("title",'')), 'A') || 
         setweight(to_tsvector(coalesce("location",'')), 'C') || 
@@ -141,7 +142,7 @@ export default class PostController {
           "User"."id" AS "User.id", 
           ts_rank_cd("tsvector", "query", 1|4) as "rank" 
         FROM "PostSearches" AS "PostSearch" 
-        LEFT OUTER JOIN "Users" AS "User" ON "PostSearch"."UserId" = "PostSearch"."id" 
+        LEFT OUTER JOIN "Users" AS "User" ON "PostSearch"."UserId" = "User"."id" 
         CROSS JOIN to_tsquery($2) AS "query" 
         WHERE "query" @@ "tsvector" 
         ORDER BY "rank" DESC 
@@ -154,7 +155,6 @@ export default class PostController {
       ) as PostUserPreview[],
       this.postsRepo.count(),
     ]);
-    await db.sequelize.query(`DROP TABLE "PostSearches";`);
 
     return {
       status: data[0].length > 0 ? 200 : 204,

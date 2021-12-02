@@ -118,7 +118,7 @@ export default class ServerApi {
           message?: string;
         };
       }
-    >('/posts/', { query, limit, offset });
+    >('/posts/search', { query, limit, offset });
   }
 
   async fetchRecentPosts(limit: number, offset: number) {

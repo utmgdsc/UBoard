@@ -342,7 +342,7 @@ export default class PostController {
     if (tags) {
       // could not get adding (multiple) tags to work any other way
       const tagObjs = await Promise.all(
-        tags.map(async (text) => {
+        tags.slice(0, 3).map(async (text) => {
           return this.setupTag(text.trim());
         })
       );

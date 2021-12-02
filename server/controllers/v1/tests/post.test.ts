@@ -89,7 +89,7 @@ describe('Test v1 - Post Controller', () => {
 
       if (result.data.result) {
         const postTags = await getPostTags(result.data.result.id);
-        expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
+        expect(postTags?.map((t) => t.text)).toContainEqual(tags);
       } else {
         expect(true).toBe(false);
       }
@@ -121,7 +121,7 @@ describe('Test v1 - Post Controller', () => {
       expect(result.status).toBe(200);
       if (result.data.result) {
         const postTags = await getPostTags(result.data.result.id);
-        expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
+        expect(postTags?.map((t) => t.text)).toContainEqual(tags);
       } else {
         expect(true).toBe(false);
       }
@@ -129,7 +129,7 @@ describe('Test v1 - Post Controller', () => {
       expect((await getAllTags()).length).toBe(tags.length);
     });
 
-    it('getting a post will include tags', async () => {
+    it('getting a post will include the associated tags', async () => {
       const author = await makeValidUser();
       const tags = ['csc108', 'bananaPepper'];
 
@@ -148,9 +148,7 @@ describe('Test v1 - Post Controller', () => {
           author.id,
           result.data.result.id
         );
-        expect(post.data.result?.Tags?.map((t) => t.text).sort()).toEqual(
-          tags.sort()
-        );
+        expect(post.data.result?.Tags?.map((t) => t.text)).toContainEqual(tags);
       }
     });
 
@@ -212,7 +210,7 @@ describe('Test v1 - Post Controller', () => {
       expect(findResult.status).toBe(404);
     });
 
-    it('deleting a post maintains the same tags on another post', async () => {
+    it('deleting a post does not delete tags', async () => {
       const author = await makeValidUser();
       const tags = ['csc108'];
 

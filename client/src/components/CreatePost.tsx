@@ -58,6 +58,31 @@ function CreatePost() {
     setOpenPopup(true);
   };
 
+  const handleNewTag = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const newTag = e.target.value.trim();
+    const isChange = e.type === 'change'; // since new tag is made onBlur or onChange
+    if (
+      newTag.length > 0 &&
+      (!isChange ||
+        (isChange && e.target.value.charAt(e.target.value.length - 1) === ' '))
+    ) { // new tag for onChange events only when there is a trailing space
+      if (!form.tags.includes(newTag)) {
+        if (form.tags.length === 2) {
+          // about to add 3rd tag. Disable input
+          toggleTagInput(false);
+        }
+        setForm({
+          ...form,
+          tags: [...form.tags, newTag],
+        });
+      } // new tag input for each space
+      e.target.value = '';
+    }
+    setTagInputValue(e.target.value);
+  };
+
   const handleSubmit = () => {
     api
       .createPost(form)
@@ -231,31 +256,17 @@ function CreatePost() {
                         </Box>
                       ),
                     }}
-                    inputProps={{maxLength: 15}}
+                    inputProps={{ maxLength: 15 }}
                     size='small'
-                    onChange={(e) => {
-                      const newTag = e.target.value;
-                      if (
-                        newTag.trim().length > 0 &&
-                        newTag.charAt(newTag.length - 1) === ' '
-                      ) {
-                        if (!form.tags.includes(newTag.trim())) {
-                          if (form.tags.length === 2) {
-                            // about to add 3rd tag. Disable input
-                            toggleTagInput(false);
-                          }
-                          setForm({
-                            ...form,
-                            tags: [...form.tags, e.target.value.trim()],
-                          });
-                        } // new tag input for each space
-                        e.target.value = '';
-                      }
-                      setTagInputValue(e.target.value);
-                    }}
-                    onKeyDown={(e) => { // TODO bug
+                    onBlur={handleNewTag}
+                    onChange={handleNewTag}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                       // backspace to delete last tag
-                      if (e.key === 'Backspace' && form.tags.length > 0 && tagInputValue.length === 0) {
+                      if (
+                        e.key === 'Backspace' &&
+                        form.tags.length > 0 &&
+                        tagInputValue.length === 0
+                      ) {
                         handleTagDelete(form.tags[form.tags.length - 1]);
                       }
                     }}

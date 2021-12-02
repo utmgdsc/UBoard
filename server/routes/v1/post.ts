@@ -91,7 +91,7 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.body,
       req.body.location,
       req.body.capacity,
-      req.body.tags.slice(0, 3) // max of 3 tags allowed
+      req.body.tags
     );
     res.status(result.status).json(result);
   } catch (err) {

@@ -51,7 +51,7 @@ export default function PostPreview(props: {
   const tags = (
     <GenerateTags
       tags={
-        props.postUser.Tags ? props.postUser.Tags.map((t) => t.text.trim()) : []
+        props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []
       }
     />
   );

@@ -78,7 +78,21 @@ describe('verifying launch of create post component', () => {
     expect(screen.getByText('tag1')).toBeInTheDocument();
   });
 
-  it('verify that more than 3 tags disable the tag input box', () => {
+  it('entering a tag and unfocusing the input box will add a new tag', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
+
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1' },
+    });
+
+    fireEvent.blur(tagTextField);
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+  });
+
+  it('verify that 3 tags disable the input, and deleting one re-enables the input', () => {
     const tagTextField = screen.getByPlaceholderText(
       'Clubs Math MCS'
     ) as HTMLInputElement;
@@ -94,26 +108,16 @@ describe('verifying launch of create post component', () => {
     });
 
     expect(tagTextField.value).toBe('');
+    expect(tagTextField.disabled).toBeTruthy();
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.getByText('tag2')).toBeInTheDocument();
     expect(screen.getByText('tag3')).toBeInTheDocument();
-  });
 
-  it('ensure more than 3 tags cannot be added', () => {
-    const tagTextField = screen.getByPlaceholderText(
-      'Clubs Math MCS'
-    ) as HTMLInputElement;
+    fireEvent.keyDown(tagTextField, {
+      key: 'Backspace',
+    });
 
-    fireEvent.change(tagTextField, {
-      target: { value: 'tag1 ' },
-    });
-    fireEvent.change(tagTextField, {
-      target: { value: 'tag2 ' },
-    });
-    fireEvent.change(tagTextField, {
-      target: { value: 'tag3 ' },
-    });
-    expect(tagTextField.disabled).toBeTruthy();
+    expect(tagTextField.disabled).toBeFalsy();
   });
 
   it('pressing backspace will delete the last tag', () => {
@@ -138,5 +142,4 @@ describe('verifying launch of create post component', () => {
     });
     expect(screen.queryByText('tag2')).not.toBeInTheDocument();
   });
-
 });

@@ -133,14 +133,16 @@ export default class PostController {
           "PostSearch"."title", 
           "PostSearch"."createdAt", 
           "PostSearch"."thumbnail", 
-          (SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+          (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "PostSearch"."id") AS "likeCount", 
-          (SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+          (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "PostSearch"."id" AND "Likes"."userID" = $1) AS "doesUserLike", 
-          "User"."firstName" AS "User.firstName", 
-          "User"."lastName" AS "User.lastName", 
-          "User"."id" AS "User.id", 
-          ts_rank_cd("tsvector", "query", 1|4) as "rank" 
+          json_build_object(
+            'firstName', "User"."firstName", 
+            'lastName', "User"."lastName",
+            'id', "User"."id"
+          ) AS "User",
+          ts_rank_cd("tsvector", "query", 1|4) AS "rank" 
         FROM "PostSearches" AS "PostSearch" 
         LEFT OUTER JOIN "Users" AS "User" ON "PostSearch"."UserId" = "User"."id" 
         CROSS JOIN to_tsquery($2) AS "query" 

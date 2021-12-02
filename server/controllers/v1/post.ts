@@ -340,33 +340,20 @@ export default class PostController {
     }
 
     if (tags) {
-      // could not get adding (multiple) tags to work any other way
-      const tagObjs = await Promise.all(
-        tags.slice(0, 3).map(async (text) => {
-          return this.setupTag(text.trim());
-        })
+      const tagObjs = await this.tagsRepo.bulkCreate(
+        // create (or find) our tag objects
+        tags.slice(0, 3).map((t) => {
+          // restrict to max 3 tags
+          return { text: t.trim() };
+        }),
+        {
+          ignoreDuplicates: true,
+        }
       );
-      await post.addTags(tagObjs);
+      await post.addTags(tagObjs); // junction table association
     }
 
     return { status: 200, data: { result: post } };
-  }
-
-  /**
-   * Find, or create, a specific tag entry
-   *
-   * @param text  - The text to be in the tag
-   * @returns The tag object
-   */
-  async setupTag(text: string): Promise<Tag> {
-    // findOrCreate is broken when using sqlite, so I had to make this function.
-    // https://github.com/sequelize/sequelize/issues/5535
-    const data = await this.tagsRepo.findByPk(text);
-    return data
-      ? data
-      : await this.tagsRepo.create({
-          text,
-        });
   }
 
   /**

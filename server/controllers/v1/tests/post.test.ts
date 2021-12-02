@@ -87,11 +87,40 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
 
-      // @ts-ignore
-      const postTags = await getPostTags(result.data.result.id);
+      const postTags = await getPostTags(result.data.result!.id);
       expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
 
       expect(result.status).toBe(200);
+    });
+
+    it('should be able to use one existing tag, and one new tag', async () => {
+      const author = await makeValidUser();
+      const tags = ['csc108'];
+
+      await postController.createPost(
+        author.id,
+        'This is a new post!',
+        'This is a new post!This is a new post!',
+        'location',
+        10,
+        tags
+      );
+
+      expect((await getAllTags()).length).toBe(tags.length);
+
+      const newTag = [...tags, 'new'];
+      const result = await postController.createPost(
+        author.id,
+        'This is another post!',
+        'This is a new post!This is a new post2!',
+        'location',
+        44,
+        newTag
+      );
+
+      expect(
+        (await getPostTags(result.data.result!.id))?.map((t) => t.text).sort()
+      ).toEqual(newTag.sort());
     });
 
     it('should be able to use existing tags', async () => {
@@ -116,8 +145,8 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
       expect(result.status).toBe(200);
-      // @ts-ignore
-      const postTags = await getPostTags(result.data.result.id);
+
+      const postTags = await getPostTags(result.data.result!.id);
       expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
       expect((await getAllTags()).length).toBe(tags.length);
     });
@@ -138,8 +167,8 @@ describe('Test v1 - Post Controller', () => {
       expect(result.status).toBe(200);
 
       const post = await postController.getPost(
-        author.id, // @ts-ignore
-        result.data.result.id
+        author.id,
+        result.data.result!.id
       );
       expect(post.data.result?.Tags?.map((t) => t.text).sort()).toEqual(
         tags.sort()
@@ -226,15 +255,13 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
 
-      // @ts-ignore
-      await postController.deletePost(author.id, deleted.data.result.id);
+      await postController.deletePost(author.id, deleted.data.result!.id);
 
       expect(result.status).toBe(200);
 
-      // @ts-ignore
       const post = await postController.getPost(
-        author.id, // @ts-ignore
-        result.data.result.id
+        author.id!,
+        result.data.result!.id
       );
       expect(post.data.result?.Tags?.map((t) => t.text)).toEqual(tags);
 

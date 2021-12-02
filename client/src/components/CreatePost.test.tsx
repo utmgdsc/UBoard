@@ -111,16 +111,13 @@ describe('verifying launch of create post component', () => {
     expect(tagTextField.disabled).toBeTruthy();
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(screen.getByText('tag2')).toBeInTheDocument();
-    expect(screen.getByText('tag3')).toBeInTheDocument();
-
-    fireEvent.keyDown(tagTextField, {
-      key: 'Backspace',
-    });
+    expect(screen.getByText('tag2')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('tag2-clicker'));
 
     expect(tagTextField.disabled).toBeFalsy();
   });
 
-  it('pressing backspace will delete the last tag', () => {
+  it('pressing backspace will put the tag back in the input box', () => {
     const tagTextField = screen.getByPlaceholderText(
       'Clubs Math MCS'
     ) as HTMLInputElement;
@@ -140,6 +137,6 @@ describe('verifying launch of create post component', () => {
     fireEvent.keyDown(tagTextField, {
       key: 'Backspace',
     });
-    expect(screen.queryByText('tag2')).not.toBeInTheDocument();
+    expect(tagTextField.value).toBe('tag2');
   });
 });

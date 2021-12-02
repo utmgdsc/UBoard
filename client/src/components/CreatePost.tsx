@@ -37,6 +37,7 @@ function CreatePost() {
 
   const handleTagDelete = (value: string) => {
     setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
+    setTagInputValue(value);
     toggleTagInput(true);
   };
 
@@ -67,7 +68,8 @@ function CreatePost() {
       newTag.length > 0 &&
       (!isChange ||
         (isChange && e.target.value.charAt(e.target.value.length - 1) === ' '))
-    ) { // new tag for onChange events only when there is a trailing space
+    ) {
+      // new tag for onChange events only when there is a trailing space
       if (!form.tags.includes(newTag)) {
         if (form.tags.length === 2) {
           // about to add 3rd tag. Disable input
@@ -245,11 +247,10 @@ function CreatePost() {
                                 sx={{ pr: 1 }}
                                 key={t}
                               >
-                                {' '}
                                 <PostCreationTags
                                   tag={t}
                                   del={handleTagDelete}
-                                />{' '}
+                                />
                               </Box>
                             );
                           })}
@@ -267,6 +268,7 @@ function CreatePost() {
                         form.tags.length > 0 &&
                         tagInputValue.length === 0
                       ) {
+                        e.preventDefault();
                         handleTagDelete(form.tags[form.tags.length - 1]);
                       }
                     }}

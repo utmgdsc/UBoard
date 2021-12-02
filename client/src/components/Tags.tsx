@@ -49,6 +49,7 @@ export function PostCreationTags(props: {
           <Cancel
             sx={{ cursor: 'pointer' }}
             fontSize='small'
+            data-testid={`${props.tag}-clicker`}
             onClick={() => {
               props.del(props.tag);
             }}

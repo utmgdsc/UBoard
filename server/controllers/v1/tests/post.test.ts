@@ -87,12 +87,9 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
 
-      if (result.data.result) {
-        const postTags = await getPostTags(result.data.result.id);
-        expect(postTags?.map((t) => t.text)).toContainEqual(tags);
-      } else {
-        expect(true).toBe(false);
-      }
+      // @ts-ignore
+      const postTags = await getPostTags(result.data.result.id);
+      expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
 
       expect(result.status).toBe(200);
     });
@@ -119,13 +116,9 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
       expect(result.status).toBe(200);
-      if (result.data.result) {
-        const postTags = await getPostTags(result.data.result.id);
-        expect(postTags?.map((t) => t.text)).toContainEqual(tags);
-      } else {
-        expect(true).toBe(false);
-      }
-
+      // @ts-ignore
+      const postTags = await getPostTags(result.data.result.id);
+      expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
       expect((await getAllTags()).length).toBe(tags.length);
     });
 
@@ -143,13 +136,14 @@ describe('Test v1 - Post Controller', () => {
       );
 
       expect(result.status).toBe(200);
-      if (result.data.result) {
-        const post = await postController.getPost(
-          author.id,
-          result.data.result.id
-        );
-        expect(post.data.result?.Tags?.map((t) => t.text)).toContainEqual(tags);
-      }
+
+      const post = await postController.getPost(
+        author.id, // @ts-ignore
+        result.data.result.id
+      );
+      expect(post.data.result?.Tags?.map((t) => t.text).sort()).toEqual(
+        tags.sort()
+      );
     });
 
     it('should error on missing parameters', async () => {
@@ -232,20 +226,18 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
 
-      if (!deleted.data.result) {
-        expect(true).toBe(false);
-      } else {
-        await postController.deletePost(author.id, deleted.data.result.id);
-      }
+      // @ts-ignore
+      await postController.deletePost(author.id, deleted.data.result.id);
 
       expect(result.status).toBe(200);
-      if (result.data.result) {
-        const post = await postController.getPost(
-          author.id,
-          result.data.result.id
-        );
-        expect(post.data.result?.Tags?.map((t) => t.text)).toEqual(tags);
-      }
+
+      // @ts-ignore
+      const post = await postController.getPost(
+        author.id, // @ts-ignore
+        result.data.result.id
+      );
+      expect(post.data.result?.Tags?.map((t) => t.text)).toEqual(tags);
+
       expect((await getAllTags()).length).toBe(1);
     });
 

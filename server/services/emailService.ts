@@ -39,7 +39,7 @@ export default class EmailService {
     lastName: string,
     emailAddress: string
   ): Promise<boolean> {
-    const confirmURL = `${this.baseRoute}email-confirmation?c=${confToken}`; // this will be our route
+    const confirmURL = `${this.baseRoute}confirm-account?c=${confToken}`; // this will be our route
     const subjectLine = 'UBoard - Confirm your Email Address';
 
     const body = `Thank you for signing up to UBoard, ${firstName} ${lastName}.

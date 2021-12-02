@@ -158,8 +158,9 @@ export default function PassResetContainer() {
 
     try {
       const { status, data } = await api.resetPass({
-        ...passResetForm,
         token: token,
+        ...passResetForm,
+        confirmPassword: confirmPass,
       });
       if (status !== 204) {
         if (!data) {

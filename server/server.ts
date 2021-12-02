@@ -29,7 +29,7 @@ const noAuthPaths = [
   '/signin',
   '/signup',
   '/signout',
-  '/send-password-reset',
+  '/request-password-reset',
   '/confirm-email',
   '/reset-password',
 ];

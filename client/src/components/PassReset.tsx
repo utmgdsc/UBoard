@@ -80,7 +80,7 @@ function PassReset(props: { handleChange: Function; showAlert: Function }) {
     }
 
     try {
-      const { status, data } = await api.sendPassReset(passResetForm);
+      const { status, data } = await api.requestPasswordReset(passResetForm);
       if (status !== 204) {
         if (!data) {
           throw new Error('Missing error response.');

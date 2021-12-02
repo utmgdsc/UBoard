@@ -83,10 +83,7 @@ function App() {
         <Routes>
           <Route path='/' element={<AuthContainer />} />
           <Route path='/dashboard' element={<ProtectedRoute />} />
-          <Route
-            path='/email-confirmation'
-            element={<EmailConfirmContainer />}
-          />
+          <Route path='/confirm-account' element={<EmailConfirmContainer />} />
           <Route path='/password-reset' element={<PassResetContainer />} />
         </Routes>
       </BrowserRouter>

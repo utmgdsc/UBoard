@@ -179,7 +179,7 @@ describe('v1 - User Controller', () => {
     });
 
     test('Ensure the conf token cannot be used for password reset', async () => {
-      await expect(uContr.resetPassword(rawToken, '')).resolves.toBeFalsy();
+      await expect(uContr.resetPassword(rawToken, '', '')).resolves.toBeFalsy();
     });
 
     test('Consume token and confirm the user account', async () => {
@@ -207,7 +207,6 @@ describe('v1 - User Controller', () => {
 
       testPerson.confirmed = true;
       await testPerson.save();
-      expect(testPerson.confirmed).toBeTruthy();
       const status = await uContr.sendResetEmail(testPerson.email);
       await testPerson.reload();
       rawToken = testPerson.confirmationToken;
@@ -236,9 +235,20 @@ describe('v1 - User Controller', () => {
       await expect(uContr.confirmEmail(rawToken)).resolves.toBeFalsy();
     });
 
+    test('Ensure nothing happens if the new password is invalid', async () => {
+      const pass = testPerson.password;
+      const status: boolean = await uContr.resetPassword(rawToken, 'abc', 'vv');
+      expect(status).toBeFalsy();
+      await testPerson.reload();
+      expect(testPerson.password).toEqual(pass);
+      expect(testPerson.confirmationToken).not.toHaveLength(0);
+      expect(testPerson.confirmationTokenExpires).not.toBeNull();
+    });
+
     test('Ensure token is consumed and new password is set', async () => {
       const status: boolean = await uContr.resetPassword(
         rawToken,
+        'newPassword',
         'newPassword'
       );
       expect(status).toBeTruthy();

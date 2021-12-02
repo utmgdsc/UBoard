@@ -91,7 +91,7 @@ export async function signUpHandler(req: Request, res: Response) {
   res.status(response.status).json(response.data);
 }
 
-async function sendPassResetHandler(req: Request, res: Response) {
+async function requestPasswordResetHandler(req: Request, res: Response) {
   const result = await uContr.sendResetEmail(req.body.email);
   if (result.data) {
     console.error(result.data.message);
@@ -117,7 +117,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
 }
 
 async function resetPassHandler(req: Request, res: Response) {
-  if (!req.body.token || !req.body.password) {
+  if (!req.body.token || !req.body.password || !req.body.confirmPassword) {
     res.status(400).json({
       message: 'Missing token or password.',
     });
@@ -125,8 +125,9 @@ async function resetPassHandler(req: Request, res: Response) {
   }
 
   const status = await uContr.resetPassword(
-    req.body.token as string,
-    req.body.password
+    req.body.token,
+    req.body.password,
+    req.body.confirmPassword
   );
 
   if (status) {
@@ -148,7 +149,7 @@ async function me(req: Request, res: Response) {
 userRouter.post('/signin', signInHandler);
 userRouter.post('/signup', signUpHandler);
 userRouter.post('/signout', signOut);
-userRouter.post('/send-password-reset', sendPassResetHandler);
+userRouter.post('/request-password-reset', requestPasswordResetHandler);
 
 userRouter.put('/confirm-email', confirmEmailHandler);
 userRouter.put('/reset-password', resetPassHandler);

@@ -12,9 +12,7 @@ if (
   !process.env.DATABASE_URL
 ) {
   /* For CI testing */
-  sequelize = new Sequelize('sqlite::memory', {
-    logging: false,
-  });
+  sequelize = new Sequelize('sqlite::memory');
 } else {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',

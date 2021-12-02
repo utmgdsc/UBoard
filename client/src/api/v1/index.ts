@@ -82,7 +82,14 @@ export default class ServerApi {
     }
   }
 
-  protected async put<ResponseDataType, RequestDataType = undefined>(
+  protected async put<ResponseDataType>(
+    path: string
+  ): Promise<{ status: number; data?: ResponseDataType }>;
+  protected async put<RequestDataType, ResponseDataType>(
+    path: string,
+    form: RequestDataType
+  ): Promise<{ status: number; data?: ResponseDataType }>;
+  protected async put<RequestDataType, ResponseDataType>(
     path: string,
     form?: RequestDataType
   ): Promise<{ status: number; data?: ResponseDataType }> {
@@ -183,22 +190,26 @@ export default class ServerApi {
     return await this.post('/users/signout', {});
   }
 
-  async sendPassReset(form: { email: string }) {
+  async requestPasswordReset(form: { email: string }) {
     return await this.post<typeof form, { message: string }>(
-      '/users/send-password-reset',
+      '/users/request-password-reset',
       form
     );
   }
 
   async confirmEmail(form: { token: string }) {
-    return await this.put<{ message: string }, typeof form>(
+    return await this.put<typeof form, { message: string }>(
       '/users/confirm-email',
       form
     );
   }
 
-  async resetPass(form: { password: string; token: string }) {
-    return await this.put<{ message: string }, typeof form>(
+  async resetPass(form: {
+    token: string;
+    password: string;
+    confirmPassword: string;
+  }) {
+    return await this.put<typeof form, { message: string }>(
       '/users/reset-password',
       form
     );

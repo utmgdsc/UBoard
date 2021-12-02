@@ -4,7 +4,7 @@ import db from '../../models';
 // The return type of a Comment associated with the Post's User.
 export type CommentsUser = Comment & {
   User: {
-    userId: string;
+    id: string;
     firstName: string;
     lastName: string;
     createdAt: string;
@@ -39,18 +39,19 @@ export default class CommentController {
   }> {
     const data = await Promise.all([
       // [0] contains the comments and the user it belongs to
-      this.commentsRepo.findByPk(postID, {
+      this.commentsRepo.findAll({
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
-        attributes: ['id', 'body'],
+        attributes: ['id', 'body', 'UserId', 'PostId'],
         include: [
           {
             model: db.User,
-            attributes: ['UserId', 'firstName', 'lastName', 'createdAt'],
+            attributes: ['firstName', 'lastName', 'id', 'createdAt'],
           },
         ],
-        order: [['createdAt', 'DESC']],
+        order: [['createdAt', 'ASC']],
         offset: offset,
+        where: { PostId: postID },
       }),
       // [1] returning the number of comments under this post
       this.commentsRepo.count({ where: { PostId: postID } }),
@@ -86,7 +87,7 @@ export default class CommentController {
       include: [
         {
           model: db.User,
-          attributes: ['UserId', 'firstName', 'lastName', 'createdAt'],
+          attributes: ['id', 'firstName', 'lastName', 'createdAt'],
         },
       ],
     })) as CommentsUser;
@@ -161,7 +162,7 @@ export default class CommentController {
     if (!comment) {
       return {
         status: 500,
-        data: { message: 'Could not create the new post' },
+        data: { message: 'Could not create the new comment' },
       };
     }
 
@@ -187,7 +188,7 @@ export default class CommentController {
   }> {
     const comment = (await this.getComment(commentID)).data.result;
 
-    if (comment && comment.UserId == currentUserId) {
+    if (comment && comment.User.id == currentUserId) {
       try {
         comment.body = body || comment.body;
         await comment.save();

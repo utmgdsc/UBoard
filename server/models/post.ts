@@ -85,7 +85,10 @@ module.exports = (sequelize: Sequelize) => {
         type: DataTypes.UUID,
         allowNull: false,
         validate: {
-          notEmpty: true,
+          len: {
+            args: [25, 1000],
+            msg: 'Length Validation Failed', // Error handling
+          },
         },
       },
     },

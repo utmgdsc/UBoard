@@ -19,29 +19,31 @@ describe('Test v1 - Comment Controller', () => {
     it('should return a list of comments', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
-
       const comments = [
         await makeValidComment(author.id, post.id),
         await makeValidComment(author.id, post.id),
+        await makeValidComment(author.id, post.id),
       ];
-
       const result = await commentController.getComments(post.id, 100, 0);
 
       expect(result.status).toBe(200);
-      expect(result.data.result![0].id).toBe(comments[0].id);
-      expect(result.data.result![1].id).toBe(comments[1].id);
-      expect(result.data.result![0].User.firstName).toBe(author.firstName);
-      expect(result.data.total).toBe(2);
+      for (let index = 0; index < 3; index++) {
+        expect(result.data.result![index].id).toBe(comments[index].id);
+        expect(result.data.result![index].User.firstName).toBe(
+          author.firstName
+        );
+      }
+      expect(result.data.total).toBe(3);
     });
 
-    it('should return an error for a missing post', async () => {
-      const result = await commentController.getComment('123');
+    it('should return an error for a missing comment', async () => {
+      const result = await commentController.getComment('bingBong');
       expect(result.status).toBe(404);
     });
   });
 
   describe('test comment creation', () => {
-    it('should create a new comment wiht valid parameters', async () => {
+    it('should create a new comment with valid parameters', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
       const result = await commentController.createComment(
@@ -53,7 +55,7 @@ describe('Test v1 - Comment Controller', () => {
       expect(result.status).toBe(200);
     });
 
-    it('shoudl error on missing parameters', async () => {
+    it('should error on missing parameters', async () => {
       const author = await makeValidUser();
       const result = await commentController.createComment(
         'This is a new comment!This is a new comment!!',
@@ -110,10 +112,10 @@ describe('Test v1 - Comment Controller', () => {
       expect(result.status).toBe(204);
 
       const findResult = await commentController.getComment(comment.id);
-      expect(findResult).toBe(404);
+      expect(findResult.status).toBe(404);
     });
 
-    it('shouldnt not delete a different comment', async () => {
+    it('should not delete a different comment', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
       const comment = await makeValidComment(author.id, post.id);
@@ -143,14 +145,16 @@ describe('Test v1 - Comment Controller', () => {
         await makeValidComment(author.id, post.id),
         await makeValidComment(author.id, post.id),
       ];
+      const resultBefore = await commentController.getComments(post.id, 100, 0);
+      expect(resultBefore.data.total).toBe(2);
 
       expect(
         (await commentController.deleteComment(author.id, comments[0].id))
           .status
       ).toBe(204);
 
-      const result = await commentController.getComments(post.id, 100, 0);
-      expect(result.data.total).toBe(1);
+      const resultAfter = await commentController.getComments(post.id, 100, 0);
+      expect(resultAfter.data.total).toBe(1);
     });
   });
 });

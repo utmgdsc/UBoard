@@ -40,8 +40,10 @@ module.exports = (sequelize: Sequelize) => {
         type: DataTypes.STRING(200),
         allowNull: false,
         validate: {
-          len: [25, 200],
-          msg: 'Length Validation Failed',
+          len: {
+            args: [25, 1000],
+            msg: 'Length Validation Failed', // Error handling
+          },
         },
       },
       UserId: {

@@ -113,7 +113,12 @@ export async function makeValidComment(
   authorID: string,
   postID: string
 ): Promise<Comment> {
-  return makeComment('This is the body of the comment', authorID, postID);
+  return makeComment(
+    'This is the body of the comment!\
+    This is the body of the comment!',
+    authorID,
+    postID
+  );
 }
 
 /* Ensure that the database is synchronized properly. The sync is forced, so any existing tables

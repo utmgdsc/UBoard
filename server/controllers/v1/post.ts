@@ -106,7 +106,7 @@ export default class PostController {
     };
   }
 
-  async getPostsByQuery(
+  async searchForPosts(
     userID: string,
     query: string,
     limit: number,
@@ -161,13 +161,7 @@ export default class PostController {
     return {
       status: data[0].length > 0 ? 200 : 204,
       data: {
-        result: data[0].map((p) => {
-          // Must case to `any` as dataValues is not typed at the moment.
-          // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
-          // p.likeCount = (p as any).dataValues.likeCount;
-          // p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
-          return p;
-        }),
+        result: data[0],
         count: data[0].length,
         total: data[1],
       },

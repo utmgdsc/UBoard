@@ -28,7 +28,7 @@ postRouter.get('', async (req: Request, res: Response) => {
         Number(offset)
       );
     } else {
-      result = await postController.getPostsByQuery(
+      result = await postController.searchForPosts(
         getAuthUser(res).id,
         query as string,
         Number(limit),

@@ -34,7 +34,7 @@ function RecentPosts(props: {
             POSTS_PER_PAGE * (props.pageNum - 1)
           );
         } else {
-          result = api.fetchPostsBySearch(
+          result = api.searchForPosts(
             props.query,
             POSTS_PER_PAGE,
             POSTS_PER_PAGE * (props.pageNum - 1)
@@ -66,7 +66,7 @@ function RecentPosts(props: {
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
       } else {
-        result = api.fetchPostsBySearch(
+        result = api.searchForPosts(
           props.query,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)

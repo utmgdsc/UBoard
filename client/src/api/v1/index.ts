@@ -107,7 +107,7 @@ export default class ServerApi {
     return await this.get<{}, User>('/users/me', {});
   }
 
-  async fetchPostsBySearch(query: string, limit: number, offset: number) {
+  async searchForPosts(query: string, limit: number, offset: number) {
     return await this.get<
       { query: string; limit: number; offset: number },
       {

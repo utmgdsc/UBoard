@@ -7,7 +7,6 @@ export type CommentsUser = Comment & {
     id: string;
     firstName: string;
     lastName: string;
-    createdAt: string;
   };
 };
 
@@ -46,10 +45,10 @@ export default class CommentController {
         include: [
           {
             model: db.User,
-            attributes: ['firstName', 'lastName', 'id', 'createdAt'],
+            attributes: ['firstName', 'lastName', 'id'],
           },
         ],
-        order: [['createdAt', 'ASC']],
+        order: [['createdAt', 'DESC']],
         offset: offset,
         where: { PostId: postID },
       }),

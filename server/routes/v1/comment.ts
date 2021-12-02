@@ -52,7 +52,7 @@ commentRouter.delete('/:commentid', async (req: Request, res: Response) => {
   }
 });
 
-commentRouter.post(':postid/comments/', async (req: Request, res: Response) => {
+commentRouter.post('', async (req: Request, res: Response) => {
   try {
     const result = await commentController.createComment(
       getAuthUser(res).id,
@@ -65,21 +65,18 @@ commentRouter.post(':postid/comments/', async (req: Request, res: Response) => {
   }
 });
 
-commentRouter.put(
-  '/postid/comments/:commentid',
-  async (req: Request, res: Response) => {
-    try {
-      const result = await commentController.updateComment(
-        getAuthUser(res).id,
-        req.params.commentid,
-        req.body.body
-      );
+commentRouter.put('/:commentid', async (req: Request, res: Response) => {
+  try {
+    const result = await commentController.updateComment(
+      getAuthUser(res).id,
+      req.params.commentid,
+      req.body.body
+    );
 
-      res.status(result.status).json(result);
-    } catch (err) {
-      console.error(err);
-    }
+    res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
   }
-);
+});
 
 export default commentRouter;

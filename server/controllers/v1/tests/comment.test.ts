@@ -25,19 +25,19 @@ describe('Test v1 - Comment Controller', () => {
         await makeValidComment(author.id, post.id),
       ];
       const result = await commentController.getComments(post.id, 100, 0);
-
       expect(result.status).toBe(200);
-      for (let index = 0; index < 3; index++) {
-        expect(result.data.result![index].id).toBe(comments[index].id);
-        expect(result.data.result![index].User.firstName).toBe(
-          author.firstName
-        );
-      }
+      expect(result.data.result!.map((x) => x.id).sort()).toEqual(
+        comments.map((x) => x.id).sort()
+      );
+      expect(
+        result.data.result!.map((x) => x.User.firstName === author.firstName)
+      ).toBeTruthy();
+
       expect(result.data.total).toBe(3);
     });
 
     it('should return an error for a missing comment', async () => {
-      const result = await commentController.getComment('bingBong');
+      const result = await commentController.getComment('123-123');
       expect(result.status).toBe(404);
     });
   });
@@ -66,7 +66,7 @@ describe('Test v1 - Comment Controller', () => {
     });
   });
 
-  describe('post mutation', () => {
+  describe('comment mutation', () => {
     it('should update the comment body', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
@@ -83,7 +83,7 @@ describe('Test v1 - Comment Controller', () => {
       expect(result.data!.result!.body).toBe(newBody);
     });
 
-    it('should not update the comment for invalid user', async () => {
+    it("should only update the author's comment", async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
       const comment = await makeValidComment(author.id, post.id);
@@ -115,7 +115,7 @@ describe('Test v1 - Comment Controller', () => {
       expect(findResult.status).toBe(404);
     });
 
-    it('should not delete a different comment', async () => {
+    it('should not delete a comment not authored by the author', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
       const comment = await makeValidComment(author.id, post.id);

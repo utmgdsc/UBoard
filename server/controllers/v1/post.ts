@@ -115,38 +115,51 @@ export default class PostController {
     status: number;
     data: { result?: PostUserPreview[]; count: number; total: number };
   }> {
-    await db.sequelize.query(`DROP TABLE IF EXISTS "PostSearches";`);
-    await db.sequelize.query(
-      `CREATE TEMP TABLE "PostSearches" AS 
-      SELECT *, (
-        setweight(to_tsvector(coalesce("title",'')), 'A') || 
-        setweight(to_tsvector(coalesce("location",'')), 'C') || 
-        setweight(to_tsvector(coalesce("body",'')), 'D')
-      ) as "tsvector" 
-      FROM "Posts";`
-    );
+    // await db.sequelize.query(`DROP TABLE IF EXISTS "PostSearches";`);
+    // await db.sequelize.query(
+    //   `CREATE TEMP TABLE "PostSearches" AS
+    //   SELECT *, (
+    //     setweight(to_tsvector(coalesce("title",'')), 'A') ||
+    //     setweight(to_tsvector(coalesce("location",'')), 'C') ||
+    //     setweight(to_tsvector(coalesce("body",'')), 'D')
+    //   ) as "tsvector"
+    //   FROM "Posts";`
+    // );
     const data = await Promise.all([
       db.sequelize.query(
         `SELECT 
-          "PostSearch"."id", 
-          "PostSearch"."body", 
-          "PostSearch"."title", 
-          "PostSearch"."createdAt", 
-          "PostSearch"."thumbnail", 
+          "Post"."id", 
+          "Post"."body", 
+          "Post"."title", 
+          "Post"."createdAt", 
+          "Post"."thumbnail", 
           (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
-            WHERE "Likes"."postID" = "PostSearch"."id") AS "likeCount", 
+            WHERE "Likes"."postID" = "Post"."id") AS "likeCount", 
           (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
-            WHERE "Likes"."postID" = "PostSearch"."id" AND "Likes"."userID" = $1) AS "doesUserLike", 
+            WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $1) AS "doesUserLike", 
           json_build_object(
             'firstName', "User"."firstName", 
             'lastName', "User"."lastName",
             'id', "User"."id"
           ) AS "User",
-          ts_rank_cd("tsvector", "query", 1|4) AS "rank" 
-        FROM "PostSearches" AS "PostSearch" 
-        LEFT OUTER JOIN "Users" AS "User" ON "PostSearch"."UserId" = "User"."id" 
+          (
+            setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
+            setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
+            setweight(to_tsvector(coalesce("Post"."body",'')), 'D')
+          ) AS "tsvector",
+          ts_rank_cd((
+            setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
+            setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
+            setweight(to_tsvector(coalesce("Post"."body",'')), 'D')
+          ), "query", 1|4) AS "rank" 
+        FROM "Posts" AS "Post" 
+        LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
         CROSS JOIN to_tsquery($2) AS "query" 
-        WHERE "query" @@ "tsvector" 
+        WHERE "query" @@ (
+          setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
+          setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
+          setweight(to_tsvector(coalesce("Post"."body",'')), 'D')
+        ) 
         ORDER BY "rank" DESC 
         LIMIT $3 
         OFFSET $4;`,

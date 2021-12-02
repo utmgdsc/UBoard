@@ -14,7 +14,13 @@ import ServerApi from './api/v1';
 
 const api = new ServerApi();
 
-export const UserContext: React.Context<User> = React.createContext({} as User);
+export const UserContext: React.Context<{
+  data: User;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}> = React.createContext({
+  data: {} as User,
+  setLoading: {} as React.Dispatch<React.SetStateAction<boolean>>,
+});
 
 const theme = createTheme({
   palette: {
@@ -24,59 +30,58 @@ const theme = createTheme({
   },
 });
 
-function ProtectedRoute(props: { isAuth: boolean }) {
+function ProtectedRoute() {
   const [currentUser, setUser] = React.useState({} as User);
   const [isLoading, setLoading] = React.useState(true);
-  const [authed, setAuthed] = React.useState(props.isAuth);
 
-    React.useEffect(() => {
-    if (!authed) {
-      setUser({} as User);
-      setLoading(true);
-    }
-
-    if (authed && isLoading) {
-      // Only called once per login. Set to false on logout
+  React.useEffect(() => {
+    // Only called once per login. Loading is triggered on signin/logout
+    if (isLoading) {
       api
         .me()
         .then((res) => {
           if (res.status === 200 && res.data) {
             setUser(res.data);
-            setLoading(false);
           }
         })
         .catch((err) => {
+          // not logged in
+          setUser({} as User);
           console.error(err);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
-  }, [authed, isLoading]);
+  }, [isLoading]);
 
-  if (authed && isLoading) { // wait
-    return <h1>Loading..</h1>;
-  }
-
-  if (!isLoading && currentUser.id && authed) {
-    return (<UserContext.Provider value={currentUser}>
-      { <PostDashboard setAuthed={setAuthed}/> }</UserContext.Provider>);
+  if (isLoading) {
+    // wait
+    return <h1>Loading...</h1>;
+  } else if (currentUser.id) {
+    return (
+      <UserContext.Provider
+        value={{ data: currentUser, setLoading: setLoading }}
+      >
+        {<PostDashboard />}
+      </UserContext.Provider>
+    );
   }
 
   return <Navigate to='/' replace />;
 }
 
 function App() {
-  const [authed, setAuthed] = React.useState(false); // necessary to handle logout
-  
   return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <Routes>
-            <Route path='/' element={<AuthContainer setAuthed={setAuthed}/>} />
-            <Route path='/dashboard' element={<ProtectedRoute isAuth={authed}/>} />
-          </Routes>
-        </BrowserRouter>
-      </ThemeProvider>
-    
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <Routes>
+          <Route path='/' element={<AuthContainer />} />
+          <Route path='/dashboard' element={<ProtectedRoute />} />
+        </Routes>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

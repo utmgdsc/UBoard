@@ -128,6 +128,20 @@ export default class ServerApi {
     >(`/posts/${postID}`, {});
   }
 
+  async createPost(form: {
+    title: string;
+    body: string;
+    file: string;
+    tags: string;
+    capacity: number;
+    location: string;
+  }) {
+    return await this.post<typeof form, { result?: Post; message?: string }>(
+      '/posts/',
+      form
+    );
+  }
+
   async signUp(form: {
     email: string;
     userName: string;

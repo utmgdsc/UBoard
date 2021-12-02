@@ -224,8 +224,8 @@ export default function ViewPostDialog(props: {
       .then((res) => {
         if (res.data && res.data.data && res.data.data.result) {
           setData(res.data.data.result);
-          if (userContext) {
-            setIsAuthor(userContext.id === props.postUser.User.id);
+          if (userContext.data) {
+            setIsAuthor(userContext.data.id === props.postUser.User.id);
           }
         }
       })

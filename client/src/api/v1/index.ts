@@ -82,8 +82,9 @@ export default class ServerApi {
     }
   }
 
-  protected async put<ResponseDataType, RequestDataType=undefined>(
-    path: string, form?: RequestDataType
+  protected async put<ResponseDataType, RequestDataType = undefined>(
+    path: string,
+    form?: RequestDataType
   ): Promise<{ status: number; data?: ResponseDataType }> {
     try {
       let response;
@@ -143,7 +144,7 @@ export default class ServerApi {
   async reportPost(postID: string) {
     return await this.put<{ status: number }>(`/posts/${postID}/report`);
   }
-  
+
   async createPost(form: {
     title: string;
     body: string;
@@ -183,14 +184,23 @@ export default class ServerApi {
   }
 
   async sendPassReset(form: { email: string }) {
-    return await this.post<typeof form, { message: string }>('/users/send-password-reset', form);
+    return await this.post<typeof form, { message: string }>(
+      '/users/send-password-reset',
+      form
+    );
   }
 
   async confirmEmail(form: { token: string }) {
-    return await this.put<{ message: string }, typeof form>('/users/confirm-email', form);
+    return await this.put<{ message: string }, typeof form>(
+      '/users/confirm-email',
+      form
+    );
   }
 
-  async resetPass(form: { password: string, token: string }) {
-    return await this.put<{ message: string }, typeof form>('/users/reset-password', form);
+  async resetPass(form: { password: string; token: string }) {
+    return await this.put<{ message: string }, typeof form>(
+      '/users/reset-password',
+      form
+    );
   }
 }

@@ -16,12 +16,14 @@ export default function PassResetContainer() {
 
   const navigate = useNavigate();
 
-  const [token, setToken] = useState("");
-  const [passResetForm, setPassResetForm] = useState({ password: "" });
-  const [passResetFormErrors, setPassResetFormErrors] = useState({ password: "" });
+  const [token, setToken] = useState('');
+  const [passResetForm, setPassResetForm] = useState({ password: '' });
+  const [passResetFormErrors, setPassResetFormErrors] = useState({
+    password: '',
+  });
 
-  const [confirmPass, setConfirmPass] = useState("");
-  const [confirmPassError, setConfirmPassError] = useState("");
+  const [confirmPass, setConfirmPass] = useState('');
+  const [confirmPassError, setConfirmPassError] = useState('');
 
   const useAlert = (): [
     { severity: string; message: string; display: boolean },
@@ -29,8 +31,8 @@ export default function PassResetContainer() {
     () => void
   ] => {
     const [alert, setAlert] = useState({
-      severity: "success",
-      message: "",
+      severity: 'success',
+      message: '',
       display: false,
     });
 
@@ -44,7 +46,7 @@ export default function PassResetContainer() {
       }
 
       setAlert({ ...alert, display: false });
-    }
+    };
 
     return [alert, showAlert, hideAlert];
   };
@@ -60,7 +62,7 @@ export default function PassResetContainer() {
       clearTimeout(timeout);
     };
   });
-  
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const r = urlParams.get('r');
@@ -74,7 +76,7 @@ export default function PassResetContainer() {
 
   const isFormMissingFields = () => {
     for (const key in passResetForm) {
-      if (passResetForm[key as keyof typeof passResetForm] === "") {
+      if (passResetForm[key as keyof typeof passResetForm] === '') {
         return true;
       }
     }
@@ -82,10 +84,10 @@ export default function PassResetContainer() {
   };
 
   const getErrorMessages = () => {
-    let msg = "";
+    let msg = '';
     for (const key in passResetFormErrors) {
       const err = passResetFormErrors[key as keyof typeof passResetFormErrors];
-      msg += err === "" ? err : `${err}.\n`;
+      msg += err === '' ? err : `${err}.\n`;
     }
     msg = msg.slice(0, -1);
     return msg;
@@ -109,17 +111,17 @@ export default function PassResetContainer() {
     if (!regexPattern.test(checkString)) {
       setHook(errorMessage);
     } else {
-      setHook("");
+      setHook('');
     }
   };
-  
+
   const validateConfirmPass = (): boolean => {
     if (passResetForm.password !== confirmPass) {
-      const errMsg = "Passwords must be matching";
+      const errMsg = 'Passwords must be matching';
       setConfirmPassError(errMsg);
       return false;
     } else {
-      setConfirmPassError("");
+      setConfirmPassError('');
       return true;
     }
   };
@@ -141,37 +143,43 @@ export default function PassResetContainer() {
     event.preventDefault();
 
     const msg = getErrorMessages();
-    if (msg !== "") {
+    if (msg !== '') {
       console.warn(msg);
-      showAlert("warning", msg);
+      showAlert('warning', msg);
       return;
     }
 
     if (isFormMissingFields()) {
-      const msg = "Please fill in all the fields.";
+      const msg = 'Please fill in all the fields.';
       console.warn(msg);
-      showAlert("warning", msg);
+      showAlert('warning', msg);
       return;
     }
 
     try {
-      const { status, data } = await api.resetPass({...passResetForm, token: token });
+      const { status, data } = await api.resetPass({
+        ...passResetForm,
+        token: token,
+      });
       if (status !== 204) {
         if (!data) {
-          throw new Error("Missing error response.");
+          throw new Error('Missing error response.');
         }
         const msg = data.message;
         console.error(msg);
-        showAlert("error", msg);
+        showAlert('error', msg);
       } else {
-        showAlert("success", "Password has been reset! You may now close this tab.");
+        showAlert(
+          'success',
+          'Password has been reset! You may now close this tab.'
+        );
         // navigate to a new page that displays this message instead of using alert
       }
     } catch (error) {
       console.error(error);
       showAlert(
-        "error",
-        "An error occurred while resetting your password. Please try again later."
+        'error',
+        'An error occurred while resetting your password. Please try again later.'
       );
     }
   };
@@ -187,11 +195,8 @@ export default function PassResetContainer() {
         }}
       >
         <Snackbar open={alert.display} onClose={hideAlert}>
-          <Alert
-            onClose={hideAlert}
-            severity={alert.severity as AlertColor}
-          >
-            <Typography sx={{ whiteSpace: "pre-line" }}>
+          <Alert onClose={hideAlert} severity={alert.severity as AlertColor}>
+            <Typography sx={{ whiteSpace: 'pre-line' }}>
               {alert.message}
             </Typography>
           </Alert>
@@ -217,10 +222,10 @@ export default function PassResetContainer() {
                 /.{8,}/,
                 passResetForm.password,
                 handleError(e),
-                "Ensure password is 8 characters or longer"
+                'Ensure password is 8 characters or longer'
               )
             }
-            error={passResetFormErrors.password !== ""}
+            error={passResetFormErrors.password !== ''}
             helperText={passResetFormErrors.password}
           />
           <TextField
@@ -233,7 +238,7 @@ export default function PassResetContainer() {
             data-testid='confirmPassword'
             onChange={(e) => setConfirmPass(e.target.value)}
             onBlur={(e) => validateConfirmPass()}
-            error={confirmPassError !== ""}
+            error={confirmPassError !== ''}
             helperText={confirmPassError}
           />
           <Button

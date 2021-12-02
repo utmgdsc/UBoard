@@ -15,7 +15,7 @@ export default function EmailConfirmContainer() {
 
   const navigate = useNavigate();
 
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState('');
 
   const useAlert = (): [
     { severity: string; message: string; display: boolean },
@@ -23,8 +23,8 @@ export default function EmailConfirmContainer() {
     () => void
   ] => {
     const [alert, setAlert] = useState({
-      severity: "success",
-      message: "",
+      severity: 'success',
+      message: '',
       display: false,
     });
 
@@ -38,7 +38,7 @@ export default function EmailConfirmContainer() {
       }
 
       setAlert({ ...alert, display: false });
-    }
+    };
 
     return [alert, showAlert, hideAlert];
   };
@@ -54,7 +54,7 @@ export default function EmailConfirmContainer() {
       clearTimeout(timeout);
     };
   });
-  
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const c = urlParams.get('c');
@@ -73,20 +73,23 @@ export default function EmailConfirmContainer() {
       const { status, data } = await api.confirmEmail({ token: token });
       if (status !== 204) {
         if (!data) {
-          throw new Error("Missing error response.");
+          throw new Error('Missing error response.');
         }
         const msg = data.message;
         console.error(msg);
-        showAlert("error", msg);
+        showAlert('error', msg);
       } else {
-        showAlert("success", "Email has been confirmed! You may now close this tab.");
+        showAlert(
+          'success',
+          'Email has been confirmed! You may now close this tab.'
+        );
         // navigate to a new page that displays this message instead of using alert
       }
     } catch (error) {
       console.error(error);
       showAlert(
-        "error",
-        "An error occurred while confirming your email. Please try again later."
+        'error',
+        'An error occurred while confirming your email. Please try again later.'
       );
     }
   };
@@ -102,11 +105,8 @@ export default function EmailConfirmContainer() {
         }}
       >
         <Snackbar open={alert.display} onClose={hideAlert}>
-          <Alert
-            onClose={hideAlert}
-            severity={alert.severity as AlertColor}
-          >
-            <Typography sx={{ whiteSpace: "pre-line" }}>
+          <Alert onClose={hideAlert} severity={alert.severity as AlertColor}>
+            <Typography sx={{ whiteSpace: 'pre-line' }}>
               {alert.message}
             </Typography>
           </Alert>

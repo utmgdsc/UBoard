@@ -275,10 +275,7 @@ export default class UserController {
 
   /** Returns true and changes the password of the user associated to the token, given that the token is valid.
    If the token is expired, or invalid, return false. */
-  async resetPassword(
-    token: string,
-    newPass: string
-  ): Promise<boolean> {
+  async resetPassword(token: string, newPass: string): Promise<boolean> {
     const user: User | null = await this.validateToken(token, TOKEN_TYPE.RESET);
 
     if (!user) {

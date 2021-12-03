@@ -26,11 +26,11 @@ describe('Test v1 - Comment Controller', () => {
       ];
       const result = await commentController.getComments(post.id, 100, 0);
       expect(result.status).toBe(200);
-      expect(result.data.result!.map((x) => x.id).sort()).toEqual(
+      expect(result.data.result!.map((c) => c.id).sort()).toEqual(
         comments.map((x) => x.id).sort()
       );
       expect(
-        result.data.result!.map((x) => x.User.firstName === author.firstName)
+        result.data.result!.map((c) => c.User.firstName === author.firstName)
       ).toBeTruthy();
 
       expect(result.data.total).toBe(3);
@@ -83,7 +83,7 @@ describe('Test v1 - Comment Controller', () => {
       expect(result.data!.result!.body).toBe(newBody);
     });
 
-    it("should only update the author's comment", async () => {
+    it('should only update the authors comment', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
       const comment = await makeValidComment(author.id, post.id);

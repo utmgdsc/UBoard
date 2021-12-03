@@ -76,6 +76,30 @@ export async function makePost(
   });
 }
 
+/* Create a (basic) Post entry in our database with the provided userid of the author, 
+title, body, and (optional) tags. Return the post on success, or null on failure. 
+*/
+export async function makePostWithTags(
+  authorid: string,
+  tags: string[]
+): Promise<Post> {
+  const post = await makeValidPost(authorid);
+
+  const tagObjs = await TagModel.bulkCreate(
+    // create (or find) our tag objects
+    tags.slice(0, 3).map((t) => {
+      // restrict to max 3 tags
+      return { text: t.trim() };
+    }),
+    {
+      ignoreDuplicates: true,
+    }
+  );
+  await post.addTags(tagObjs); // allows inserting multiple items into PostTags without directly referencing it
+
+  return post;
+}
+
 export async function makeValidPost(authorID: string): Promise<Post> {
   return makePost(
     authorID,

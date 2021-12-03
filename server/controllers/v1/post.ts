@@ -350,7 +350,7 @@ export default class PostController {
           ignoreDuplicates: true,
         }
       );
-      await post.addTags(tagObjs); // junction table association
+      await post.addTags(tagObjs); // allows inserting multiple items into PostTags without directly referencing it
     }
 
     return { status: 200, data: { result: post } };

@@ -106,8 +106,6 @@ describe('Test v1 - Post Controller', () => {
         tags
       );
 
-      expect((await getAllTags()).length).toBe(tags.length);
-
       const newTag = [...tags, 'new'];
       const result = await postController.createPost(
         author.id,
@@ -121,34 +119,6 @@ describe('Test v1 - Post Controller', () => {
       expect(
         (await getPostTags(result.data.result!.id))?.map((t) => t.text).sort()
       ).toEqual(newTag.sort());
-    });
-
-    it('should be able to use existing tags', async () => {
-      const author = await makeValidUser();
-      const tags = ['csc108', 'bananaPepper'];
-
-      await postController.createPost(
-        author.id,
-        'This is a new post!',
-        'This is a new post!This is a new post!',
-        'location',
-        10,
-        tags
-      );
-      expect((await getAllTags()).length).toBe(tags.length);
-      const result = await postController.createPost(
-        author.id,
-        'This is another post!',
-        'This is a new post!This is a new post2!',
-        'location',
-        44,
-        tags
-      );
-      expect(result.status).toBe(200);
-
-      const postTags = await getPostTags(result.data.result!.id);
-      expect(postTags?.map((t) => t.text).sort()).toEqual(tags.sort());
-      expect((await getAllTags()).length).toBe(tags.length);
     });
 
     it('getting a post will include the associated tags', async () => {

@@ -1,6 +1,13 @@
-import { makeUser, makePost, dbSync } from './testHelpers';
+import {
+  makeUser,
+  makePost,
+  dbSync,
+  getAllTags,
+  getPostTags,
+  makePostWithTags,
+} from './testHelpers';
 
-beforeAll(async () => {
+beforeEach(async () => {
   await dbSync().catch((err) => fail(err));
 });
 
@@ -45,6 +52,22 @@ describe('Post Model', () => {
       await expect(
         makePost(badAuthor.id, 'Short post', 'a')
       ).rejects.toThrowError('Validation error: Length Validation Failed');
+    });
+  });
+
+  describe('Post Tags', () => {
+    it('should be able to use existing tags', async () => {
+      const author = await makeUser('postTester', 'poster@mail.utoronto.ca');
+      const tags = ['csc108', 'bananaPepper'];
+
+      await makePostWithTags(author.id, tags);
+
+      expect((await getAllTags()).length).toBe(tags.length);
+      const result = await makePostWithTags(author.id, tags);
+
+      const postTags = await getPostTags(result.id);
+      expect(postTags!.map((t) => t.text).sort()).toEqual(tags.sort());
+      expect((await getAllTags()).length).toBe(tags.length);
     });
   });
 });

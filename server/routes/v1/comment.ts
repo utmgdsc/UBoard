@@ -8,9 +8,9 @@ const commentController = new CommentController(db.Post);
 
 commentRouter.get('', async (req: Request, res: Response) => {
   try {
-    const limit = req.body.limit;
-    const offset = req.body.offset;
-    const postID = req.params.postid;
+    const limit = req.query.limit;
+    const offset = req.query.offset;
+    const postID = req.body.postid;
     if (!limit || offset == undefined) {
       return res.status(400).json({
         code: 400,
@@ -56,7 +56,7 @@ commentRouter.post('', async (req: Request, res: Response) => {
   try {
     const result = await commentController.createComment(
       getAuthUser(res).id,
-      req.params.postid,
+      req.body.postid,
       req.body.body
     );
     res.status(result.status).json(result);

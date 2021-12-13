@@ -2,15 +2,61 @@ import React from 'react';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
+import Cancel from '@mui/icons-material/Cancel';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 /* Generate pre-formatted TagItems based on an array of provided tags */
-export default function GenerateTags(tags: Array<string>) {
+export default function GenerateTags(props: { tags: string[] }) {
   return (
-    <Stack direction='row' spacing={3} style={{ alignItems: 'center' }}>
-      {tags.map((tag: string) => (
-        <TagItem key={tag}>{tag}</TagItem>
+    <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
+      {props.tags.map((tag: string) => (
+        <Tag tag={tag} key={tag} />
       ))}
     </Stack>
+  );
+}
+
+export function Tag(props: { tag: string }) {
+  return (
+    <>
+      <TagItem key={props.tag}>{props.tag}</TagItem>
+    </>
+  );
+}
+
+export function PostCreationTags(props: {
+  tag: string;
+  del: (value: string) => void;
+}) {
+  return (
+    <Box
+      sx={{
+        background: 'purple',
+        padding: '5px',
+        margin: '5px',
+        justifyContent: 'center',
+        alignContent: 'center',
+        color: '#ffffff',
+        borderRadius: '15px',
+      }}
+    >
+      <Stack direction='row' gap={1}>
+        <Typography variant='caption' sx={{ pl: 1 }}>
+          {props.tag}
+        </Typography>
+        {
+          <Cancel
+            sx={{ cursor: 'pointer' }}
+            fontSize='small'
+            data-testid={`${props.tag}-clicker`}
+            onClick={() => {
+              props.del(props.tag);
+            }}
+          />
+        }
+      </Stack>
+    </Box>
   );
 }
 

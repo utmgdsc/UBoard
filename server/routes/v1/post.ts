@@ -4,7 +4,7 @@ import PostController from '../../controllers/v1/post';
 import { getAuthUser } from '../../middleware/auth';
 
 const postRouter = express.Router();
-const postController = new PostController(db.Post);
+const postController = new PostController(db.Post, db.UserPostLikes, db.Tag);
 
 postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.query.limit;
@@ -18,14 +18,28 @@ postRouter.get('', async (req: Request, res: Response) => {
       } ${!offset ? 'offset' : ''}`,
     });
   }
-
-  const result = await postController.getPosts(Number(limit), Number(offset));
-  return res.status(result.status).json(result);
+  try {
+    const result = await postController.getPosts(
+      getAuthUser(res).id,
+      Number(limit),
+      Number(offset)
+    );
+    return res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.get('/:postid', async (req: Request, res: Response) => {
-  const result = await postController.getPost(req.params.postid);
-  res.status(result.status).json(result);
+  try {
+    const result = await postController.getPost(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.delete('/:postid', async (req: Request, res: Response) => {
@@ -41,8 +55,27 @@ postRouter.delete('/:postid', async (req: Request, res: Response) => {
 });
 
 postRouter.put('/:postid/upvote', async (req: Request, res: Response) => {
-  const result = await postController.upVote(req.params.postid);
-  res.status(result.status);
+  try {
+    const result = await postController.upVote(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+postRouter.put('/:postid/downvote', async (req: Request, res: Response) => {
+  try {
+    const result = await postController.downVote(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.put('/:postid/report', async (req: Request, res: Response) => {
@@ -57,7 +90,8 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.title,
       req.body.body,
       req.body.location,
-      req.body.capacity
+      req.body.capacity,
+      req.body.tags
     );
     res.status(result.status).json(result);
   } catch (err) {

@@ -11,7 +11,7 @@ import CreatePost from '../components/CreatePost';
 
 import ServerApi, { PostUserPreview } from '../api/v1';
 
-export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page. 
+export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page.
 
 const api = new ServerApi();
 
@@ -64,7 +64,11 @@ function RecentPosts(props: {
   return (
     <>
       {recentPosts.map((data) => (
-        <PostPreview key={data.id} postUser={data} setOpenedPost={setOpenedPost} />
+        <PostPreview
+          key={data.id}
+          postUser={data}
+          setOpenedPost={setOpenedPost}
+        />
       ))}
     </>
   );
@@ -76,7 +80,7 @@ export default function PostDashboard() {
 
   return (
     <>
-      <Header/>
+      <Header />
       <main>
         <Container
           sx={{ py: 5 }}
@@ -93,7 +97,7 @@ export default function PostDashboard() {
                 alignItems: 'flex-end',
               }}
             >
-              <CreatePost/>
+              <CreatePost />
             </Grid>
 
             <RecentPosts setPageCount={setPageCount} pageNum={page} />
@@ -116,7 +120,7 @@ export default function PostDashboard() {
             onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
               setPage(pg);
             }}
-            data-testid="test-paginate"
+            data-testid='test-paginate'
             color='primary'
             variant='outlined'
           />

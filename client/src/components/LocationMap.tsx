@@ -28,17 +28,20 @@ export function LocationPickerMap(props: {
   setLocation: React.Dispatch<React.SetStateAction<google.maps.LatLng>>;
 }) {
   const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
-    // initial API load, marker is invisible until user autofills an address
+    // initial API load
+
     const marker = new maps.Marker({
-      position: { lat: 0, lng: 0 },
+      position: { lat: 0, lng: 0 }, // changed on autofill
       map,
       draggable: true,
     });
 
     marker.addListener('dragend', () => {
+      props.setLocation(marker.getPosition() as google.maps.LatLng);
       // update position when marker released
     });
-    marker.setVisible(false);
+
+    marker.setVisible(false); // only show this when user autofills a place
 
     const autocomplete = new google.maps.places.Autocomplete(
       document.getElementById('pac-input') as HTMLInputElement,

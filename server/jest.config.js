@@ -4,4 +4,4 @@ module.exports = {
   testEnvironment: 'node',
 };
 
-require("dotenv").config();
+require('dotenv').config();

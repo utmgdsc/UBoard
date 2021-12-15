@@ -1,9 +1,18 @@
+import sequelize from 'sequelize';
 import { Post } from '../../models/post';
+import { Tag } from '../../models/tags';
+import { UserPostLikes } from '../../models/userPostLikes';
+import { PostTag } from '../../models/PostTags';
 import db from '../../models';
 
 // The return type of a Post associated with the Post's User.
 export type PostUser = Post & {
+  likeCount: number;
+  doesUserLike: boolean;
   User: { id: string; firstName: string; lastName: string };
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
 };
 
 export type PostUserPreview = {
@@ -12,7 +21,12 @@ export type PostUserPreview = {
   body: string;
   title: string;
   createdAt: Date;
+  likeCount: number;
+  doesUserLike: boolean;
 } & {
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
   User: { id: string; firstName: string; lastName: string };
 };
 
@@ -21,9 +35,17 @@ const MAX_RESULTS = 50;
 
 export default class PostController {
   protected postsRepo: typeof Post;
+  protected userPostLikesRepo: typeof UserPostLikes;
+  protected tagsRepo: typeof Tag;
 
-  constructor(postsRepo: typeof Post) {
+  constructor(
+    postsRepo: typeof Post,
+    userPostLikesRepo: typeof UserPostLikes,
+    tagsRepo: typeof Tag
+  ) {
     this.postsRepo = postsRepo;
+    this.userPostLikesRepo = userPostLikesRepo;
+    this.tagsRepo = tagsRepo;
   }
 
   /**
@@ -34,6 +56,7 @@ export default class PostController {
    * @returns A data object containing the results.
    */
   async getPosts(
+    userID: string,
     limit: number,
     offset: number
   ): Promise<{
@@ -44,11 +67,37 @@ export default class PostController {
       this.postsRepo.findAndCountAll({
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
-        attributes: ['id', 'body', 'title', 'createdAt', 'thumbnail'],
+        attributes: [
+          'id',
+          'body',
+          'title',
+          'createdAt',
+          'thumbnail',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
+            ),
+            'likeCount',
+          ],
+          [
+            sequelize.literal(
+              // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                  WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'doesUserLike',
+          ],
+        ],
         include: [
           {
             model: db.User,
             attributes: ['firstName', 'lastName', 'id'],
+          },
+          {
+            model: db.Tag,
+            attributes: ['text'],
           },
         ],
         order: [['createdAt', 'DESC']],
@@ -60,7 +109,13 @@ export default class PostController {
     return {
       status: data[0].count > 0 ? 200 : 204,
       data: {
-        result: data[0].rows as any as PostUserPreview[],
+        result: (data[0].rows as any as PostUserPreview[]).map((p) => {
+          // Must case to `any` as dataValues is not typed at the moment.
+          // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
+          p.likeCount = (p as any).dataValues.likeCount;
+          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          return p;
+        }),
         count: data[0].count,
         total: data[1],
       },
@@ -70,18 +125,52 @@ export default class PostController {
   /**
    * Search for the post by the given ID if it exists.
    *
+   * @param userID - The user making the request.
    * @param postID - The identifier used to find the specific post.
    * @returns The details of the post
    */
-  async getPost(postID: string): Promise<{
+  async getPost(
+    userID: string,
+    postID: string
+  ): Promise<{
     status: number;
     data: { result?: PostUser; message?: string };
   }> {
     const data = (await this.postsRepo.findByPk(postID, {
+      attributes: [
+        'id',
+        'title',
+        'body',
+        'thumbnail',
+        'location',
+        'capacity',
+        'feedbackScore',
+        'UserId',
+        [
+          sequelize.literal(
+            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
+          ),
+          'likeCount',
+        ],
+        [
+          sequelize.literal(
+            // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                  WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+          ),
+          'doesUserLike',
+        ],
+      ],
       include: [
         {
           model: db.User,
           attributes: ['firstName', 'lastName', 'userName'],
+        },
+        {
+          model: db.Tag,
+          attributes: ['text'],
         },
       ],
     })) as PostUser;
@@ -92,10 +181,15 @@ export default class PostController {
         data: { message: `Post ${postID} could not be found` },
       };
     }
-    return {
+    const result = {
       status: 200,
       data: { result: data },
     };
+
+    result.data.result.likeCount = (data as any).dataValues.likeCount;
+    result.data.result.doesUserLike = (data as any).dataValues.doesUserLike;
+
+    return result;
   }
 
   /**
@@ -135,18 +229,17 @@ export default class PostController {
     postID: string,
     amount: 1 | -1
   ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
-    // TODO: We should track which users voted and how frequently, and take action to prevent vote
-    // spamming.
-    const data = await this.getPost(postID);
+    // TODO: Once reporting has been implemented this can be removed
+    const data = await this.postsRepo.findByPk(postID);
 
-    if (data.status != 200) {
-      return data;
+    if (!data) {
+      return { status: 404, data: { message: 'Could not find post.' } };
     }
 
     try {
-      (data.data.result!.feedbackScore as number) += amount;
-      await data.data.result!.save();
-      return { status: 204, data: { result: data.data.result } };
+      (data.feedbackScore as number) += amount;
+      await data.save();
+      return { status: 204, data: { result: data } };
     } catch (err) {
       console.error(`Could not change vote for: ${postID}`);
       return {
@@ -174,13 +267,43 @@ export default class PostController {
 
   /**
    * Upvote a given post.
+   * @param userID - The user voting.
    * @param postID - The post to upvote.
    * @returns A status object indivating whether the post was upvoted.
    */
   async upVote(
+    userID: string,
     postID: string
   ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
-    return this.vote(postID, 1);
+    const result = await this.userPostLikesRepo.likePost(userID, postID);
+    if (result) {
+      return { status: 204 };
+    }
+    return {
+      status: 500,
+      data: { message: `Could not like the post: ${postID}` },
+    };
+  }
+
+  /**
+   * Downvote a post.
+   *
+   * @param userID  - The user voting.
+   * @param postID  - the post being voted on
+   * @returns A status object with the result.
+   */
+  async downVote(
+    userID: string,
+    postID: string
+  ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
+    const result = await this.userPostLikesRepo.unlikePost(userID, postID);
+    if (result) {
+      return { status: 204 };
+    }
+    return {
+      status: 500,
+      data: { message: `Could not unlike the post: ${postID}` },
+    };
   }
 
   /**
@@ -191,8 +314,12 @@ export default class PostController {
     title?: string,
     body?: string,
     location?: string,
-    capacity?: number
-  ): Promise<{ status: number; data: { result?: Post; message?: string } }> {
+    capacity?: number,
+    tags?: string[]
+  ): Promise<{
+    status: number;
+    data: { result?: Post; message?: string };
+  }> {
     if (!title || !body || !location || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
@@ -212,6 +339,20 @@ export default class PostController {
       };
     }
 
+    if (tags) {
+      const tagObjs = await this.tagsRepo.bulkCreate(
+        // create (or find) our tag objects
+        tags.slice(0, 3).map((t) => {
+          // restrict to max 3 tags
+          return { text: t.trim() };
+        }),
+        {
+          ignoreDuplicates: true,
+        }
+      );
+      await post.addTags(tagObjs); // allows inserting multiple items into PostTags without directly referencing it
+    }
+
     return { status: 200, data: { result: post } };
   }
 
@@ -228,7 +369,7 @@ export default class PostController {
     location?: string,
     capacity?: number
   ): Promise<{ status: number; data?: { message?: string; result?: Post } }> {
-    const post = (await this.getPost(postID)).data.result;
+    const post = await this.postsRepo.findByPk(postID);
 
     if (post && post.UserId == currentUserId) {
       try {

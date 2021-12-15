@@ -12,39 +12,77 @@ import Dialog from '@mui/material/Dialog';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import PreviewPopUp from './PreviewPopUp';
 import Snackbar from '@mui/material/Snackbar';
-
+import { PostCreationTags } from './Tags';
 import ServerApi from '../api/v1/index';
 
 const api = new ServerApi();
 
 function CreatePost() {
-  const [form, setForm] = useState({
-    title: '',
-    body: '',
-    file: '',
-    tags: '',
-    capacity: 0,
-    location: '',
-  });
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
   const [alertMsg, setMsg] = useState('An error has occurred'); // for snackbar message
   const [capacityError, setCapacityError] = useState(''); // for capacity input validation
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
+  const [allowTagInput, toggleTagInput] = React.useState(true);
+  const [tagInputValue, setTagInputValue] = React.useState('');
+
+  const [form, setForm] = useState({
+    title: '',
+    body: '',
+    file: '',
+    tags: [] as string[],
+    capacity: 0,
+    location: '',
+  });
+
+  const handleTagDelete = (value: string) => {
+    setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
+    setTagInputValue(value);
+    toggleTagInput(true);
+  };
 
   const closeDialog = () => {
     setForm({
       title: '',
       body: '',
       file: '',
-      tags: '',
+      tags: [],
       capacity: 0,
       location: '',
     });
     toggleDialog(false);
+    showAlert(false);
+    toggleTagInput(true);
   };
+
   const handleClickOpen = () => {
     setOpenPopup(true);
+  };
+
+  const handleNewTag = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
+  ) => {
+    const newTag = e.target.value.trim();
+    const isChange = e.type === 'change'; // since new tag is made onBlur or onChange
+    if (
+      newTag.length > 0 &&
+      (!isChange ||
+        (isChange && e.target.value.charAt(e.target.value.length - 1) === ' '))
+    ) {
+      // new tag for onChange events only when there is a trailing space
+      if (!form.tags.includes(newTag)) {
+        if (form.tags.length === 2) {
+          // about to add 3rd tag. Disable input
+          toggleTagInput(false);
+        }
+        setForm({
+          ...form,
+          tags: [...form.tags, newTag],
+        });
+      } // new tag input for each space
+      e.target.value = '';
+    }
+    setTagInputValue(e.target.value);
   };
 
   const handleSubmit = () => {
@@ -136,7 +174,7 @@ function CreatePost() {
                   <TextField
                     required
                     fullWidth
-                    label='Body'
+                    label='Body (Minimum 25 characters)'
                     inputProps={{ 'data-testid': 'bodyTextField' }}
                     placeholder='Description (minimum 25 characters)'
                     multiline
@@ -190,14 +228,50 @@ function CreatePost() {
                     }
                   />
                 </Grid>
-
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label='Tags (Separate tags by a comma)'
-                    placeholder='Clubs, Math, MCS'
+                    label='Tags (Seperated by a space. Max of 3 tags)'
+                    placeholder='Clubs Math MCS'
+                    data-testid='tagsInput'
+                    id='tagsInput'
+                    value={tagInputValue}
+                    disabled={!allowTagInput}
+                    InputProps={{
+                      startAdornment: (
+                        <Box sx={{ display: 'flex', pt: 0.5 }}>
+                          {form.tags.map((t) => {
+                            return (
+                              <Box
+                                data-testid={`test-${t}`}
+                                sx={{ pr: 1 }}
+                                key={t}
+                              >
+                                <PostCreationTags
+                                  tag={t}
+                                  del={handleTagDelete}
+                                />
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                      ),
+                    }}
+                    inputProps={{ maxLength: 15 }}
                     size='small'
-                    onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                    onBlur={handleNewTag}
+                    onChange={handleNewTag}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
+                      // backspace to delete last tag
+                      if (
+                        e.key === 'Backspace' &&
+                        form.tags.length > 0 &&
+                        tagInputValue.length === 0
+                      ) {
+                        e.preventDefault();
+                        handleTagDelete(form.tags[form.tags.length - 1]);
+                      }
+                    }}
                   />
                 </Grid>
               </Grid>

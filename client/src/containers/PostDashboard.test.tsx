@@ -10,7 +10,8 @@ import ServerApi, { PostUserPreview } from '../api/v1';
 function fakePostPreview(
   title: string,
   body: string,
-  createdAt: string
+  createdAt: string,
+  tags?: string[]
 ): PostUserPreview {
   return {
     id: (Math.random() * 100).toString(),
@@ -18,6 +19,9 @@ function fakePostPreview(
     body,
     title,
     createdAt,
+    likeCount: 0,
+    doesUserLike: false,
+    Tags: [],
     User: {
       id: 'user-123',
       firstName: 'John',
@@ -38,7 +42,7 @@ beforeEach(() => {
 
 describe('Dashboard Interaction', () => {
   it('Account Menu properly opens', () => {
-    render(<PostDashboard/>);
+    render(<PostDashboard />);
     const menuBtn = screen.getByTestId('test-acc-menu-icon');
     expect(screen.queryByTestId('test-post-settings-menu')).toBeNull();
     expect(menuBtn).toBeInTheDocument();

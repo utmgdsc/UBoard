@@ -25,8 +25,10 @@ function ClickMarker(props: { lat: number; lng: number }) {
 }
 
 export function LocationPickerMap(props: {
-  setLocation: React.Dispatch<React.SetStateAction<google.maps.LatLng>>;
-}) {
+  setLocation: (address: string, lat?: number | undefined, lng?: number | undefined) => void
+}) { 
+  const [address, setAddress] = React.useState('');
+
   const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
     // initial API load
 
@@ -37,7 +39,9 @@ export function LocationPickerMap(props: {
     });
 
     marker.addListener('dragend', () => {
-      props.setLocation(marker.getPosition() as google.maps.LatLng);
+      const pos = marker.getPosition() as google.maps.LatLng;
+
+      props.setLocation(address, pos.lat(), pos.lng());
       // update position when marker released
     });
 
@@ -60,27 +64,36 @@ export function LocationPickerMap(props: {
     autocomplete.addListener('place_changed', () => {
       const place = autocomplete.getPlace();
 
-      if (!place.geometry || !place.geometry.location) {
+      if (!place.geometry || !place.geometry.location || !place.name) {
         return;
       }
-      props.setLocation(place.geometry.location);
-      map.setCenter(place.geometry.location);
+      const location = place.geometry.location;
+      props.setLocation(place.name, location.lat(), location.lng());
+      setAddress(place.name);
+      map.setCenter(location);
       map.setZoom(15);
-      marker.setPosition(place.geometry.location);
+      marker.setPosition(location);
       marker.setVisible(true);
     });
   };
 
   return (
     <Stack>
-      <TextField id='pac-input' />
+      <TextField
+        fullWidth
+        size='small'
+        id='pac-input'
+      />
       <Paper
         elevation={5}
-        style={{ height: '50vh', width: '25%' }}
+        style={{ height: '50vh', width: '100%' }}
         sx={{ mt: 2 }}
       >
         <GoogleMapReact
-          bootstrapURLKeys={{ key: process.env.MAPS_API as string, libraries: ['places'] }}
+          bootstrapURLKeys={{
+            key: MAPS_API as string,
+            libraries: ['places'],
+          }}
           defaultCenter={{ lat: 43.59, lng: -79.65 }} // default to GTA
           defaultZoom={8}
           yesIWantToUseGoogleMapApiInternals

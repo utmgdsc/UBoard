@@ -28,6 +28,15 @@ const theme = createTheme({
       main: '#f4003d',
     },
   },
+  components: {
+    MuiCssBaseline: { // Without this maps autofill does not work in CreatePost dialog
+      styleOverrides: `
+          .pac-container {
+            z-index: 1500 !important;
+          }
+        `,
+    },
+  },
 });
 
 function ProtectedRoute() {

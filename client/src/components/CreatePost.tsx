@@ -14,6 +14,11 @@ import PreviewPopUp from './PreviewPopUp';
 import Snackbar from '@mui/material/Snackbar';
 import { PostCreationTags } from './Tags';
 import ServerApi from '../api/v1/index';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
+
+import { LocationPickerMap } from './LocationMap';
 
 const api = new ServerApi();
 
@@ -25,6 +30,7 @@ function CreatePost() {
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
+  const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -33,7 +39,25 @@ function CreatePost() {
     tags: [] as string[],
     capacity: 0,
     location: '',
+    coords: { lat: -1, lng: -1 }, // lat/lng -1 indicates online event.
   });
+
+  const handleLocation = (
+    location: string,
+    lat: number = -1,
+    lng: number = -1
+  ) => {
+    setForm({
+      ...form,
+      location,
+      coords: { lat, lng },
+    });
+  };
+
+  const handleLocationToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    toggleOnlineEvent(e.target.checked);
+    handleLocation('');   // clear any previous entries if they switch between online/offline
+  };
 
   const handleTagDelete = (value: string) => {
     setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
@@ -49,6 +73,7 @@ function CreatePost() {
       tags: [],
       capacity: 0,
       location: '',
+      coords: { lat: -1, lng: -1 },
     });
     toggleDialog(false);
     showAlert(false);
@@ -220,17 +245,6 @@ function CreatePost() {
                 <Grid item xs={12} md={5}>
                   <TextField
                     fullWidth
-                    label='Location'
-                    placeholder='Deerfield Hall'
-                    size='small'
-                    onChange={(e) =>
-                      setForm({ ...form, location: e.target.value })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
                     label='Tags (Seperated by a space. Max of 3 tags)'
                     placeholder='Clubs Math MCS'
                     data-testid='tagsInput'
@@ -273,6 +287,32 @@ function CreatePost() {
                       }
                     }}
                   />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isOnlineEvent}
+                          onChange={handleLocationToggle}
+                        />
+                      }
+                      label='This is an online event'
+                    />
+                  </FormGroup>
+                  {/* Normal text field if event is online, google maps picker otherwise */}
+                  {!isOnlineEvent && (
+                    <LocationPickerMap setLocation={handleLocation} />
+                  )}
+                  {isOnlineEvent && (
+                    <TextField
+                      fullWidth
+                      label='Enter a Location'
+                      placeholder='Zoom'
+                      size='small'
+                      onChange={(e) => handleLocation(e.target.value)}
+                    />
+                  )}
                 </Grid>
               </Grid>
 
@@ -340,6 +380,7 @@ function CreatePost() {
               tags={form.tags}
               eventCapacity={form.capacity}
               location={form.location}
+              coords={form.coords}
               openPopup={openPopup}
               handleClose={() => setOpenPopup(false)}
             ></PreviewPopUp>

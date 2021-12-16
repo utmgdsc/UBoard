@@ -31,6 +31,9 @@ function CreatePost() {
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
   const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);
+  const [location, setLocation] = React.useState(
+    {} as { location: string; lat: number; lng: number }
+  );
 
   const [form, setForm] = useState({
     title: '',
@@ -47,16 +50,27 @@ function CreatePost() {
     lat: number = -1,
     lng: number = -1
   ) => {
-    setForm({
-      ...form,
+    setLocation({
+      // directly updating form in child was buggy
       location,
-      coords: { lat, lng },
+      lat,
+      lng,
     });
   };
 
+  React.useEffect(() => {
+    setForm((form) => {
+      return {
+        ...form,
+        location: location.location,
+        coords: { lat: location.lat, lng: location.lng },
+      };
+    });
+  }, [location]);
+
   const handleLocationToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     toggleOnlineEvent(e.target.checked);
-    handleLocation('');   // clear any previous entries if they switch between online/offline
+    handleLocation(''); // clear any previous entries if they switch between online/offline
   };
 
   const handleTagDelete = (value: string) => {
@@ -310,7 +324,11 @@ function CreatePost() {
                       label='Enter a Location'
                       placeholder='Zoom'
                       size='small'
-                      onChange={(e) => handleLocation(e.target.value)}
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLTextAreaElement | HTMLInputElement
+                        >
+                      ) => handleLocation(e.target.value)}
                     />
                   )}
                 </Grid>

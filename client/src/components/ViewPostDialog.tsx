@@ -18,13 +18,12 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
-import Switch from '@mui/material/Switch'
+import Switch from '@mui/material/Switch';
 
 import { UserContext } from '../App';
 import { LocationMap } from './LocationMap';
 
 import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
-
 
 const api = new ServerApi();
 
@@ -209,25 +208,35 @@ function CapacityBar(props: { maxCapacity: number }) {
   );
 }
 
-function LocationHandler(props: { lat: number, lng: number, location: string }) {
+function LocationHandler(props: {
+  lat: number;
+  lng: number;
+  location: string;
+}) {
   const [isMapVisible, toggleMap] = React.useState(true);
+  const mapEnabled = props.lat !== -1 && props.lng !== -1; // disable google maps with invalid coords
 
   return (
     <>
-      <Typography variant="body2" sx={{ pt: 2 }}>
+      <Typography variant='body2' sx={{ pt: 2 }}>
         Location: {props.location}
-      <Switch
-        checked={isMapVisible}
-        onChange={() => toggleMap((prev) => !prev)}
-        size="medium"
-      />
+        {mapEnabled && (
+          <Switch
+            checked={isMapVisible}
+            onChange={() => toggleMap((prev) => !prev)}
+            size='medium'
+          />
+        )}
       </Typography>
-
-      <LocationMap
-        visible={isMapVisible}
-        lat={props.lat}
-        lng={props.lng}
-      />
+      {/* Show google maps on valid coordinates */}
+      {mapEnabled && (
+        <LocationMap
+          visible={isMapVisible}
+          location={props.location}
+          lat={props.lat}
+          lng={props.lng}
+        />
+      )}
     </>
   );
 }
@@ -330,11 +339,11 @@ export default function ViewPostDialog(props: {
         {/* Top information (author, date, tags..) */}
         <Stack sx={{ pl: 4 }}>
           <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
-            Posted on {new Date(props.postUser.createdAt).toString()} by {" "}
+            Posted on {new Date(props.postUser.createdAt).toString()} by{' '}
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}
-          <LocationHandler lat={0} lng={0} location={postData.location}/>
+          <LocationHandler lat={-1} lng={-1} location={postData.location} />
         </Stack>
 
         {/* Post image and body */}

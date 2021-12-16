@@ -1,36 +1,23 @@
 import React from 'react';
-import LocationOn from '@mui/icons-material/LocationOn';
 import Paper from '@mui/material/Paper';
-import IconButton from '@mui/material/IconButton';
-
-import GoogleMapReact, { Maps } from 'google-map-react';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
+import FormGroup from '@mui/material/FormGroup';
 
-function ClickMarker(props: { lat: number; lng: number }) {
-  return (
-    <>
-      <IconButton
-        onClick={() => {
-          window.open(
-            `https://www.google.com/maps/search/?api=1&query=${props.lat}%2C${props.lng}`,
-            `_blank`
-          );
-        }}
-      >
-        <LocationOn fontSize='large' />
-      </IconButton>
-    </>
-  );
-}
+import GoogleMapReact from 'google-map-react';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch/Switch';
 
 export function LocationPickerMap(props: {
-  setLocation: (address: string, lat?: number | undefined, lng?: number | undefined) => void
-}) { 
-  const [address, setAddress] = React.useState('');
+  setLocation: (address: string, lat?: number, lng?: number) => void;
+}) {
+  const [locationInput, setInput] = React.useState('');
+  const [showMap, toggleMap] = React.useState(true);
 
   const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
     // initial API load
+
+    const geocoder = new google.maps.Geocoder();
 
     const marker = new maps.Marker({
       position: { lat: 0, lng: 0 }, // changed on autofill
@@ -39,10 +26,16 @@ export function LocationPickerMap(props: {
     });
 
     marker.addListener('dragend', () => {
+      // update position when marker released
       const pos = marker.getPosition() as google.maps.LatLng;
 
-      props.setLocation(address, pos.lat(), pos.lng());
-      // update position when marker released
+      geocoder
+        .geocode({ location: { lat: pos.lat(), lng: pos.lng() } })
+        .then((res) => {
+          const addr = res.results[0].formatted_address;
+          setInput(addr); // change input box to where marker was dropped
+          props.setLocation(addr, pos.lat(), pos.lng());
+        });
     });
 
     marker.setVisible(false); // only show this when user autofills a place
@@ -56,7 +49,7 @@ export function LocationPickerMap(props: {
       }
     );
 
-    // Bias the search for the area shown on the map (GTA by default)
+    // Prioritize the current map area in the autofill suggestions
     autocomplete.setBounds(
       new google.maps.LatLngBounds().extend(map.getCenter()!)
     );
@@ -67,9 +60,9 @@ export function LocationPickerMap(props: {
       if (!place.geometry || !place.geometry.location || !place.name) {
         return;
       }
+      setInput(place.formatted_address!);
       const location = place.geometry.location;
       props.setLocation(place.name, location.lat(), location.lng());
-      setAddress(place.name);
       map.setCenter(location);
       map.setZoom(15);
       marker.setPosition(location);
@@ -81,17 +74,30 @@ export function LocationPickerMap(props: {
     <Stack>
       <TextField
         fullWidth
+        value={locationInput}
+        onChange={(e) => setInput(e.target.value)}
         size='small'
         id='pac-input'
       />
+      <FormGroup sx={{ pt: 1 }}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={showMap}
+              onChange={() => toggleMap((prev) => !prev)}
+            />
+          }
+          label='View on Map'
+        />
+      </FormGroup>
       <Paper
         elevation={5}
-        style={{ height: '50vh', width: '100%' }}
-        sx={{ mt: 2 }}
+        style={{ height: showMap ? '35vh' : '0', width: '100%' }}
+        sx={{ mt: 1 }}
       >
         <GoogleMapReact
           bootstrapURLKeys={{
-            key: MAPS_API as string,
+            key: process.env.MAPS_API as string,
             libraries: ['places'],
           }}
           defaultCenter={{ lat: 43.59, lng: -79.65 }} // default to GTA
@@ -106,6 +112,7 @@ export function LocationPickerMap(props: {
 
 export function LocationMap(props: {
   visible: boolean;
+  location: string;
   lat: number;
   lng: number;
 }) {
@@ -113,8 +120,9 @@ export function LocationMap(props: {
     lat: props.lat,
     lng: props.lng,
   };
-  // TODO: look into infoWindow
-  const getOptions = (maps: Maps) => {
+
+  // enable additional options (i.e streetview)
+  const getOptions = (maps: GoogleMapReact.Maps) => {
     return {
       mapTypeControl: true,
       streetViewControl: true,
@@ -130,6 +138,27 @@ export function LocationMap(props: {
     };
   };
 
+  const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
+    const pos = map.getCenter();
+    
+    const info = new google.maps.InfoWindow({
+      content: `<p>${props.location}</p>`
+    })
+
+    const marker = new maps.Marker({
+      position: { lat: pos!.lat(), lng: pos!.lng() },
+      map,
+    });
+
+    marker.addListener('click', () => {
+      info.open({
+        anchor: marker,
+        map,
+        shouldFocus: false,
+      });
+    });
+  };
+
   return props.visible ? (
     <>
       <Paper
@@ -142,10 +171,9 @@ export function LocationMap(props: {
           defaultCenter={center}
           defaultZoom={15}
           options={getOptions}
+          onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
           yesIWantToUseGoogleMapApiInternals
-        >
-          <ClickMarker lat={center.lat} lng={center.lng} />
-        </GoogleMapReact>
+        />
       </Paper>
     </>
   ) : (

@@ -3,10 +3,10 @@ import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Stack from '@mui/material/Stack';
 import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 import GoogleMapReact from 'google-map-react';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Switch from '@mui/material/Switch/Switch';
 
 export function LocationPickerMap(props: {
   setLocation: (address: string, lat?: number, lng?: number) => void;

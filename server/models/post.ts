@@ -1,4 +1,18 @@
-import { Sequelize, Model, UUIDV4, DataTypes, Optional } from 'sequelize';
+import {
+  Sequelize,
+  Model,
+  UUIDV4,
+  DataTypes,
+  Optional,
+  BelongsToManyAddAssociationMixin,
+  BelongsToManyHasAssociationMixin,
+  BelongsToManyCountAssociationsMixin,
+  BelongsToManyCreateAssociationMixin,
+  BelongsToManyGetAssociationsMixin,
+  BelongsToManyAddAssociationsMixin,
+} from 'sequelize';
+import { Tag } from './tags';
+import { PostTag } from './PostTags';
 
 interface PostAttributes {
   id: string;
@@ -8,7 +22,6 @@ interface PostAttributes {
   location: string;
   capacity: Number;
   feedbackScore: Number;
-
   UserId: string;
 }
 
@@ -29,8 +42,14 @@ export class Post
   location!: string;
   capacity!: Number;
   feedbackScore!: Number;
-
   UserId!: string; /* Foreign Key from UserId */
+
+  public getTags!: BelongsToManyGetAssociationsMixin<Tag & PostTag>;
+  public addTag!: BelongsToManyAddAssociationMixin<Tag, string>;
+  public addTags!: BelongsToManyAddAssociationsMixin<Tag, string>;
+  public hasTag!: BelongsToManyHasAssociationMixin<Tag, string>;
+  public countTags!: BelongsToManyCountAssociationsMixin;
+  public createTag!: BelongsToManyCreateAssociationMixin<Tag>;
 
   static associate(model: any) {
     Post.belongsTo(model.User);

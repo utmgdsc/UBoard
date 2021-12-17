@@ -63,4 +63,80 @@ describe('verifying launch of create post component', () => {
   it('closes the dialog when clicked on `Back` button', () => {
     expect(screen.getByTestId('newPostButton')).toBeInTheDocument();
   });
+
+  it('entering a tag and hitting space will add tag styling and empty the field', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
+
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
+
+    // ensure input is cleared, and tag elem is added
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+  });
+
+  it('entering a tag and unfocusing the input box will add a new tag', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
+
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1' },
+    });
+
+    fireEvent.blur(tagTextField);
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+  });
+
+  it('verify that 3 tags disable the input, and deleting one re-enables the input', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
+
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag2 ' },
+    });
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag3 ' },
+    });
+
+    expect(tagTextField.value).toBe('');
+    expect(tagTextField.disabled).toBeTruthy();
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+    expect(screen.getByText('tag2')).toBeInTheDocument();
+    expect(screen.getByText('tag2')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('tag2-clicker'));
+
+    expect(tagTextField.disabled).toBeFalsy();
+  });
+
+  it('pressing backspace will put the tag back in the input box', () => {
+    const tagTextField = screen.getByPlaceholderText(
+      'Clubs Math MCS'
+    ) as HTMLInputElement;
+
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag1 ' },
+    });
+
+    fireEvent.change(tagTextField, {
+      target: { value: 'tag2 ' },
+    });
+
+    expect(tagTextField.value).toBe('');
+    expect(screen.getByText('tag1')).toBeInTheDocument();
+    expect(screen.getByText('tag2')).toBeInTheDocument();
+
+    fireEvent.keyDown(tagTextField, {
+      key: 'Backspace',
+    });
+    expect(tagTextField.value).toBe('tag2');
+  });
 });

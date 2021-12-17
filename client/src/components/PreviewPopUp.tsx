@@ -12,11 +12,13 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 
+import GenerateTags from './Tags';
+
 export default function PreviewPopUp(props: {
   title: string;
   body: string;
   img: string;
-  tags: string;
+  tags: string[];
   eventCapacity: Number;
   location: string;
   openPopup: boolean;
@@ -67,7 +69,8 @@ export default function PreviewPopUp(props: {
                 <Typography>Location: {location}</Typography>
               </Grid>
               <Grid item xs={12}>
-                <Typography>Tags: {tags}</Typography>
+                <Typography>Tags: </Typography>
+                <GenerateTags tags={tags}/>
               </Grid>
             </Grid>
           </CardContent>

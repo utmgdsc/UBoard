@@ -16,7 +16,6 @@ export default function PassResetContainer() {
 
   const navigate = useNavigate();
 
-  const [token, setToken] = useState('');
   const [passResetForm, setPassResetForm] = useState({ password: '' });
   const [passResetFormErrors, setPassResetFormErrors] = useState({
     password: '',
@@ -63,16 +62,12 @@ export default function PassResetContainer() {
     };
   });
 
-  useEffect(() => {
+  const getToken = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const r = urlParams.get('r');
-    if (!r) {
-      console.error('Missing token.');
-      navigate('/');
-      return;
-    }
-    setToken(r);
-  }, [navigate]);
+
+    return r;
+  };
 
   const isFormMissingFields = () => {
     for (const key in passResetForm) {
@@ -142,6 +137,13 @@ export default function PassResetContainer() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const token = getToken();
+    if (!token) {
+      console.error('Missing token.');
+      navigate('/');
+      return;
+    }
+
     const msg = getErrorMessages();
     if (msg !== '') {
       console.warn(msg);
@@ -208,7 +210,13 @@ export default function PassResetContainer() {
         <Typography component='h1' variant='h5'>
           Create new password
         </Typography>
-        <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box
+          component='form'
+          onSubmit={handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+          data-testid='form'
+        >
           <TextField
             margin='normal'
             required

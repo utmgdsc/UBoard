@@ -15,8 +15,6 @@ export default function EmailConfirmContainer() {
 
   const navigate = useNavigate();
 
-  const [token, setToken] = useState('');
-
   const useAlert = (): [
     { severity: string; message: string; display: boolean },
     (type: string, message: string) => void,
@@ -55,19 +53,22 @@ export default function EmailConfirmContainer() {
     };
   });
 
-  useEffect(() => {
+  const getToken = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const c = urlParams.get('c');
-    if (!c) {
+
+    return c;
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const token = getToken();
+    if (!token) {
       console.error('Missing token.');
       navigate('/');
       return;
     }
-    setToken(c);
-  }, [navigate]);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
 
     try {
       const { status, data } = await api.confirmEmail({ token: token });
@@ -117,7 +118,13 @@ export default function EmailConfirmContainer() {
         <Typography component='h1' variant='h5'>
           Confirm email address
         </Typography>
-        <Box component='form' onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box
+          component='form'
+          onSubmit={handleSubmit}
+          noValidate
+          sx={{ mt: 1 }}
+          data-testid='form'
+        >
           <Button
             type='submit'
             fullWidth

@@ -37,6 +37,11 @@ module.exports = {
       coords: {
         // Coordinates to the event (if it is in-person)
         type: DataTypes.JSON,
+        defaultValue: {
+          // if not specified, -1 to indicate online event
+          lat: -1,
+          lng: -1,
+        },
       },
       feedbackScore: {
         /* Post 'score' decreases if it is reported too many times, 

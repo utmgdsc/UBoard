@@ -18,11 +18,13 @@ describe('Post Model', () => {
       expect(author).toBeDefined();
 
       expect(author.userName).toContain('postTester');
+      const coord = { lat: 34.123913028321, lng: -96.123913028321 };
 
       const posted = await makePost(
         author.id,
         'This is a new post!',
-        'Woooo new post new post abcdefghhi!!'
+        'Woooo new post new post abcdefghhi!!',
+        coord
       );
 
       expect(posted).toBeDefined();
@@ -30,6 +32,7 @@ describe('Post Model', () => {
       expect(posted.UserId).toEqual(author.id);
       expect(posted.body).toEqual('Woooo new post new post abcdefghhi!!');
       expect(posted.title).toEqual('This is a new post!');
+      expect(posted.coords).toEqual(coord);
     });
   });
 

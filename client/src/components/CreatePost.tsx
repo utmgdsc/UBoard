@@ -22,6 +22,37 @@ import { LocationPickerMap } from './LocationMap';
 
 const api = new ServerApi();
 
+export const FormContext = React.createContext(
+  {} as {
+    form: {
+      title: string;
+      body: string;
+      file: string;
+      tags: string[];
+      capacity: number;
+      location: string;
+      coords: {
+        lat: number;
+        lng: number;
+      };
+    };
+    setForm: React.Dispatch<
+      React.SetStateAction<{
+        title: string;
+        body: string;
+        file: string;
+        tags: string[];
+        capacity: number;
+        location: string;
+        coords: {
+          lat: number;
+          lng: number;
+        };
+      }>
+    >;
+  }
+);
+
 function CreatePost() {
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
@@ -31,9 +62,6 @@ function CreatePost() {
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
   const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);
-  const [location, setLocation] = React.useState(
-    {} as { location: string; lat: number; lng: number }
-  );
 
   const [form, setForm] = useState({
     title: '',
@@ -45,32 +73,9 @@ function CreatePost() {
     coords: { lat: -1, lng: -1 }, // lat/lng -1 indicates online event.
   });
 
-  const handleLocation = (
-    location: string,
-    lat: number = -1,
-    lng: number = -1
-  ) => {
-    setLocation({
-      // directly updating form in child was buggy
-      location,
-      lat,
-      lng,
-    });
-  };
-
-  React.useEffect(() => {
-    setForm((form) => {
-      return {
-        ...form,
-        location: location.location,
-        coords: { lat: location.lat, lng: location.lng },
-      };
-    });
-  }, [location]);
-
   const handleLocationToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     toggleOnlineEvent(e.target.checked);
-    handleLocation(''); // clear any previous entries if they switch between online/offline
+    setForm({ ...form, location: '', coords: { lat: -1, lng: -1 } }); // clear any previous entries if they switch between online/offline
   };
 
   const handleTagDelete = (value: string) => {
@@ -316,7 +321,9 @@ function CreatePost() {
                   </FormGroup>
                   {/* Normal text field if event is online, google maps picker otherwise */}
                   {!isOnlineEvent && (
-                    <LocationPickerMap setLocation={handleLocation} />
+                    <FormContext.Provider value={{ form, setForm }}>
+                      <LocationPickerMap /> 
+                    </FormContext.Provider>
                   )}
                   {isOnlineEvent && (
                     <TextField
@@ -328,7 +335,7 @@ function CreatePost() {
                         e: React.ChangeEvent<
                           HTMLTextAreaElement | HTMLInputElement
                         >
-                      ) => handleLocation(e.target.value)}
+                      ) => setForm({...form, location: e.target.value})}
                     />
                   )}
                 </Grid>

@@ -91,7 +91,8 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.body,
       req.body.location,
       req.body.capacity,
-      req.body.tags
+      req.body.tags,
+      req.body.coords
     );
     res.status(result.status).json(result);
   } catch (err) {
@@ -107,7 +108,8 @@ postRouter.put('/:postid', async (req: Request, res: Response) => {
       req.body.title,
       req.body.body,
       req.body.location,
-      req.body.capacity
+      req.body.capacity,
+      req.body.coords
     );
 
     res.status(result.status).json(result);

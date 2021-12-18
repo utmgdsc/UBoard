@@ -34,6 +34,10 @@ module.exports = {
       capacity: {
         type: DataTypes.INTEGER /* Optional: An event ad can indicate maximum capacity of attendees */,
       },
+      coords: {
+        // Coordinates to the event (if it is in-person)
+        type: DataTypes.JSON,
+      },
       feedbackScore: {
         /* Post 'score' decreases if it is reported too many times, 
                           can increase if liked. Post with score too low is auto removed.*/

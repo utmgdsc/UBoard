@@ -35,9 +35,12 @@ function CreatePost() {
     location: '',
   });
 
-  const handleTagDelete = (value: string) => {
+  const handleTagDelete = (value: string, emptyInput: boolean = false) => {
     setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
-    setTagInputValue(value);
+    if (!emptyInput) {
+      // put the tag back in the inputbox (allow editing it).
+      setTagInputValue(value);
+    }
     toggleTagInput(true);
   };
 
@@ -59,17 +62,14 @@ function CreatePost() {
     setOpenPopup(true);
   };
 
-  const handleNewTag = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const newTag = e.target.value.trim();
-    const isChange = e.type === 'change'; // since new tag is made onBlur or onChange
+  const handleNewTag = (rawTag: string, onChange: boolean) => {
+    const newTag = rawTag.trim();
+
     if (
       newTag.length > 0 &&
-      (!isChange ||
-        (isChange && e.target.value.charAt(e.target.value.length - 1) === ' '))
+      (!onChange || (onChange && rawTag.charAt(rawTag.length - 1) === ' '))
     ) {
-      // new tag for onChange events only when there is a trailing space
+      // onChange events only create tag when there is a trailing space
       if (!form.tags.includes(newTag)) {
         if (form.tags.length === 2) {
           // about to add 3rd tag. Disable input
@@ -80,9 +80,10 @@ function CreatePost() {
           tags: [...form.tags, newTag],
         });
       } // new tag input for each space
-      e.target.value = '';
+      setTagInputValue('');
+    } else {
+      setTagInputValue(rawTag);
     }
-    setTagInputValue(e.target.value);
   };
 
   const handleSubmit = () => {
@@ -259,8 +260,17 @@ function CreatePost() {
                     }}
                     inputProps={{ maxLength: 15 }}
                     size='small'
-                    onBlur={handleNewTag}
-                    onChange={handleNewTag}
+                    onBlur={(
+                      e: React.FocusEvent<
+                        HTMLInputElement | HTMLTextAreaElement,
+                        Element
+                      >
+                    ) => handleNewTag(e.target.value, false)}
+                    onChange={(
+                      e: React.ChangeEvent<
+                        HTMLInputElement | HTMLTextAreaElement
+                      >
+                    ) => handleNewTag(e.target.value, true)}
                     onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                       // backspace to delete last tag
                       if (
@@ -270,6 +280,10 @@ function CreatePost() {
                       ) {
                         e.preventDefault();
                         handleTagDelete(form.tags[form.tags.length - 1]);
+                      }
+
+                      if (e.key === 'Enter') {
+                        handleNewTag(tagInputValue, false);
                       }
                     }}
                   />

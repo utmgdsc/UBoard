@@ -235,8 +235,10 @@ function PostEditor(props: {
     } else if (form.title === '' || form.location === '') {
       setMsg('Enter all required fields');
       showAlert(true);
+    } else if (isNaN(form.capacity)) {
+      setMsg('Capacity must be a number');
+      showAlert(true);
     } else {
-      // submit form and close editor
       console.log(form);
       api.updatePost(props.id, form);
       props.toggleEdit();
@@ -354,7 +356,7 @@ export default function ViewPostDialog(props: {
 
   React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
-    if (isOpen) {
+    if (isOpen && !isEditing) {
       const interval = setInterval(() => {
         fetchData();
       }, 500);
@@ -373,40 +375,39 @@ export default function ViewPostDialog(props: {
 
   return (
     <>
-      {' '}
-      {isEditing && (
-        <PostEditor
-          id={postData.id}
-          title={postData.title}
-          body={postData.body}
-          location={postData.location}
-          capacity={Number(postData.capacity)}
-          toggleEdit={() => toggleEditor(false)}
-        />
-      )}
-      {!isEditing && (
-        <>
-          <Button
-            data-testid='test-btn-preview'
-            variant='outlined'
-            onClick={() => {
-              toggleDialog(true);
-              props.setOpenedPost(true);
-              fetchData();
-            }}
-            sx={{ mb: 3 }}
-          >
-            Read More
-          </Button>
-          <Dialog
-            fullScreen
-            open={isOpen}
-            onClose={closeDialog}
-            TransitionComponent={Transition}
-            data-testid='test-post-dialog'
-            aria-label='post-dialog'
+      <Button
+        data-testid='test-btn-preview'
+        variant='outlined'
+        onClick={() => {
+          toggleDialog(true);
+          props.setOpenedPost(true);
+          fetchData();
+        }}
+        sx={{ mb: 3 }}
+      >
+        Read More
+      </Button>
+      <Dialog
+        fullScreen
+        open={isOpen}
+        onClose={closeDialog}
+        TransitionComponent={Transition}
+        data-testid='test-post-dialog'
+        aria-label='post-dialog'
+        id={postData.id}
+      >
+        {isEditing && ( // show the editing UI instead of normal post
+          <PostEditor
             id={postData.id}
-          >
+            title={postData.title}
+            body={postData.body}
+            location={postData.location}
+            capacity={Number(postData.capacity)}
+            toggleEdit={() => toggleEditor(false)}
+          />
+        )}
+        {!isEditing && (
+          <>
             <AppBar sx={{ position: 'relative' }}>
               <IconButton
                 data-testid='test-btn-close'
@@ -418,7 +419,6 @@ export default function ViewPostDialog(props: {
                 <ArrowBack />
               </IconButton>
             </AppBar>
-
             {/* Title and Options (3 dots) */}
             <Grid>
               <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
@@ -447,7 +447,6 @@ export default function ViewPostDialog(props: {
               </Typography>
               {/* TODO: Implement Google Maps API */}
             </Stack>
-
             {/* Post image and body */}
             <Stack sx={{ pl: 4 }}>
               <Box
@@ -481,7 +480,6 @@ export default function ViewPostDialog(props: {
                 <LikeButton numLikes={Number(postData.feedbackScore)} />
               </Stack>
             </Stack>
-
             {/* Comment Section */}
             <Stack sx={{ px: 8, pb: 5 }}>
               <Typography variant='h5' sx={{ py: 2 }}>
@@ -496,10 +494,10 @@ export default function ViewPostDialog(props: {
                 Add Comment
               </Button>
             </Stack>
-            {/* TODO: Create Comment component later */}
-          </Dialog>{' '}
-        </>
-      )}
+          </>
+        )}
+        {/* TODO: Create Comment component later */}
+      </Dialog>
     </>
   );
 }

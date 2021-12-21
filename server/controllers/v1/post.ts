@@ -115,16 +115,13 @@ export default class PostController {
     status: number;
     data: { result?: PostUserPreview[]; count: number; total: number };
   }> {
-    // await db.sequelize.query(`DROP TABLE IF EXISTS "PostSearches";`);
-    // await db.sequelize.query(
-    //   `CREATE TEMP TABLE "PostSearches" AS
-    //   SELECT *, (
-    //     setweight(to_tsvector(coalesce("title",'')), 'A') ||
-    //     setweight(to_tsvector(coalesce("location",'')), 'C') ||
-    //     setweight(to_tsvector(coalesce("body",'')), 'D')
-    //   ) as "tsvector"
-    //   FROM "Posts";`
-    // );
+    const weights = `(
+      setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
+      setweight(to_tsvector(coalesce("User"."firstName")), 'B') || 
+      setweight(to_tsvector(coalesce("User"."lastName")), 'B') || 
+      setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
+      setweight(to_tsvector(coalesce("Post"."body",'')), 'D') 
+    )`;
     const data = await Promise.all([
       db.sequelize.query(
         `SELECT 
@@ -136,35 +133,23 @@ export default class PostController {
           (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "Post"."id") AS "likeCount", 
           (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
-            WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $1) AS "doesUserLike", 
+            WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $userID) AS "doesUserLike", 
           json_build_object(
             'firstName', "User"."firstName", 
             'lastName', "User"."lastName",
             'id', "User"."id"
           ) AS "User",
-          (
-            setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
-            setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
-            setweight(to_tsvector(coalesce("Post"."body",'')), 'D')
-          ) AS "tsvector",
-          ts_rank_cd((
-            setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
-            setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
-            setweight(to_tsvector(coalesce("Post"."body",'')), 'D')
-          ), "query", 1|4) AS "rank" 
+          ${weights} AS "tsvector",
+          ts_rank_cd(${weights}, "query", 1|4) AS "rank" 
         FROM "Posts" AS "Post" 
         LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
-        CROSS JOIN to_tsquery($2) AS "query" 
-        WHERE "query" @@ (
-          setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
-          setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
-          setweight(to_tsvector(coalesce("Post"."body",'')), 'D')
-        ) 
+        CROSS JOIN to_tsquery($query) AS "query" 
+        WHERE "query" @@ ${weights} 
         ORDER BY "rank" DESC 
-        LIMIT $3 
-        OFFSET $4;`,
+        LIMIT $limit 
+        OFFSET $offset;`,
         {
-          bind: [userID, query, limit, offset],
+          bind: { userID, query, limit, offset },
           type: QueryTypes.SELECT,
         }
       ) as PostUserPreview[],

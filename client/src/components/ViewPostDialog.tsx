@@ -209,12 +209,12 @@ function CapacityBar(props: { maxCapacity: number }) {
 }
 
 function LocationHandler(props: {
-  lat: number;
-  lng: number;
+  coords?: { lat: number; lng: number };
   location: string;
 }) {
   const [isMapVisible, toggleMap] = React.useState(true);
-  const mapEnabled = props.lat !== -1 && props.lng !== -1; // disable google maps with invalid coords
+  const mapEnabled =
+    props.coords && props.coords.lat !== -1 && props.coords.lng !== -1; // disable google maps with invalid coords
 
   return (
     <>
@@ -233,8 +233,8 @@ function LocationHandler(props: {
         <LocationMap
           visible={isMapVisible}
           location={props.location}
-          lat={props.lat}
-          lng={props.lng}
+          lat={props.coords!.lat}
+          lng={props.coords!.lng}
         />
       )}
     </>
@@ -343,7 +343,7 @@ export default function ViewPostDialog(props: {
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}
-          <LocationHandler lat={-1} lng={-1} location={postData.location} />
+          <LocationHandler coords={postData.coords} location={postData.location} />
         </Stack>
 
         {/* Post image and body */}

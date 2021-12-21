@@ -175,7 +175,7 @@ export function LocationMap(props: {
     <>
       <Paper
         elevation={5}
-        style={{ height: '50vh', width: '75vh' }}
+        style={{ height: '40vh', width: '75vh' }}
         sx={{ mt: 2 }}
       >
         <GoogleMapReact

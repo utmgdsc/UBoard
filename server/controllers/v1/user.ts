@@ -206,8 +206,9 @@ export default class UserController {
         !user ||
         user.confirmationToken !== dbTokenFormat ||
         user.confirmationTokenExpires.getTime() <= currTime
-      )
+      ) {
         return null;
+      }
     } catch (err) {
       console.error(`validateToken failed: ${err}`);
       return null;
@@ -218,15 +219,23 @@ export default class UserController {
 
   /** Generate and send the user an email to reset their password.
       Returns the success status. */
-  async sendResetEmail(emailAddress: string): Promise<boolean> {
+  async sendResetEmail(
+    emailAddress: string
+  ): Promise<{ status: number; data?: { message: string } }> {
     const user: User | null = await this.userRepo.findOne({
-      where: { email: emailAddress.toLowerCase() },
+      where: { email: emailAddress.toLowerCase(), confirmed: true },
     });
     if (!user) {
-      return false;
+      return { status: 400, data: { message: 'Invalid email address.' } };
+    }
+    if (!(await this.generateToken(user, TOKEN_TYPE.RESET))) {
+      return {
+        status: 500,
+        data: { message: 'Failed to generate password reset email.' },
+      };
     }
 
-    return await this.generateToken(user, TOKEN_TYPE.RESET);
+    return { status: 204 };
   }
 
   /** Generate and send the user an email to confirm their account.

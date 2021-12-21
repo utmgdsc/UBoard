@@ -93,11 +93,12 @@ export default class ServerApi {
     }
   }
 
-  protected async put<ResponseDataType>(
-    path: string
+  protected async put<RequestDataType, ResponseDataType>(
+    path: string,
+    params?: RequestDataType
   ): Promise<{ status: number; data?: ResponseDataType }> {
     try {
-      const response = await this.api.put(path);
+      const response = await this.api.put(path, params);
       return { status: response.status, data: response.data };
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -153,6 +154,21 @@ export default class ServerApi {
     );
   }
 
+  async updatePost(
+    postID: string,
+    form: {
+      title: string;
+      body: string;
+      location: string;
+      capacity: number;
+    }
+  ) {
+    return await this.put<typeof form, { result?: Post; message?: string }>(
+      `/posts/${postID}`,
+      form
+    );
+  }
+
   async signUp(form: {
     email: string;
     userName: string;
@@ -171,11 +187,11 @@ export default class ServerApi {
   }
 
   async likePost(postID: string) {
-    return await this.put<{ status: number }>(`/posts/${postID}/upvote`);
+    return await this.put<{}, { status: number }>(`/posts/${postID}/upvote`);
   }
 
   async reportPost(postID: string) {
-    return await this.put<{ status: number }>(`/posts/${postID}/report`);
+    return await this.put<{}, { status: number }>(`/posts/${postID}/report`);
   }
 
   async signIn(form: { userName: string; password: string }) {

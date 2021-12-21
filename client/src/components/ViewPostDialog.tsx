@@ -42,6 +42,7 @@ function MoreOptions(props: {
   postID: string;
   isAuth: boolean;
   closeDialog: Function;
+  toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
@@ -115,7 +116,7 @@ function MoreOptions(props: {
       >
         {props.isAuth ? (
           <>
-            <MenuItem onClick={closeMenu}>Edit</MenuItem>
+            <MenuItem onClick={() => props.toggleEdit(true)}>Edit</MenuItem>
             <MenuItem onClick={deletePost}>Delete</MenuItem>
           </>
         ) : (
@@ -206,6 +207,124 @@ function CapacityBar(props: { maxCapacity: number }) {
   );
 }
 
+function PostEditor(props: {
+  id: string;
+  title: string;
+  body: string;
+  location: string;
+  capacity: number;
+  toggleEdit: () => void;
+}) {
+  const [alertMsg, setMsg] = React.useState(
+    'Error. Ensure all fields are filled'
+  );
+  const [capacityError, setCapacityError] = React.useState('');
+  const [isAlertOpen, showAlert] = React.useState(false);
+
+  const [form, setForm] = React.useState({
+    title: props.title,
+    body: props.body,
+    capacity: props.capacity,
+    location: props.location,
+  });
+
+  const handleSubmit = () => {
+    if (form.body.length < 25) {
+      setMsg('Body must be atleast 25 characters');
+      showAlert(true);
+    } else if (form.title === '' || form.location === '') {
+      setMsg('Enter all required fields');
+      showAlert(true);
+    } else {
+      // submit form and close editor
+      console.log(form);
+      api.updatePost(props.id, form);
+      props.toggleEdit();
+    }
+  };
+
+  return (
+    <>
+      <AppBar sx={{ position: 'relative' }}>
+        <IconButton
+          data-testid='test-btn-edit-close'
+          edge='start'
+          color='inherit'
+          onClick={props.toggleEdit}
+          aria-label='close'
+        >
+          <ArrowBack />
+        </IconButton>
+      </AppBar>
+
+      <Stack sx={{ pt: 5, pl: 4, px: 4 }}>
+        <Typography> Title </Typography>
+        <TextField
+          fullWidth
+          defaultValue={props.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+      </Stack>
+
+      {/* Top information (author, date, tags..) */}
+      <Stack sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}>
+        {/* {GenerateTags(['Tag 1', 'Tag 2'])} */}
+        <Typography> Location </Typography>
+        <TextField
+          size='small'
+          defaultValue={props.location}
+          onChange={(e) => setForm({ ...form, location: e.target.value })}
+        />
+      </Stack>
+
+      {/* Post image and body */}
+      <Stack sx={{ pl: 4, px: 4 }}>
+        <Typography> Body </Typography>
+        <TextField
+          defaultValue={props.body}
+          fullWidth
+          multiline
+          onChange={(e) => setForm({ ...form, body: e.target.value })}
+        />
+        <Stack sx={{ pt: 2, pb: 2 }}>
+          <Typography> Capacity </Typography>
+          <TextField
+            size='small'
+            defaultValue={props.capacity}
+            onChange={(e) =>
+              setForm({ ...form, capacity: Number(e.target.value) })
+            }
+            onBlur={() => {
+              if (!/^[0-9]*$/.test(form.capacity.toString())) {
+                setCapacityError('Only numbers allowed!');
+              } else {
+                setCapacityError('');
+              }
+            }}
+            error={capacityError !== ''}
+            helperText={capacityError}
+          />
+        </Stack>
+
+        <Button
+          data-testid='test-btn-edit'
+          variant='contained'
+          onClick={handleSubmit}
+          sx={{ mb: 3 }}
+        >
+          Update Post
+        </Button>
+      </Stack>
+      <Snackbar
+        open={isAlertOpen}
+        autoHideDuration={6000}
+        onClose={() => showAlert(false)}
+        message={alertMsg}
+      />
+    </>
+  );
+}
+
 /* Opens a full screen dialog containing a post. */
 export default function ViewPostDialog(props: {
   postUser: PostUserPreview;
@@ -215,6 +334,7 @@ export default function ViewPostDialog(props: {
   const [isOpen, toggleDialog] = React.useState(false);
   const [postData, setData] = React.useState(props.postUser as any as PostUser);
   const [isAuthor, setIsAuthor] = React.useState(false);
+  const [isEditing, toggleEditor] = React.useState(false);
   const userContext = React.useContext(UserContext);
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
@@ -253,117 +373,133 @@ export default function ViewPostDialog(props: {
 
   return (
     <>
-      <Button
-        data-testid='test-btn-preview'
-        variant='outlined'
-        onClick={() => {
-          toggleDialog(true);
-          props.setOpenedPost(true);
-          fetchData();
-        }}
-        sx={{ mb: 3 }}
-      >
-        Read More
-      </Button>
-      <Dialog
-        fullScreen
-        open={isOpen}
-        onClose={closeDialog}
-        TransitionComponent={Transition}
-        data-testid='test-post-dialog'
-        aria-label='post-dialog'
-        id={postData.id}
-      >
-        <AppBar sx={{ position: 'relative' }}>
-          <IconButton
-            data-testid='test-btn-close'
-            edge='start'
-            color='inherit'
-            onClick={closeDialog}
-            aria-label='close'
-          >
-            <ArrowBack />
-          </IconButton>
-        </AppBar>
-
-        {/* Title and Options (3 dots) */}
-        <Grid>
-          <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
-            <Grid item xs={11}>
-              <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
-                {postData.title}
-              </Typography>
-            </Grid>
-            <MoreOptions
-              postID={postData.id}
-              isAuth={isAuthor}
-              closeDialog={closeDialog}
-            />
-          </Stack>
-        </Grid>
-        {/* Top information (author, date, tags..) */}
-        <Stack sx={{ pl: 4 }}>
-          <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
-            Posted on {new Date(props.postUser.createdAt).toString()} by {" "}
-            {postData.User.firstName} {postData.User.lastName}
-          </Typography>
-          {props.tags}
-          <Typography variant='body2' sx={{ pt: 2 }}>
-            Location: {postData.location}
-          </Typography>
-          {/* TODO: Implement Google Maps API */}
-        </Stack>
-
-        {/* Post image and body */}
-        <Stack sx={{ pl: 4 }}>
-          <Box
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
+      {' '}
+      {isEditing && (
+        <PostEditor
+          id={postData.id}
+          title={postData.title}
+          body={postData.body}
+          location={postData.location}
+          capacity={Number(postData.capacity)}
+          toggleEdit={() => toggleEditor(false)}
+        />
+      )}
+      {!isEditing && (
+        <>
+          <Button
+            data-testid='test-btn-preview'
+            variant='outlined'
+            onClick={() => {
+              toggleDialog(true);
+              props.setOpenedPost(true);
+              fetchData();
             }}
+            sx={{ mb: 3 }}
           >
-            <img
-              // TODO src={props.postUser.thumbnail}
-              src='https://i.imgur.com/8EYKtwP.png'
-              alt='Thumbnail'
-              height='400px'
-              width='400px'
-            />
-          </Box>
-          <Typography
-            variant='body1'
-            sx={{ px: 4, py: 1, pb: 4 }}
-            style={{ wordWrap: 'break-word' }}
-          >
-            {postData.body}
-          </Typography>
-          <Stack direction='row' sx={{ px: 4, pb: 5 }}>
-            {Number(postData.capacity) > 0 ? (
-              <CapacityBar maxCapacity={Number(postData.capacity)} />
-            ) : (
-              <></>
-            )}
-            <LikeButton numLikes={Number(postData.feedbackScore)} />
-          </Stack>
-        </Stack>
-
-        {/* Comment Section */}
-        <Stack sx={{ px: 8, pb: 5 }}>
-          <Typography variant='h5' sx={{ py: 2 }}>
-            Comments
-          </Typography>
-          <TextField
-            variant='filled'
-            placeholder='Write a comment'
-            size='small'
-          ></TextField>
-          <Button variant='contained' sx={{ mt: 2 }}>
-            Add Comment
+            Read More
           </Button>
-        </Stack>
-        {/* TODO: Create Comment component later */}
-      </Dialog>
+          <Dialog
+            fullScreen
+            open={isOpen}
+            onClose={closeDialog}
+            TransitionComponent={Transition}
+            data-testid='test-post-dialog'
+            aria-label='post-dialog'
+            id={postData.id}
+          >
+            <AppBar sx={{ position: 'relative' }}>
+              <IconButton
+                data-testid='test-btn-close'
+                edge='start'
+                color='inherit'
+                onClick={closeDialog}
+                aria-label='close'
+              >
+                <ArrowBack />
+              </IconButton>
+            </AppBar>
+
+            {/* Title and Options (3 dots) */}
+            <Grid>
+              <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
+                <Grid item xs={11}>
+                  <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
+                    {postData.title}
+                  </Typography>
+                </Grid>
+                <MoreOptions
+                  postID={postData.id}
+                  isAuth={isAuthor}
+                  closeDialog={closeDialog}
+                  toggleEdit={toggleEditor}
+                />
+              </Stack>
+            </Grid>
+            {/* Top information (author, date, tags..) */}
+            <Stack sx={{ pl: 4 }}>
+              <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
+                Posted on {new Date(props.postUser.createdAt).toString()} by{' '}
+                {postData.User.firstName} {postData.User.lastName}
+              </Typography>
+              {props.tags}
+              <Typography variant='body2' sx={{ pt: 2 }}>
+                Location: {postData.location}
+              </Typography>
+              {/* TODO: Implement Google Maps API */}
+            </Stack>
+
+            {/* Post image and body */}
+            <Stack sx={{ pl: 4 }}>
+              <Box
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <img
+                  // TODO src={props.postUser.thumbnail}
+                  src='https://i.imgur.com/8EYKtwP.png'
+                  alt='Thumbnail'
+                  height='400px'
+                  width='400px'
+                />
+              </Box>
+              <Typography
+                variant='body1'
+                sx={{ px: 4, py: 1, pb: 4 }}
+                style={{ wordWrap: 'break-word' }}
+              >
+                {postData.body}
+              </Typography>
+              <Stack direction='row' sx={{ px: 4, pb: 5 }}>
+                {Number(postData.capacity) > 0 ? (
+                  <CapacityBar maxCapacity={Number(postData.capacity)} />
+                ) : (
+                  <></>
+                )}
+                <LikeButton numLikes={Number(postData.feedbackScore)} />
+              </Stack>
+            </Stack>
+
+            {/* Comment Section */}
+            <Stack sx={{ px: 8, pb: 5 }}>
+              <Typography variant='h5' sx={{ py: 2 }}>
+                Comments
+              </Typography>
+              <TextField
+                variant='filled'
+                placeholder='Write a comment'
+                size='small'
+              ></TextField>
+              <Button variant='contained' sx={{ mt: 2 }}>
+                Add Comment
+              </Button>
+            </Stack>
+            {/* TODO: Create Comment component later */}
+          </Dialog>{' '}
+        </>
+      )}
     </>
   );
 }

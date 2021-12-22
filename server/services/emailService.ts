@@ -1,4 +1,5 @@
 import sgMail from '@sendgrid/mail';
+
 export default class EmailService {
   private baseRoute: string;
 
@@ -47,12 +48,8 @@ export default class EmailService {
     To continue with your account registration, please confirm your email address by visiting: 
     
     ${confirmURL}`;
-    const html = `Thank you for signing up to UBoard, ${firstName} ${lastName}. </br>
-        
-    To continue with your account registration, please confirm your email address by <a href="${confirmURL}">clicking here</a>
-        `;
 
-    return await this.sendEmail(emailAddress, subjectLine, body, html);
+    return await this.sendEmail(emailAddress, subjectLine, body, body);
   }
 
   /** Sends a password reset email to the user based on the provided parameters. Returns the success status. */
@@ -66,13 +63,10 @@ export default class EmailService {
     const resetURL = `${this.baseRoute}password-reset?r=${confToken}`;
     const subjectLine = 'UBoard - Password Reset Requested';
     const body = `Hello,  ${firstName} ${lastName}.
-        A password reset has been requested for the account with username: ${userName}. To reset your password, click the link below. 
+        A password reset has been requested for the account with username: ${userName}. To reset your password, visit the link below: 
         ${resetURL}
         `;
-    const html = `Hello, ${firstName} ${lastName}.  </br>
-        A password reset has been requested for the account with username: ${userName}. To reset your password, <a href="${resetURL}">click here</a>
-        `;
 
-    return await this.sendEmail(emailAddress, subjectLine, body, html);
+    return await this.sendEmail(emailAddress, subjectLine, body, body);
   }
 }

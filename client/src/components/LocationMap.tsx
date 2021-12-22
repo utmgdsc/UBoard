@@ -7,24 +7,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 
 import GoogleMapReact from 'google-map-react';
-import { FormContext } from './CreatePost';
 
-export function LocationPickerMap() {
+export function LocationPickerMap( props: { setLocation:  (location: string, lat?: number, lng?: number) => void }) {
   const [locationInput, setInput] = React.useState('');
   const [showMap, toggleMap] = React.useState(true);
-
-  const { form, setForm } = React.useContext(FormContext);
-  const setLocation = (
-    location: string,
-    lat: number = -1,
-    lng: number = -1
-  ) => {
-    setForm({
-      ...form,
-      location,
-      coords: { lat, lng },
-    });
-  };
 
   const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
     // initial API load
@@ -46,7 +32,7 @@ export function LocationPickerMap() {
         .then((res) => {
           const addr = res.results[0].formatted_address;
           setInput(addr); // change input box to where marker was dropped
-          setLocation(addr, pos.lat(), pos.lng());
+          props.setLocation(addr, pos.lat(), pos.lng());
         });
     });
 
@@ -74,7 +60,7 @@ export function LocationPickerMap() {
       }
       setInput(place.formatted_address!);
       const location = place.geometry.location;
-      setLocation(place.name, location.lat(), location.lng());
+      props.setLocation(place.name, location.lat(), location.lng());
       map.setCenter(location);
       map.setZoom(15);
       marker.setPosition(location);

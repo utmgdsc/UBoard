@@ -61,7 +61,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function AccountMenu() {
+function AccountMenu(props: { setSearch: Function, setEscapedQuery: Function }) {
   const [isOpen, openMenu] = React.useState(false);
   const authedUser = React.useContext(UserContext);
   const navigate = useNavigate();
@@ -95,7 +95,27 @@ function AccountMenu() {
           'aria-labelledby': 'menu-btn',
         }}
       >
-        <MenuItem onClick={closeMenu}>My Posts</MenuItem>
+        <MenuItem
+          onClick={async () => {
+            try {
+              const result = await api.me();
+              const user = result.data;
+              if (!user) { 
+                throw new Error("Current user could not be found.");
+              }
+
+              const query = `${user.firstName} ${user.lastName}`;
+              props.setSearch(query);
+              props.setEscapedQuery(query);
+            } catch (err) {
+              console.error(err);
+            }
+
+            closeMenu();
+          }}
+        >
+          My Posts
+        </MenuItem>
         <MenuItem
           onClick={() => {
             api.signOut();
@@ -146,7 +166,7 @@ export default function Header(props: { setEscapedQuery: Function }) {
             }}
           />
         </Search>
-        <AccountMenu />
+        <AccountMenu setSearch={setSearch} setEscapedQuery={props.setEscapedQuery} />
       </Toolbar>
     </AppBar>
   );

@@ -23,7 +23,7 @@ function RecentPosts(props: {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
   const [openedPost, setOpenedPost] = React.useState(false);
 
-  const checkForPosts = React.useCallback(async () => {
+  const checkForPosts = React.useCallback(() => {
     if (!openedPost) {
       let result;
       if (!props.query) {
@@ -41,14 +41,11 @@ function RecentPosts(props: {
       result
         .then((res) => {
           if (res.data && res.data.data.result) {
-            if (res.data.data.count) {
-              updateRecent(res.data.data.result);
-            } else {
-              updateRecent([]);
-            }
-            props.setPageCount(
-              Math.ceil(res.data.data.total / POSTS_PER_PAGE)
-            );
+            updateRecent(res.data.data.result);
+            props.setPageCount(Math.ceil(res.data.data.total / POSTS_PER_PAGE));
+          } else {
+            updateRecent([]);
+            props.setPageCount(1);
           }
         })
         .catch((err) => console.log(err));

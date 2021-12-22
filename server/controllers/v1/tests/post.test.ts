@@ -145,6 +145,31 @@ describe('Test v1 - Post Controller', () => {
       );
     });
 
+    it('getting a post will include the location and coordinates', async () => {
+      const author = await makeValidUser();
+      const coords = {
+        lat: 59.321312903128301289,
+        lng: -94.2312903128312901212,
+      };
+      const result = await postController.createPost(
+        author.id,
+        'This is a new post!',
+        'This is a new post!This is a new post!',
+        'location',
+        10,
+        [],
+        coords
+      );
+
+      expect(result.status).toBe(200);
+
+      const post = await postController.getPost(
+        author.id,
+        result.data.result!.id
+      );
+      expect(post.data.result?.coords).toEqual(coords);
+    });
+
     it('should error on missing parameters', async () => {
       const author = await makeValidUser();
 

@@ -23,41 +23,7 @@ function RecentPosts(props: {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
   const [openedPost, setOpenedPost] = React.useState(false);
 
-  /* Fetch new posts by polling */
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      if (!openedPost) {
-        let result;
-        if (!props.query) {
-          result = api.fetchRecentPosts(
-            POSTS_PER_PAGE,
-            POSTS_PER_PAGE * (props.pageNum - 1)
-          );
-        } else {
-          result = api.searchForPosts(
-            props.query,
-            POSTS_PER_PAGE,
-            POSTS_PER_PAGE * (props.pageNum - 1)
-          );
-        }
-        result
-          .then((res) => {
-            if (res.data && res.data.data.result) {
-              updateRecent(res.data.data.result);
-              props.setPageCount(
-                Math.ceil(res.data.data.total / POSTS_PER_PAGE)
-              );
-            }
-          })
-          .catch((err) => console.log(err));
-      }
-    }, 5000);
-
-    return () => clearInterval(interval);
-  });
-
-  /* Fetch posts triggered by page-change or post dialog close */
-  React.useEffect(() => {
+  const checkForPosts = React.useCallback(async () => {
     if (!openedPost) {
       let result;
       if (!props.query) {
@@ -75,13 +41,33 @@ function RecentPosts(props: {
       result
         .then((res) => {
           if (res.data && res.data.data.result) {
-            updateRecent(res.data.data.result);
-            props.setPageCount(Math.ceil(res.data.data.total / POSTS_PER_PAGE));
+            if (res.data.data.count) {
+              updateRecent(res.data.data.result);
+            } else {
+              updateRecent([]);
+            }
+            props.setPageCount(
+              Math.ceil(res.data.data.total / POSTS_PER_PAGE)
+            );
           }
         })
         .catch((err) => console.log(err));
     }
   }, [props, openedPost]);
+
+  /* Fetch new posts by polling */
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      checkForPosts();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  });
+
+  /* Fetch posts triggered by page-change or post dialog close */
+  React.useEffect(() => {
+    checkForPosts();
+  }, [checkForPosts]);
 
   return (
     <>

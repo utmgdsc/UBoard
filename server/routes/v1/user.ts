@@ -7,12 +7,12 @@ import UserController from '../../controllers/v1/user';
 import { getAuthUser } from '../../middleware/auth';
 
 const userRouter = express.Router();
-const apiRoute = `${process.env.PAGE_URL}api/v1`;
+const baseRoute = `${process.env.PAGE_URL}`;
 const cookie_key = 'token';
 
 const uContr: UserController = new UserController(
   db.User,
-  new EmailService(apiRoute)
+  new EmailService(baseRoute)
 );
 
 async function signOut(req: Request, res: Response) {
@@ -91,44 +91,49 @@ export async function signUpHandler(req: Request, res: Response) {
   res.status(response.status).json(response.data);
 }
 
+async function requestPasswordResetHandler(req: Request, res: Response) {
+  const result = await uContr.sendResetEmail(req.body.email);
+  if (result.data) {
+    console.error(result.data.message);
+    res.status(result.status).json(result.data);
+    return;
+  }
+  res.status(result.status).json();
+}
+
 async function confirmEmailHandler(req: Request, res: Response) {
-  const token = req.query.c as string;
+  const token = req.body.token as string;
 
   if (!token) {
-    res.status(400).json({ code: 400, message: 'Missing token.' });
+    res.status(400).json({ message: 'Missing token.' });
     return;
   }
 
   if (await uContr.confirmEmail(token)) {
     res.status(204).json();
   } else {
-    res
-      .status(400)
-      .json({ code: 400, message: 'Token is invalid or expired.' });
+    res.status(400).json({ message: 'Token is invalid or expired.' });
   }
 }
 
 async function resetPassHandler(req: Request, res: Response) {
-  if (!req.query.r || !req.body.password || !req.body.password_confirmation) {
+  if (!req.body.token || !req.body.password || !req.body.confirmPassword) {
     res.status(400).json({
-      code: 400,
       message: 'Missing token or password.',
     });
     return;
   }
 
   const status = await uContr.resetPassword(
-    req.query.r as string,
+    req.body.token,
     req.body.password,
-    req.body.password_confirmation
+    req.body.confirmPassword
   );
 
   if (status) {
     res.status(204).json();
   } else {
-    res
-      .status(400)
-      .json({ code: 400, message: 'Token is invalid or expired.' });
+    res.status(400).json({ message: 'Token is invalid or expired.' });
   }
 }
 
@@ -144,9 +149,11 @@ async function me(req: Request, res: Response) {
 userRouter.post('/signin', signInHandler);
 userRouter.post('/signup', signUpHandler);
 userRouter.post('/signout', signOut);
+userRouter.post('/request-password-reset', requestPasswordResetHandler);
 
-userRouter.get('/confirm', confirmEmailHandler);
-userRouter.get('/password-reset', resetPassHandler);
+userRouter.put('/confirm-email', confirmEmailHandler);
+userRouter.put('/reset-password', resetPassHandler);
+
 userRouter.get('/me', me);
 
 export default userRouter;

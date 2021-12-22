@@ -1,6 +1,8 @@
 import sequelize from 'sequelize';
-import { Post } from '../../models/post';
+import { latLng, Post } from '../../models/post';
+import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
+import { PostTag } from '../../models/PostTags';
 import db from '../../models';
 import { QueryTypes } from 'sequelize';
 
@@ -9,6 +11,9 @@ export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
   User: { id: string; firstName: string; lastName: string };
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
 };
 
 export type PostUserPreview = {
@@ -20,6 +25,9 @@ export type PostUserPreview = {
   likeCount: number;
   doesUserLike: boolean;
 } & {
+  Tags: {
+    text: string & { PostTags: PostTag }; // sequelize pluarlizes name
+  }[];
   User: { id: string; firstName: string; lastName: string };
 };
 
@@ -29,10 +37,16 @@ const MAX_RESULTS = 50;
 export default class PostController {
   protected postsRepo: typeof Post;
   protected userPostLikesRepo: typeof UserPostLikes;
+  protected tagsRepo: typeof Tag;
 
-  constructor(postsRepo: typeof Post, userPostLikesRepo: typeof UserPostLikes) {
+  constructor(
+    postsRepo: typeof Post,
+    userPostLikesRepo: typeof UserPostLikes,
+    tagsRepo: typeof Tag
+  ) {
     this.postsRepo = postsRepo;
     this.userPostLikesRepo = userPostLikesRepo;
+    this.tagsRepo = tagsRepo;
   }
 
   /**
@@ -82,8 +96,11 @@ export default class PostController {
             model: db.User,
             attributes: ['firstName', 'lastName', 'id'],
           },
+          {
+            model: db.Tag,
+            attributes: ['text'],
+          },
         ],
-
         order: [['createdAt', 'DESC']],
         offset: offset,
       }),
@@ -187,6 +204,7 @@ export default class PostController {
         'body',
         'thumbnail',
         'location',
+        'coords',
         'capacity',
         'feedbackScore',
         'UserId',
@@ -211,6 +229,10 @@ export default class PostController {
         {
           model: db.User,
           attributes: ['firstName', 'lastName', 'userName'],
+        },
+        {
+          model: db.Tag,
+          attributes: ['text'],
         },
       ],
     })) as PostUser;
@@ -354,17 +376,23 @@ export default class PostController {
     title?: string,
     body?: string,
     location?: string,
-    capacity?: number
-  ): Promise<{ status: number; data: { result?: Post; message?: string } }> {
+    capacity?: number,
+    tags?: string[],
+    coords?: latLng
+  ): Promise<{
+    status: number;
+    data: { result?: Post; message?: string };
+  }> {
     if (!title || !body || !location || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
     const post = await this.postsRepo.create({
-      title: title,
-      body: body,
-      location: location,
-      capacity: capacity,
+      title,
+      body,
+      location,
+      capacity,
+      coords,
       UserId: userID,
     });
 
@@ -373,6 +401,20 @@ export default class PostController {
         status: 500,
         data: { message: 'Could not create the new post' },
       };
+    }
+
+    if (tags) {
+      const tagObjs = await this.tagsRepo.bulkCreate(
+        // create (or find) our tag objects
+        tags.slice(0, 3).map((t) => {
+          // restrict to max 3 tags
+          return { text: t.trim() };
+        }),
+        {
+          ignoreDuplicates: true,
+        }
+      );
+      await post.addTags(tagObjs); // allows inserting multiple items into PostTags without directly referencing it
     }
 
     return { status: 200, data: { result: post } };
@@ -389,7 +431,8 @@ export default class PostController {
     title?: string,
     body?: string,
     location?: string,
-    capacity?: number
+    capacity?: number,
+    coords?: latLng
   ): Promise<{ status: number; data?: { message?: string; result?: Post } }> {
     const post = await this.postsRepo.findByPk(postID);
 
@@ -399,6 +442,7 @@ export default class PostController {
         post.body = body || post.body;
         post.location = location || post.location;
         post.capacity = capacity || post.capacity;
+        post.coords = coords || post.coords;
         await post.save();
         return { status: 200, data: { result: post } };
       } catch (err) {

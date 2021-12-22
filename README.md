@@ -19,6 +19,10 @@ Then in the root directory of the project run this:
 
 Windows:
 
+`rmdir "%cd%/client/node_modules/models"`
+
+`rmdir "%cd%/client/node_modules/@types/models"`
+
 `mklink /D "%cd%/client/node_modules/models" "%cd%/server/build/models"`
 
 `mklink /D "%cd%/client/node_modules/@types/models" "%cd%/server/build/types/models"`

@@ -87,7 +87,9 @@ export default function PostDashboard() {
     const [query, setQuery] = React.useState('');
 
     const setEscapedQuery = (q: string) => {
-      setQuery(q.replace(/\W+/g, '&'));
+      let escaped = q.replace(/\W+/g, '&');
+      escaped = escaped.replace(/^&+|&+$/g, '');
+      setQuery(escaped);
     };
 
     return [query, setEscapedQuery];

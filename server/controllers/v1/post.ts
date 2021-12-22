@@ -83,10 +83,11 @@ export default class PostController {
           [
             sequelize.literal(
               // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
-                  WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
-                    `${userID}`
-                  )})`
+              `(
+                SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                WHERE "Likes"."postID" = "Post"."id" 
+                  AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+              )`
             ),
             'doesUserLike',
           ],
@@ -136,6 +137,7 @@ export default class PostController {
       setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
       setweight(to_tsvector(coalesce("User"."firstName")), 'B') || 
       setweight(to_tsvector(coalesce("User"."lastName")), 'B') || 
+      setweight(to_tsvector(coalesce("PostTag"."TagText")), 'C') || 
       setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
       setweight(to_tsvector(coalesce("Post"."body",'')), 'D') 
     )`;
@@ -147,10 +149,14 @@ export default class PostController {
           "Post"."title", 
           "Post"."createdAt", 
           "Post"."thumbnail", 
-          (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
-            WHERE "Likes"."postID" = "Post"."id") AS "likeCount", 
-          (SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
-            WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $userID) AS "doesUserLike", 
+          (
+            SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
+            WHERE "Likes"."postID" = "Post"."id"
+          ) AS "likeCount", 
+          (
+            SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
+            WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $userID
+          ) AS "doesUserLike", 
           json_build_object(
             'firstName', "User"."firstName", 
             'lastName', "User"."lastName",
@@ -160,6 +166,10 @@ export default class PostController {
           ts_rank_cd(${weights}, "query", 1|4) AS "rank" 
         FROM "Posts" AS "Post" 
         LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
+        LEFT OUTER JOIN (
+          SELECT "PostId", string_agg("TagText", ' ') AS "TagText" 
+          FROM "PostTags" GROUP BY 1
+        ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
         CROSS JOIN to_tsquery($query) AS "query" 
         WHERE "query" @@ ${weights} 
         ORDER BY "rank" DESC 
@@ -217,10 +227,11 @@ export default class PostController {
         [
           sequelize.literal(
             // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
-                WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
-                  `${userID}`
-                )})`
+            `(
+              SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+              WHERE "Likes"."postID" = "Post"."id" 
+                AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+            )`
           ),
           'doesUserLike',
         ],

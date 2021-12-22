@@ -1,5 +1,5 @@
 import db from '../index';
-import { Post } from '../post';
+import { latLng, Post } from '../post';
 import { PostTag } from '../PostTags';
 import { Tag } from '../tags';
 import { User } from '../user';
@@ -63,7 +63,8 @@ title, and body. Return the post on success, or throw an error on failure.
 export async function makePost(
   authorid: string,
   title: string,
-  body: string
+  body: string,
+  coords?: latLng
 ): Promise<Post> {
   return await PostModel.create({
     title: title,
@@ -73,6 +74,7 @@ export async function makePost(
     location: 'toronto',
     thumbnail: 'some-path',
     UserId: authorid,
+    coords,
   });
 }
 

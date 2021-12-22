@@ -17,6 +17,7 @@ import { useTheme } from '@mui/material/styles';
 
 import SignIn from '../components/SignIn';
 import SignUp from '../components/SignUp';
+import PassReset from '../components/PassReset';
 
 import './AuthContainer.css';
 
@@ -163,6 +164,9 @@ function AuthContainer() {
             </TabPanel>
             <TabPanel value={tabIndex} index={1}>
               <SignUp handleChange={handleChange} showAlert={showAlert} />
+            </TabPanel>
+            <TabPanel value={tabIndex} index={2}>
+              <PassReset handleChange={handleChange} showAlert={showAlert} />
             </TabPanel>
           </Box>
         </Grid>

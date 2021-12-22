@@ -14,6 +14,10 @@ import {
 import { Tag } from './tags';
 import { PostTag } from './PostTags';
 
+export type latLng = {
+  lat: number;
+  lng: number;
+};
 interface PostAttributes {
   id: string;
   title: string;
@@ -21,6 +25,7 @@ interface PostAttributes {
   thumbnail: string;
   location: string;
   capacity: Number;
+  coords: latLng;
   feedbackScore: Number;
   UserId: string;
 }
@@ -28,7 +33,13 @@ interface PostAttributes {
 interface PostCreationAttributes
   extends Optional<
     PostAttributes,
-    'id' | 'thumbnail' | 'location' | 'capacity' | 'feedbackScore' | 'UserId'
+    | 'id'
+    | 'thumbnail'
+    | 'location'
+    | 'coords'
+    | 'capacity'
+    | 'feedbackScore'
+    | 'UserId'
   > {}
 
 export class Post
@@ -41,6 +52,7 @@ export class Post
   thumbnail!: string;
   location!: string;
   capacity!: Number;
+  coords!: latLng;
   feedbackScore!: Number;
   UserId!: string; /* Foreign Key from UserId */
 
@@ -92,6 +104,15 @@ module.exports = (sequelize: Sequelize) => {
       },
       capacity: {
         type: DataTypes.INTEGER /* Optional: An event ad can indicate maximum capacity of attendees */,
+      },
+      coords: {
+        // Coordinates to the event (if it is in-person)
+        type: DataTypes.JSON,
+        defaultValue: {
+          // if not specified, -1 to indicate online event
+          lat: -1,
+          lng: -1,
+        },
       },
       feedbackScore: {
         /* Post 'score' decreases if it is reported too many times, 

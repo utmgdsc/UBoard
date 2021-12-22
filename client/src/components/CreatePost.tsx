@@ -35,9 +35,9 @@ function CreatePost() {
     location: '',
   });
 
-  const handleTagDelete = (value: string, emptyInput: boolean = false) => {
+  const handleTagDelete = (value: string, clearInput: boolean = false) => {
     setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
-    if (!emptyInput) {
+    if (!clearInput) {
       // put the tag back in the inputbox (allow editing it).
       setTagInputValue(value);
     }

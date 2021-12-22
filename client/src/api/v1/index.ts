@@ -95,9 +95,25 @@ export default class ServerApi {
 
   protected async put<ResponseDataType>(
     path: string
+  ): Promise<{ status: number; data?: ResponseDataType }>;
+  protected async put<RequestDataType, ResponseDataType>(
+    path: string,
+    form: RequestDataType
+  ): Promise<{ status: number; data?: ResponseDataType }>;
+  protected async put<RequestDataType, ResponseDataType>(
+    path: string,
+    form?: RequestDataType
   ): Promise<{ status: number; data?: ResponseDataType }> {
     try {
-      const response = await this.api.put(path);
+      let response;
+      if (form) {
+        response = await this.api.put(path, form);
+      } else {
+        response = await this.api.put(path);
+      }
+      if (!response.data) {
+        return { status: response.status };
+      }
       return { status: response.status, data: response.data };
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -139,6 +155,14 @@ export default class ServerApi {
     >(`/posts/${postID}`, {});
   }
 
+  async likePost(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/upvote`);
+  }
+
+  async reportPost(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/report`);
+  }
+
   async createPost(form: {
     title: string;
     body: string;
@@ -166,22 +190,39 @@ export default class ServerApi {
     );
   }
 
-  async signOut() {
-    return await this.post('/users/signout', {});
-  }
-
-  async likePost(postID: string) {
-    return await this.put<{ status: number }>(`/posts/${postID}/upvote`);
-  }
-
-  async reportPost(postID: string) {
-    return await this.put<{ status: number }>(`/posts/${postID}/report`);
-  }
-
   async signIn(form: { userName: string; password: string }) {
     return await this.post<
       typeof form,
       { message: string; result?: UserAttributes }
     >('/users/signin', form);
+  }
+
+  async signOut() {
+    return await this.post('/users/signout', {});
+  }
+
+  async requestPasswordReset(form: { email: string }) {
+    return await this.post<typeof form, { message: string }>(
+      '/users/request-password-reset',
+      form
+    );
+  }
+
+  async confirmEmail(form: { token: string }) {
+    return await this.put<typeof form, { message: string }>(
+      '/users/confirm-email',
+      form
+    );
+  }
+
+  async resetPass(form: {
+    token: string;
+    password: string;
+    confirmPassword: string;
+  }) {
+    return await this.put<typeof form, { message: string }>(
+      '/users/reset-password',
+      form
+    );
   }
 }

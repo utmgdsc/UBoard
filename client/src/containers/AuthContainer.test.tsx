@@ -262,7 +262,7 @@ describe('signin component', () => {
         password: 'password',
       };
 
-      act(async () => {
+      await act(async () => {
         fireEvent.submit(form);
         await new Promise((r) => setTimeout(r, 1));
         expect(mockSignIn).toBeCalledWith(formData);

@@ -27,7 +27,7 @@ export function Tag(props: { tag: string }) {
 
 export function PostCreationTags(props: {
   tag: string;
-  del: (value: string) => void;
+  del: (value: string, emptyInput?: boolean) => void;
 }) {
   return (
     <Box
@@ -51,7 +51,7 @@ export function PostCreationTags(props: {
             fontSize='small'
             data-testid={`${props.tag}-clicker`}
             onClick={() => {
-              props.del(props.tag);
+              props.del(props.tag, true);
             }}
           />
         }

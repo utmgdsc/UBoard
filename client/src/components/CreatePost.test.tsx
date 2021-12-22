@@ -98,15 +98,23 @@ describe('verifying launch of create post component', () => {
     ) as HTMLInputElement;
 
     fireEvent.change(tagTextField, {
-      target: { value: 'tag1 ' },
+      target: { value: 'tag1' },
+    });
+    fireEvent.keyDown(tagTextField, {
+      key: 'Enter',
     });
     fireEvent.change(tagTextField, {
-      target: { value: 'tag2 ' },
+      target: { value: 'tag2' },
+    });
+    fireEvent.keyDown(tagTextField, {
+      key: 'Enter',
     });
     fireEvent.change(tagTextField, {
-      target: { value: 'tag3 ' },
+      target: { value: 'tag3' },
     });
-
+    fireEvent.keyDown(tagTextField, {
+      key: 'Enter',
+    });
     expect(tagTextField.value).toBe('');
     expect(tagTextField.disabled).toBeTruthy();
     expect(screen.getByText('tag1')).toBeInTheDocument();

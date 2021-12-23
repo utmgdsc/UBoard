@@ -18,8 +18,10 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
+import Switch from '@mui/material/Switch';
 
 import { UserContext } from '../App';
+import { LocationMap } from './LocationMap';
 
 import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
 
@@ -206,6 +208,39 @@ function CapacityBar(props: { maxCapacity: number }) {
   );
 }
 
+function LocationHandler(props: {
+  coords?: { lat: number; lng: number };
+  location: string;
+}) {
+  const [isMapVisible, toggleMap] = React.useState(true);
+  const isOfflineEvent =
+    props.coords && props.coords.lat !== -1 && props.coords.lng !== -1; // disable google maps with invalid coords
+
+  return (
+    <Box sx={{pl: 4, pb: 1}}>
+      <Typography variant='body2' sx={{ pt: 2 }}>
+        Location: {props.location}
+        {isOfflineEvent && (
+          <Switch
+            checked={isMapVisible}
+            onChange={() => toggleMap((prev) => !prev)}
+            size='medium'
+          />
+        )}
+      </Typography>
+      {/* Show google maps on valid coordinates */}
+      {isOfflineEvent && (
+        <LocationMap
+          visible={isMapVisible}
+          location={props.location}
+          lat={props.coords!.lat}
+          lng={props.coords!.lng}
+        />
+      )}
+    </Box>
+  );
+}
+
 /* Opens a full screen dialog containing a post. */
 export default function ViewPostDialog(props: {
   postUser: PostUserPreview;
@@ -304,14 +339,10 @@ export default function ViewPostDialog(props: {
         {/* Top information (author, date, tags..) */}
         <Stack sx={{ pl: 4 }}>
           <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
-            Posted on {new Date(props.postUser.createdAt).toString()} by {" "}
+            Posted on {new Date(props.postUser.createdAt).toString()} by{' '}
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}
-          <Typography variant='body2' sx={{ pt: 2 }}>
-            Location: {postData.location}
-          </Typography>
-          {/* TODO: Implement Google Maps API */}
         </Stack>
 
         {/* Post image and body */}
@@ -346,6 +377,7 @@ export default function ViewPostDialog(props: {
             )}
             <LikeButton numLikes={Number(postData.feedbackScore)} />
           </Stack>
+            <LocationHandler coords={postData.coords} location={postData.location} />
         </Stack>
 
         {/* Comment Section */}

@@ -64,6 +64,54 @@ describe('verifying launch of create post component', () => {
     expect(screen.getByTestId('newPostButton')).toBeInTheDocument();
   });
 
+  it('Toggling online event disables the map', () => {
+    screen.getByTestId('online-toggler').click();
+    
+    expect(screen.queryByTestId('picker-map')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pac-test')).not.toBeInTheDocument();
+    expect(screen.getByTestId('online-loc-input')).toBeInTheDocument();
+  });
+
+  it('Switching between online to offline event clears previous input', () => {
+    const toggler = screen.getByTestId('online-toggler');
+    toggler.click();
+  
+    const online = screen.getByTestId('online-loc-input').querySelector('input');
+
+    fireEvent.change(online!, {
+      target: {
+        value: 'online123'
+      }
+    });
+    
+    expect(online?.value).toEqual('online123');
+    toggler.click();
+    toggler.click();
+    expect(screen.getByTestId('online-loc-input').querySelector('input')?.value).toEqual('');
+    toggler.click();
+
+    const offline = screen.getByTestId('pac-input-test').querySelector('input');
+    fireEvent.change(offline!, {
+      target: {
+        value: 'addr'
+      }
+    });
+    expect(offline?.value).toEqual('addr');
+    toggler.click();
+    expect(screen.queryByTestId('pac-input-test')).not.toBeInTheDocument();
+    toggler.click();
+    expect(screen.getByTestId('pac-input-test').querySelector('input')?.value).toEqual('');
+
+  })
+
+  it('View map switch properly hides/shows map', () => {
+    screen.getByTestId('map-toggle').click();
+    const map = screen.getByTestId('picker-map');
+    expect(map.style.height).toEqual('0px');
+    screen.getByTestId('map-toggle').click();
+    expect(map.style.height).not.toEqual('0px');
+  });
+
   it('entering a tag and hitting space will add tag styling and empty the field', () => {
     const tagTextField = screen.getByPlaceholderText(
       'Clubs Math MCS'

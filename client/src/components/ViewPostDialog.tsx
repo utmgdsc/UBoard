@@ -19,9 +19,12 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { UserContext } from '../App';
-import { LocationMap } from './LocationMap';
+import { LocationMap, LocationPickerMap } from './LocationMap';
 
 import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
 
@@ -214,21 +217,48 @@ function PostEditor(props: {
   title: string;
   body: string;
   location: string;
+  coords?: { lat: number; lng: number };
   capacity: number;
   toggleEdit: () => void;
 }) {
-  const [alertMsg, setMsg] = React.useState(
-    'Error. Ensure all fields are filled'
-  );
-  const [capacityError, setCapacityError] = React.useState('');
-  const [isAlertOpen, showAlert] = React.useState(false);
-
+  const isOnlineInitially = // indicate if prior to editing we are online
+    !props.coords || props.coords.lat === -1 || props.coords.lng === -1;
   const [form, setForm] = React.useState({
     title: props.title,
     body: props.body,
     capacity: props.capacity,
     location: props.location,
+    coords: props.coords,
   });
+  const [location, setLocation] = React.useState({
+    location: props.location,
+    coords: props.coords ? props.coords : { lat: -1, lng: -1 },
+  });
+
+  const [alertMsg, setMsg] = React.useState(
+    'Error. Ensure all fields are filled'
+  );
+  const [capacityError, setCapacityError] = React.useState('');
+  const [isAlertOpen, showAlert] = React.useState(false);
+  const [isOnlineEvent, toggleOnlineEvent] = React.useState(isOnlineInitially);
+
+  const locationHandler = (
+    location: string,
+    lat: number = -1,
+    lng: number = -1
+  ) => {
+    setLocation({ location, coords: { lat, lng } });
+  };
+
+  React.useEffect(() => {
+    setForm((form) => {
+      return {
+        ...form,
+        location: location.location,
+        coords: { lat: location.coords.lat, lng: location.coords.lng },
+      };
+    });
+  }, [location]);
 
   const handleSubmit = () => {
     if (form.body.length < 25) {
@@ -241,7 +271,6 @@ function PostEditor(props: {
       setMsg('Capacity must be a number');
       showAlert(true);
     } else {
-      console.log(form);
       api.updatePost(props.id, form);
       props.toggleEdit();
     }
@@ -270,18 +299,36 @@ function PostEditor(props: {
         />
       </Stack>
 
-      {/* Top information (author, date, tags..) */}
       <Stack sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}>
-        {/* {GenerateTags(['Tag 1', 'Tag 2'])} */}
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isOnlineEvent}
+                onChange={(e) => {
+                  toggleOnlineEvent(e.target.checked);
+                  locationHandler('');
+                }}
+              />
+            }
+            label='Online Event'
+          />
+        </FormGroup>
         <Typography> Location </Typography>
-        <TextField
-          size='small'
-          defaultValue={props.location}
-          onChange={(e) => setForm({ ...form, location: e.target.value })}
-        />
+        {!isOnlineEvent ? (
+          <LocationPickerMap
+            defaultInput={!isOnlineInitially ? props.location : undefined}
+            defaultCenter={!isOnlineInitially ? props.coords : undefined}
+            setLocation={locationHandler}
+          />
+        ) : (
+          <TextField
+            size='small'
+            defaultValue={isOnlineInitially ? props.location : ''}
+            onChange={(e) => locationHandler(e.target.value)}
+          />
+        )}
       </Stack>
-
-      {/* Post image and body */}
       <Stack sx={{ pl: 4, px: 4 }}>
         <Typography> Body </Typography>
         <TextField
@@ -310,14 +357,33 @@ function PostEditor(props: {
           />
         </Stack>
 
-        <Button
-          data-testid='test-btn-edit'
-          variant='contained'
-          onClick={handleSubmit}
-          sx={{ mb: 3 }}
-        >
-          Update Post
-        </Button>
+        <Stack direction='row' sx={{ pt: 1, pb: 1 }}>
+          <Box
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Button
+              data-testid='test-btn-edit'
+              variant='contained'
+              onClick={handleSubmit}
+              sx={{ mr: 2 }}
+            >
+              Update Post
+            </Button>
+
+            <Button
+              data-testid='test-btn-edit'
+              variant='contained'
+              color='secondary'
+              onClick={() => props.toggleEdit()}
+            >
+              Cancel
+            </Button>
+          </Box>
+        </Stack>
       </Stack>
       <Snackbar
         open={isAlertOpen}
@@ -400,6 +466,7 @@ export default function ViewPostDialog(props: {
   });
 
   const closeDialog = () => {
+    toggleEditor(false);
     props.setOpenedPost(false);
     toggleDialog(false);
   };
@@ -438,6 +505,7 @@ export default function ViewPostDialog(props: {
             body={postData.body}
             location={postData.location}
             capacity={Number(postData.capacity)}
+            coords={postData.coords}
             toggleEdit={() => toggleEditor(false)}
           />
         )}
@@ -470,12 +538,6 @@ export default function ViewPostDialog(props: {
                 />
               </Stack>
             </Grid>
-            <MoreOptions
-              postID={postData.id}
-              userHasCreatedPost={isAuthor}
-              closeDialog={closeDialog}
-              toggleEdit={toggleEditor}
-            />
             {/* Top information (author, date, tags..) */}
             <Stack sx={{ pl: 4 }}>
               <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>

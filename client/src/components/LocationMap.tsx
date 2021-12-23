@@ -76,7 +76,7 @@ export function LocationPickerMap(props: {
       if (!place.geometry || !place.geometry.location || !place.name) {
         return;
       }
-      setInput(place.formatted_address!);
+      setInput(place.name!);
       const location = place.geometry.location;
       props.setLocation(place.name, location.lat(), location.lng());
       map.setCenter(location);

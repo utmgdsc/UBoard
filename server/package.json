@@ -11,7 +11,8 @@
   "license": "ISC",
   "resolutions": {
     "ansi-regex": "^5.0.1",
-    "tar": "4.4.18"
+    "tar": "4.4.18",
+    "json-schema": "^0.4.0" 
   },
   "dependencies": {
     "@sendgrid/mail": "^7.5.0",

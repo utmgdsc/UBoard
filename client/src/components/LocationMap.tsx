@@ -14,6 +14,22 @@ export function LocationPickerMap(props: {
   const [locationInput, setInput] = React.useState('');
   const [showMap, toggleMap] = React.useState(true);
 
+  const getOptions = (maps: GoogleMapReact.Maps) => {
+    return {
+      mapTypeControl: true,
+      streetViewControl: true,
+      fullScreenControl: true,
+      fullSCreenControlOptions: true,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'on' }],
+        },
+      ],
+    };
+  };
+
   const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
     // initial API load
 
@@ -105,6 +121,7 @@ export function LocationPickerMap(props: {
           }}
           defaultCenter={{ lat: 43.59, lng: -79.65 }} // default to GTA
           defaultZoom={8}
+          options={getOptions}
           yesIWantToUseGoogleMapApiInternals
           onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
         />

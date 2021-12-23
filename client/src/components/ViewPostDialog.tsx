@@ -217,7 +217,7 @@ function LocationHandler(props: {
     props.coords && props.coords.lat !== -1 && props.coords.lng !== -1; // disable google maps with invalid coords
 
   return (
-    <>
+    <Box sx={{pl: 4, pb: 1}}>
       <Typography variant='body2' sx={{ pt: 2 }}>
         Location: {props.location}
         {isOfflineEvent && (
@@ -237,7 +237,7 @@ function LocationHandler(props: {
           lng={props.coords!.lng}
         />
       )}
-    </>
+    </Box>
   );
 }
 
@@ -343,7 +343,6 @@ export default function ViewPostDialog(props: {
             {postData.User.firstName} {postData.User.lastName}
           </Typography>
           {props.tags}
-          <LocationHandler coords={postData.coords} location={postData.location} />
         </Stack>
 
         {/* Post image and body */}
@@ -378,6 +377,7 @@ export default function ViewPostDialog(props: {
             )}
             <LikeButton numLikes={Number(postData.feedbackScore)} />
           </Stack>
+            <LocationHandler coords={postData.coords} location={postData.location} />
         </Stack>
 
         {/* Comment Section */}

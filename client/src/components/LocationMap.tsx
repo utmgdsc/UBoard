@@ -149,6 +149,31 @@ export function LocationMap(props: {
     lng: props.lng,
   };
 
+  const [googleMap, setMap] = React.useState(
+    {} as {
+      map: google.maps.Map;
+      maps: typeof google.maps;
+      marker: google.maps.Marker;
+      info: google.maps.InfoWindow;
+    }
+  );
+
+  React.useEffect(() => {
+    if (googleMap.map) {
+      // if map has loaded before, update markers on position change (occurs on post edit)
+      googleMap.info.setContent(`<p>${props.location}</p>`);
+      googleMap.marker.setPosition(googleMap.map.getCenter());
+
+      googleMap.marker.addListener('click', () => {
+        googleMap.info.open({
+          anchor: googleMap.marker,
+          map: googleMap.map,
+          shouldFocus: false,
+        });
+      });
+    }
+  }, [googleMap, props.location]);
+
   // enable additional options (i.e streetview)
   const getOptions = (maps: GoogleMapReact.Maps) => {
     return {
@@ -186,6 +211,7 @@ export function LocationMap(props: {
       });
     });
 
+    setMap({ map, maps, marker, info });
   };
 
   return props.visible ? (

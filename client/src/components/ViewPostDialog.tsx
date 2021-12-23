@@ -358,13 +358,6 @@ function PostEditor(props: {
         </Stack>
 
         <Stack direction='row' sx={{ pt: 1, pb: 1 }}>
-          <Box
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
             <Button
               data-testid='test-btn-edit'
               variant='contained'
@@ -382,7 +375,6 @@ function PostEditor(props: {
             >
               Cancel
             </Button>
-          </Box>
         </Stack>
       </Stack>
       <Snackbar

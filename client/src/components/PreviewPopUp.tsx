@@ -21,6 +21,7 @@ export default function PreviewPopUp(props: {
   tags: string[];
   eventCapacity: Number;
   location: string;
+  coords: { lat: number, lng: number };
   openPopup: boolean;
   handleClose: () => void;
 }) {

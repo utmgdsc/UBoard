@@ -175,7 +175,7 @@ export default class PostController {
         offset: offset,
         where: { UserId: queryUserID },
       }),
-      this.postsRepo.count(),
+      this.postsRepo.count({ where: { UserId: queryUserID } }),
     ]);
 
     return {
@@ -234,7 +234,6 @@ export default class PostController {
             SELECT json_agg(json_build_object('text', "PostTag"."TagText", 'PostTags', row_to_json("PostTag"))) 
             FROM "PostTags" AS "PostTag" WHERE "PostTag"."PostId" = "Post"."id"
           ) AS "Tags",
-          ${weights} AS "tsvector",
           ts_rank_cd(${weights}, "query", 1|4) AS "rank" 
         FROM "Posts" AS "Post" 
         LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
@@ -252,7 +251,20 @@ export default class PostController {
           type: QueryTypes.SELECT,
         }
       ) as PostUserPreview[],
-      this.postsRepo.count(),
+      db.sequelize.query(
+        `SELECT count(*) FROM "Posts" AS "Post" 
+        LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
+        LEFT OUTER JOIN (
+          SELECT "PostId", string_agg("TagText", ' ') AS "TagText" 
+          FROM "PostTags" GROUP BY 1
+        ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
+        CROSS JOIN to_tsquery($query) AS "query" 
+        WHERE "query" @@ ${weights}`,
+        {
+          bind: { query },
+          type: QueryTypes.SELECT,
+        }
+      ),
     ]);
 
     return {
@@ -260,7 +272,7 @@ export default class PostController {
       data: {
         result: data[0],
         count: data[0].length,
-        total: data[1],
+        total: Number(data[1][0].count),
       },
     };
   }

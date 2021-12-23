@@ -134,12 +134,12 @@ export default class PostController {
     data: { result?: PostUserPreview[]; count: number; total: number };
   }> {
     const weights = `(
-      setweight(to_tsvector(coalesce("Post"."title",'')), 'A') || 
-      setweight(to_tsvector(coalesce("User"."firstName")), 'B') || 
-      setweight(to_tsvector(coalesce("User"."lastName")), 'B') || 
-      setweight(to_tsvector(coalesce("PostTag"."TagText")), 'C') || 
-      setweight(to_tsvector(coalesce("Post"."location",'')), 'C') || 
-      setweight(to_tsvector(coalesce("Post"."body",'')), 'D') 
+      setweight(to_tsvector(coalesce("Post"."title", '')), 'A') || 
+      setweight(to_tsvector(coalesce("User"."firstName", '')), 'B') || 
+      setweight(to_tsvector(coalesce("User"."lastName", '')), 'B') || 
+      setweight(to_tsvector(coalesce("PostTag"."TagText", '')), 'C') || 
+      setweight(to_tsvector(coalesce("Post"."location", '')), 'C') || 
+      setweight(to_tsvector(coalesce("Post"."body", '')), 'D') 
     )`;
     const data = await Promise.all([
       db.sequelize.query(
@@ -162,6 +162,10 @@ export default class PostController {
             'lastName', "User"."lastName",
             'id', "User"."id"
           ) AS "User",
+          (
+            SELECT json_agg(json_build_object('text', "PostTag"."TagText", 'PostTags', row_to_json("PostTag"))) 
+            FROM "PostTags" AS "PostTag" WHERE "PostTag"."PostId" = "Post"."id"
+          ) AS "Tags",
           ${weights} AS "tsvector",
           ts_rank_cd(${weights}, "query", 1|4) AS "rank" 
         FROM "Posts" AS "Post" 

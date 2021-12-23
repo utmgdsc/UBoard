@@ -45,7 +45,7 @@ function CreatePost() {
     coords: { lat: -1, lng: -1 }, // lat/lng -1 indicates online event.
   });
 
-  const handleLocation = (
+  const updateLocation = (
     location: string,
     lat: number = -1,
     lng: number = -1
@@ -68,9 +68,9 @@ function CreatePost() {
     });
   }, [location]);
 
-  const handleLocationToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleOnlineLocation = (e: React.ChangeEvent<HTMLInputElement>) => {
     toggleOnlineEvent(e.target.checked);
-    handleLocation(''); // clear any previous entries if they switch between online/offline
+    updateLocation(''); // clear any previous entries if they switch between online/offline
   };
 
   const handleTagDelete = (value: string, clearInput: boolean = false) => {
@@ -94,6 +94,7 @@ function CreatePost() {
     });
     toggleDialog(false);
     showAlert(false);
+    setTagInputValue('');
     toggleTagInput(true);
   };
 
@@ -322,7 +323,8 @@ function CreatePost() {
                       control={
                         <Checkbox
                           checked={isOnlineEvent}
-                          onChange={handleLocationToggle}
+                          onChange={toggleOnlineLocation}
+                          data-testid='online-toggler'
                         />
                       }
                       label='This is an online event'
@@ -330,19 +332,20 @@ function CreatePost() {
                   </FormGroup>
                   {/* Normal text field if event is online, google maps picker otherwise */}
                   {!isOnlineEvent && (
-                    <LocationPickerMap setLocation={handleLocation} />
+                    <LocationPickerMap setLocation={updateLocation} />
                   )}
                   {isOnlineEvent && (
                     <TextField
                       fullWidth
                       label='Enter a Location'
                       placeholder='Zoom'
+                      inputProps={{'data-testid':'online-loc-input'}}
                       size='small'
                       onChange={(
                         e: React.ChangeEvent<
                           HTMLTextAreaElement | HTMLInputElement
                         >
-                      ) => handleLocation(e.target.value)}
+                      ) => updateLocation(e.target.value)}
                     />
                   )}
                 </Grid>

@@ -64,6 +64,22 @@ describe('verifying launch of create post component', () => {
     expect(screen.getByTestId('newPostButton')).toBeInTheDocument();
   });
 
+  it('Toggling online event disables the map', () => {
+    screen.getByTestId('online-toggler').click();
+    
+    expect(screen.queryByTestId('picker-map')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('pac-test')).not.toBeInTheDocument();
+    expect(screen.getByTestId('online-loc-input')).toBeInTheDocument();
+  });
+
+  it('View map switch properly hides/shows map', () => {
+    screen.getByTestId('map-toggle').click();
+    const map = screen.getByTestId('picker-map');
+    expect(map.style.height).toEqual('0px');
+    screen.getByTestId('map-toggle').click();
+    expect(map.style.height).not.toEqual('0px');
+  });
+
   it('entering a tag and hitting space will add tag styling and empty the field', () => {
     const tagTextField = screen.getByPlaceholderText(
       'Clubs Math MCS'

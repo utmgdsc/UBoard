@@ -213,14 +213,14 @@ function LocationHandler(props: {
   location: string;
 }) {
   const [isMapVisible, toggleMap] = React.useState(true);
-  const mapEnabled =
+  const isOfflineEvent =
     props.coords && props.coords.lat !== -1 && props.coords.lng !== -1; // disable google maps with invalid coords
 
   return (
     <>
       <Typography variant='body2' sx={{ pt: 2 }}>
         Location: {props.location}
-        {mapEnabled && (
+        {isOfflineEvent && (
           <Switch
             checked={isMapVisible}
             onChange={() => toggleMap((prev) => !prev)}
@@ -229,7 +229,7 @@ function LocationHandler(props: {
         )}
       </Typography>
       {/* Show google maps on valid coordinates */}
-      {mapEnabled && (
+      {isOfflineEvent && (
         <LocationMap
           visible={isMapVisible}
           location={props.location}

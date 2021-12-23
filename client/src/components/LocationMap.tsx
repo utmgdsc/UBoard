@@ -8,7 +8,9 @@ import Switch from '@mui/material/Switch';
 
 import GoogleMapReact from 'google-map-react';
 
-export function LocationPickerMap( props: { setLocation:  (location: string, lat?: number, lng?: number) => void }) {
+export function LocationPickerMap(props: {
+  setLocation: (location: string, lat?: number, lng?: number) => void;
+}) {
   const [locationInput, setInput] = React.useState('');
   const [showMap, toggleMap] = React.useState(true);
 
@@ -76,12 +78,14 @@ export function LocationPickerMap( props: { setLocation:  (location: string, lat
         onChange={(e) => setInput(e.target.value)}
         size='small'
         id='pac-input'
+        inputProps={{ 'data-testid': 'pac-test' }}
       />
       <FormGroup sx={{ pt: 1 }}>
         <FormControlLabel
           control={
             <Switch
               checked={showMap}
+              data-testid='map-toggle'
               onChange={() => toggleMap((prev) => !prev)}
             />
           }
@@ -90,8 +94,9 @@ export function LocationPickerMap( props: { setLocation:  (location: string, lat
       </FormGroup>
       <Paper
         elevation={5}
-        style={{ height: showMap ? '35vh' : '0', width: '100%' }}
+        style={{ height: showMap ? '35vh' : '0', width: '100%' }} // don't unload the map, 0 height will hide it
         sx={{ mt: 1 }}
+        data-testid='picker-map'
       >
         <GoogleMapReact
           bootstrapURLKeys={{

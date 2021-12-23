@@ -5,39 +5,27 @@ import Avatar from '@mui/material/Avatar';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 
-import { useNavigate, useLocation } from 'react-router-dom';
-
 import ServerApi from '../api/v1/index';
 
-function SignIn(props: { handleChange: Function; showAlert: Function }) {
+function PassReset(props: { handleChange: Function; showAlert: Function }) {
   const api = new ServerApi();
 
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const previousPath = location.state?.from?.pathname || '/dashboard';
-
-  // create hooks for username and password
-  const [signinForm, setSignInForm] = useState({
-    userName: '',
-    password: '',
+  const [passResetForm, setPassResetForm] = useState({
+    email: '',
   });
 
-  const [signinFormErrors, setSignInFormErrors] = useState({
-    userName: '',
-    password: '',
+  const [passResetFormErrors, setPassResetFormErrors] = useState({
+    email: '',
   });
 
   const isFormMissingFields = () => {
-    for (const key in signinForm) {
-      if (signinForm[key as keyof typeof signinForm] === '') {
+    for (const key in passResetForm) {
+      if (passResetForm[key as keyof typeof passResetForm] === '') {
         return true;
       }
     }
@@ -46,8 +34,8 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
 
   const getErrorMessages = () => {
     let msg = '';
-    for (const key in signinFormErrors) {
-      const err = signinFormErrors[key as keyof typeof signinFormErrors];
+    for (const key in passResetFormErrors) {
+      const err = passResetFormErrors[key as keyof typeof passResetFormErrors];
       msg += err === '' ? err : `${err}.\n`;
     }
     msg = msg.slice(0, -1);
@@ -67,8 +55,6 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
     setHook: Function,
     errorMessage: string
   ) => {
-    // only check for the confirm password field
-
     if (!regexPattern.test(checkString)) {
       setHook(errorMessage);
     } else {
@@ -76,7 +62,6 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
     }
   };
 
-  // handle function for submitting username and password
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault(); // no refresh; default
 
@@ -95,7 +80,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
     }
 
     try {
-      const { status, data } = await api.signIn(signinForm);
+      const { status, data } = await api.requestPasswordReset(passResetForm);
       if (status !== 204) {
         if (!data) {
           throw new Error('Missing error response.');
@@ -104,7 +89,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
         console.error(msg);
         props.showAlert('error', msg);
       } else {
-        navigate(previousPath, { replace: true });
+        props.showAlert('success', 'Password reset email sent!');
       }
     } catch (error) {
       console.error(error);
@@ -116,21 +101,21 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
   };
 
   const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSignInForm({ ...signinForm, [e.target.name]: e.target.value });
+    setPassResetForm({ ...passResetForm, [e.target.name]: e.target.value });
   };
 
   const handleError =
     (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     (msg: string) => {
-      return setSignInFormErrors({
-        ...signinFormErrors,
+      return setPassResetFormErrors({
+        ...passResetFormErrors,
         [e.target.name]: msg,
       });
     };
 
   return (
     <Box
-      data-testid='SignInTab'
+      data-testid='ResetPassTab'
       sx={{
         mx: 2,
         display: 'flex',
@@ -144,7 +129,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
         <LockOutlinedIcon />
       </Avatar>
       <Typography component='h1' variant='h5'>
-        Sign in
+        Reset Password
       </Typography>
       <Box
         component='form'
@@ -155,48 +140,23 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
         sx={{ mt: 1 }}
       >
         <TextField
-          name='userName'
-          margin='normal'
-          label='Username'
+          name='email'
+          label='Email Address'
           onChange={handleFormInput}
           fullWidth
           required
-          data-testid='userNameForm'
+          data-testid='resetField'
+          type='email'
           onBlur={(e) =>
             validateBlur(
-              /^[a-zA-Z0-9]+$/,
-              signinForm.userName,
+              /..*@(mail\.|alum\.){0,}utoronto.ca$/,
+              passResetForm.email,
               handleError(e),
-              'Please enter a valid username'
+              'Invalid email, only utoronto emails allowed'
             )
           }
-          error={signinFormErrors.userName !== ''}
-          helperText={signinFormErrors.userName}
-        />
-        <TextField
-          name='password'
-          margin='normal'
-          label='Password'
-          onChange={handleFormInput}
-          fullWidth
-          required
-          data-testid='passwordForm'
-          type='password'
-          onBlur={(e) =>
-            validateBlur(
-              /.{8,}/,
-              signinForm.password,
-              handleError(e),
-              'Ensure password is 8 characters or longer'
-            )
-          }
-          error={signinFormErrors.password !== ''}
-          helperText={signinFormErrors.password}
-        />
-        {/* will be implemented in future PR (after search) */}
-        <FormControlLabel
-          control={<Checkbox value='remember' color='primary' />}
-          label='Remember me'
+          error={passResetFormErrors.email !== ''}
+          helperText={passResetFormErrors.email}
         />
         <Button
           type='submit'
@@ -204,26 +164,17 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
           fullWidth
           sx={{ mt: 3, mb: 2 }}
         >
-          Sign In
+          Reset my password
         </Button>
         <Grid container>
-          <Grid item xs>
-            <Link
-              href='#'
-              variant='body2'
-              onClick={(e) => props.handleChange(e, 2)}
-            >
-              Forgot password?
-            </Link>
-          </Grid>
           <Grid item>
             <Link
               href='#'
               variant='body2'
-              onClick={(e) => props.handleChange(e, 1)}
-              data-testid='CreateAccountButton'
+              onClick={(e) => props.handleChange(e, 0)}
+              data-testid='resetPassButton'
             >
-              Don't have an account? Sign Up
+              Back to Sign In
             </Link>
           </Grid>
         </Grid>
@@ -232,4 +183,4 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
   );
 }
 
-export default SignIn;
+export default PassReset;

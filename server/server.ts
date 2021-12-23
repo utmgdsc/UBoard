@@ -11,6 +11,12 @@ if (!process.env.JWT_SECRET) {
   throw new Error(err);
 }
 
+if (!process.env.PAGE_URL) {
+  const err = 'Missing page url';
+  console.error(err);
+  throw new Error(err);
+}
+
 const app = express();
 const port = 8080;
 
@@ -23,8 +29,9 @@ const noAuthPaths = [
   '/signin',
   '/signup',
   '/signout',
-  '/confirm',
-  '/password-reset',
+  '/request-password-reset',
+  '/confirm-email',
+  '/reset-password',
 ];
 app.use(
   auth(

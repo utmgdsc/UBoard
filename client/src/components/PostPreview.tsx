@@ -47,7 +47,14 @@ export default function PostPreview(props: {
   postUser: PostUserPreview;
   setOpenedPost: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const tags = GenerateTags(['Placeholder']);
+  // generate tags (if the post has any)
+  const tags = (
+    <GenerateTags
+      tags={
+        props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []
+      }
+    />
+  );
 
   return (
     <Grid data-testid='test-postpreview' item xs={12} sm={6} md={4} lg={4}>

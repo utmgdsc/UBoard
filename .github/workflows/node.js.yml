@@ -27,8 +27,6 @@ jobs:
       env:
           CI: true
           JWT_SECRET: test
-          BACKBLAZE_APP_KEY_ID: ${{secrets.BACKBLAZE_APP_KEY_ID}}
-          BACKBLAZE_APP_KEY: ${{secrets.BACKBLAZE_APP_KEY}}
     
     - name: Tests ✅
       if: ${{ success() }}

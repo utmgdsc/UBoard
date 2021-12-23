@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 
 const maxSize = 2 * 1024 * 1024;
-const allowedFileTypes = /jpeg|jpg|png/.compile();
+const allowedFileTypes = /jpeg|jpg|png/;
 
 export interface File {
   originalname: string;

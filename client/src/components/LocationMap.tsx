@@ -100,7 +100,7 @@ export function LocationPickerMap(props: {
       >
         <GoogleMapReact
           bootstrapURLKeys={{
-            key: process.env.MAPS_API as string,
+            key: process.env.REACT_APP_MAPS_API as string,
             libraries: ['places'],
           }}
           defaultCenter={{ lat: 43.59, lng: -79.65 }} // default to GTA
@@ -170,7 +170,7 @@ export function LocationMap(props: {
         sx={{ mt: 2 }}
       >
         <GoogleMapReact
-          bootstrapURLKeys={{ key: process.env.MAPS_API as string }}
+          bootstrapURLKeys={{ key: process.env.REACT_APP_MAPS_API as string }}
           defaultCenter={center}
           defaultZoom={15}
           options={getOptions}

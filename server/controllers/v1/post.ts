@@ -1,5 +1,5 @@
 import sequelize from 'sequelize';
-import { Post } from '../../models/post';
+import { latLng, Post } from '../../models/post';
 import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
 import { PostTag } from '../../models/PostTags';
@@ -143,6 +143,7 @@ export default class PostController {
         'body',
         'thumbnail',
         'location',
+        'coords',
         'capacity',
         'feedbackScore',
         'UserId',
@@ -315,7 +316,8 @@ export default class PostController {
     body?: string,
     location?: string,
     capacity?: number,
-    tags?: string[]
+    tags?: string[],
+    coords?: latLng
   ): Promise<{
     status: number;
     data: { result?: Post; message?: string };
@@ -325,10 +327,11 @@ export default class PostController {
     }
 
     const post = await this.postsRepo.create({
-      title: title,
-      body: body,
-      location: location,
-      capacity: capacity,
+      title,
+      body,
+      location,
+      capacity,
+      coords,
       UserId: userID,
     });
 
@@ -367,7 +370,8 @@ export default class PostController {
     title?: string,
     body?: string,
     location?: string,
-    capacity?: number
+    capacity?: number,
+    coords?: latLng
   ): Promise<{ status: number; data?: { message?: string; result?: Post } }> {
     const post = await this.postsRepo.findByPk(postID);
 
@@ -377,6 +381,7 @@ export default class PostController {
         post.body = body || post.body;
         post.location = location || post.location;
         post.capacity = capacity || post.capacity;
+        post.coords = coords || post.coords;
         await post.save();
         return { status: 200, data: { result: post } };
       } catch (err) {

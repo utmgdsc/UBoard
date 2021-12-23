@@ -14,6 +14,11 @@ import PreviewPopUp from './PreviewPopUp';
 import Snackbar from '@mui/material/Snackbar';
 import { PostCreationTags } from './Tags';
 import ServerApi from '../api/v1/index';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
+
+import { LocationPickerMap } from './LocationMap';
 
 const api = new ServerApi();
 
@@ -25,6 +30,10 @@ function CreatePost() {
   const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
+  const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);
+  const [location, setLocation] = React.useState(
+    {} as { location: string; lat: number; lng: number }
+  );
 
   const [form, setForm] = useState({
     title: '',
@@ -33,11 +42,43 @@ function CreatePost() {
     tags: [] as string[],
     capacity: 0,
     location: '',
+    coords: { lat: -1, lng: -1 }, // lat/lng -1 indicates online event.
   });
 
-  const handleTagDelete = (value: string) => {
+  const updateLocation = (
+    location: string,
+    lat: number = -1,
+    lng: number = -1
+  ) => {
+    setLocation({
+      // directly updating form in child was buggy
+      location,
+      lat,
+      lng,
+    });
+  };
+
+  React.useEffect(() => {
+    setForm((form) => {
+      return {
+        ...form,
+        location: location.location,
+        coords: { lat: location.lat, lng: location.lng },
+      };
+    });
+  }, [location]);
+
+  const toggleOnlineLocation = (e: React.ChangeEvent<HTMLInputElement>) => {
+    toggleOnlineEvent(e.target.checked);
+    updateLocation(''); // clear any previous entries if they switch between online/offline
+  };
+
+  const handleTagDelete = (value: string, clearInput: boolean = false) => {
     setForm({ ...form, tags: form.tags.filter((val) => val !== value) });
-    setTagInputValue(value);
+    if (!clearInput) {
+      // put the tag back in the inputbox (allow editing it).
+      setTagInputValue(value);
+    }
     toggleTagInput(true);
   };
 
@@ -49,9 +90,11 @@ function CreatePost() {
       tags: [],
       capacity: 0,
       location: '',
+      coords: { lat: -1, lng: -1 },
     });
     toggleDialog(false);
     showAlert(false);
+    setTagInputValue('');
     toggleTagInput(true);
   };
 
@@ -59,17 +102,14 @@ function CreatePost() {
     setOpenPopup(true);
   };
 
-  const handleNewTag = (
-    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>
-  ) => {
-    const newTag = e.target.value.trim();
-    const isChange = e.type === 'change'; // since new tag is made onBlur or onChange
+  const handleNewTag = (rawTag: string, onChange: boolean) => {
+    const newTag = rawTag.trim();
+
     if (
       newTag.length > 0 &&
-      (!isChange ||
-        (isChange && e.target.value.charAt(e.target.value.length - 1) === ' '))
+      (!onChange || (onChange && rawTag.charAt(rawTag.length - 1) === ' '))
     ) {
-      // new tag for onChange events only when there is a trailing space
+      // onChange events only create tag when there is a trailing space
       if (!form.tags.includes(newTag)) {
         if (form.tags.length === 2) {
           // about to add 3rd tag. Disable input
@@ -80,9 +120,10 @@ function CreatePost() {
           tags: [...form.tags, newTag],
         });
       } // new tag input for each space
-      e.target.value = '';
+      setTagInputValue('');
+    } else {
+      setTagInputValue(rawTag);
     }
-    setTagInputValue(e.target.value);
   };
 
   const handleSubmit = () => {
@@ -220,17 +261,6 @@ function CreatePost() {
                 <Grid item xs={12} md={5}>
                   <TextField
                     fullWidth
-                    label='Location'
-                    placeholder='Deerfield Hall'
-                    size='small'
-                    onChange={(e) =>
-                      setForm({ ...form, location: e.target.value })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
                     label='Tags (Seperated by a space. Max of 3 tags)'
                     placeholder='Clubs Math MCS'
                     data-testid='tagsInput'
@@ -259,8 +289,17 @@ function CreatePost() {
                     }}
                     inputProps={{ maxLength: 15 }}
                     size='small'
-                    onBlur={handleNewTag}
-                    onChange={handleNewTag}
+                    onBlur={(
+                      e: React.FocusEvent<
+                        HTMLInputElement | HTMLTextAreaElement,
+                        Element
+                      >
+                    ) => handleNewTag(e.target.value, false)}
+                    onChange={(
+                      e: React.ChangeEvent<
+                        HTMLInputElement | HTMLTextAreaElement
+                      >
+                    ) => handleNewTag(e.target.value, true)}
                     onKeyDown={(e: React.KeyboardEvent<HTMLDivElement>) => {
                       // backspace to delete last tag
                       if (
@@ -271,8 +310,44 @@ function CreatePost() {
                         e.preventDefault();
                         handleTagDelete(form.tags[form.tags.length - 1]);
                       }
+
+                      if (e.key === 'Enter') {
+                        handleNewTag(tagInputValue, false);
+                      }
                     }}
                   />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={isOnlineEvent}
+                          onChange={toggleOnlineLocation}
+                          data-testid='online-toggler'
+                        />
+                      }
+                      label='This is an online event'
+                    />
+                  </FormGroup>
+                  {/* Normal text field if event is online, google maps picker otherwise */}
+                  {!isOnlineEvent && (
+                    <LocationPickerMap setLocation={updateLocation} />
+                  )}
+                  {isOnlineEvent && (
+                    <TextField
+                      fullWidth
+                      label='Enter a Location'
+                      placeholder='Zoom'
+                      data-testid='online-loc-input'
+                      size='small'
+                      onChange={(
+                        e: React.ChangeEvent<
+                          HTMLTextAreaElement | HTMLInputElement
+                        >
+                      ) => updateLocation(e.target.value)}
+                    />
+                  )}
                 </Grid>
               </Grid>
 
@@ -340,6 +415,7 @@ function CreatePost() {
               tags={form.tags}
               eventCapacity={form.capacity}
               location={form.location}
+              coords={form.coords}
               openPopup={openPopup}
               handleClose={() => setOpenPopup(false)}
             ></PreviewPopUp>

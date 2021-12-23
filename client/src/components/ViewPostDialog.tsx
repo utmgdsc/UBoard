@@ -18,8 +18,10 @@ import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
+import Switch from '@mui/material/Switch';
 
 import { UserContext } from '../App';
+import { LocationMap } from './LocationMap';
 
 import ServerApi, { PostUser, PostUserPreview } from '../api/v1';
 
@@ -40,7 +42,7 @@ const Transition = React.forwardRef(
   and edit options are only shown if the user is authorized. */
 function MoreOptions(props: {
   postID: string;
-  isAuth: boolean;
+  userHasCreatedPost: boolean;
   closeDialog: Function;
   toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
@@ -114,7 +116,7 @@ function MoreOptions(props: {
           'aria-labelledby': 'post-settings',
         }}
       >
-        {props.isAuth ? (
+        {props.userHasCreatedPost ? (
           <>
             <MenuItem onClick={() => props.toggleEdit(true)}>Edit</MenuItem>
             <MenuItem onClick={deletePost}>Delete</MenuItem>
@@ -327,6 +329,39 @@ function PostEditor(props: {
   );
 }
 
+function LocationHandler(props: {
+  coords?: { lat: number; lng: number };
+  location: string;
+}) {
+  const [isMapVisible, toggleMap] = React.useState(true);
+  const isOfflineEvent =
+    props.coords && props.coords.lat !== -1 && props.coords.lng !== -1; // disable google maps with invalid coords
+
+  return (
+    <Box sx={{ pl: 4, pb: 1 }}>
+      <Typography variant='body2' sx={{ pt: 2 }}>
+        Location: {props.location}
+        {isOfflineEvent && (
+          <Switch
+            checked={isMapVisible}
+            onChange={() => toggleMap((prev) => !prev)}
+            size='medium'
+          />
+        )}
+      </Typography>
+      {/* Show google maps on valid coordinates */}
+      {isOfflineEvent && (
+        <LocationMap
+          visible={isMapVisible}
+          location={props.location}
+          lat={props.coords!.lat}
+          lng={props.coords!.lng}
+        />
+      )}
+    </Box>
+  );
+}
+
 /* Opens a full screen dialog containing a post. */
 export default function ViewPostDialog(props: {
   postUser: PostUserPreview;
@@ -429,12 +464,18 @@ export default function ViewPostDialog(props: {
                 </Grid>
                 <MoreOptions
                   postID={postData.id}
-                  isAuth={isAuthor}
+                  userHasCreatedPost={isAuthor}
                   closeDialog={closeDialog}
                   toggleEdit={toggleEditor}
                 />
               </Stack>
             </Grid>
+            <MoreOptions
+              postID={postData.id}
+              userHasCreatedPost={isAuthor}
+              closeDialog={closeDialog}
+              toggleEdit={toggleEditor}
+            />
             {/* Top information (author, date, tags..) */}
             <Stack sx={{ pl: 4 }}>
               <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
@@ -442,11 +483,8 @@ export default function ViewPostDialog(props: {
                 {postData.User.firstName} {postData.User.lastName}
               </Typography>
               {props.tags}
-              <Typography variant='body2' sx={{ pt: 2 }}>
-                Location: {postData.location}
-              </Typography>
-              {/* TODO: Implement Google Maps API */}
             </Stack>
+
             {/* Post image and body */}
             <Stack sx={{ pl: 4 }}>
               <Box
@@ -479,7 +517,12 @@ export default function ViewPostDialog(props: {
                 )}
                 <LikeButton numLikes={Number(postData.feedbackScore)} />
               </Stack>
+              <LocationHandler
+                coords={postData.coords}
+                location={postData.location}
+              />
             </Stack>
+
             {/* Comment Section */}
             <Stack sx={{ px: 8, pb: 5 }}>
               <Typography variant='h5' sx={{ py: 2 }}>
@@ -490,13 +533,13 @@ export default function ViewPostDialog(props: {
                 placeholder='Write a comment'
                 size='small'
               ></TextField>
+              {/* TODO: Create Comment component later */}
               <Button variant='contained' sx={{ mt: 2 }}>
                 Add Comment
               </Button>
             </Stack>
           </>
         )}
-        {/* TODO: Create Comment component later */}
       </Dialog>
     </>
   );

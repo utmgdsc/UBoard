@@ -6,7 +6,7 @@ The official University of Toronto bulletin board.
 
 ```
 docker build -t uoftboard .
-docker run -p 80:80 -e PORT=80 -e JWT_SECRET=test uoftboard
+docker run -p 80:80 -e PORT=80 -e JWT_SECRET=test -e PAGE_URL=test uoftboard
 ```
 
 ## Setting up types for client

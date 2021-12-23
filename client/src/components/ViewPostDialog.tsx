@@ -237,7 +237,7 @@ export default function ViewPostDialog(props: {
     if (isOpen) {
       const interval = setInterval(() => {
         fetchData();
-      }, 500);
+      }, 5000);
       return () => clearInterval(interval);
     }
   });

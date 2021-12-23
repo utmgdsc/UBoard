@@ -148,6 +148,20 @@ export default class ServerApi {
     >('/posts/search', { query, limit, offset });
   }
 
+  async fetchUserPosts(userId: string, limit: number, offset: number) {
+    return await this.get<
+      { limit: number; offset: number },
+      {
+        data: {
+          result?: PostUserPreview[];
+          count: number;
+          total: number;
+          message?: string;
+        };
+      }
+    >(`/posts/user/${userId}`, { limit, offset });
+  }
+
   async fetchRecentPosts(limit: number, offset: number) {
     return await this.get<
       { limit: number; offset: number },

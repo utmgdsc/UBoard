@@ -62,6 +62,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 function AccountMenu(props: {
+  setUserId: Function;
   setSearch: Function;
   setEscapedQuery: Function;
 }) {
@@ -100,19 +101,7 @@ function AccountMenu(props: {
       >
         <MenuItem
           onClick={async () => {
-            try {
-              const result = await api.me();
-              const user = result.data;
-              if (!user) {
-                throw new Error('Current user could not be found.');
-              }
-
-              const query = `${user.firstName} ${user.lastName}`;
-              props.setSearch(query);
-              props.setEscapedQuery(query);
-            } catch (err) {
-              console.error(err);
-            }
+            props.setUserId(authedUser.data.id);
 
             closeMenu();
           }}
@@ -133,7 +122,10 @@ function AccountMenu(props: {
   );
 }
 
-export default function Header(props: { setEscapedQuery: Function }) {
+export default function Header(props: {
+  setUserId: Function;
+  setEscapedQuery: Function;
+}) {
   const [search, setSearch] = React.useState('');
 
   React.useEffect(() => {
@@ -160,16 +152,19 @@ export default function Header(props: { setEscapedQuery: Function }) {
             placeholder='Search'
             inputProps={{ 'aria-label': 'search' }}
             onChange={(e) => {
+              props.setUserId('');
               setSearch(e.target.value);
             }}
             onKeyPress={(e) => {
               if (e.key === 'Enter') {
+                props.setUserId('');
                 props.setEscapedQuery(search);
               }
             }}
           />
         </Search>
         <AccountMenu
+          setUserId={props.setUserId}
           setSearch={setSearch}
           setEscapedQuery={props.setEscapedQuery}
         />

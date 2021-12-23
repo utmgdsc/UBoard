@@ -124,6 +124,74 @@ export default class PostController {
     };
   }
 
+  async getUserPosts(
+    userID: string,
+    queryUserID: string,
+    limit: number,
+    offset: number
+  ): Promise<{
+    status: number;
+    data: { result?: PostUserPreview[]; count: number; total: number };
+  }> {
+    const data = await Promise.all([
+      this.postsRepo.findAndCountAll({
+        limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
+        // Since we are returning multiple results, we want to limit the data.
+        attributes: [
+          'id',
+          'body',
+          'title',
+          'createdAt',
+          'thumbnail',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
+            ),
+            'likeCount',
+          ],
+          [
+            sequelize.literal(
+              // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+              `(
+                SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                WHERE "Likes"."postID" = "Post"."id" 
+                  AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+              )`
+            ),
+            'doesUserLike',
+          ],
+        ],
+        include: [
+          {
+            model: db.User,
+            attributes: ['firstName', 'lastName', 'id'],
+          },
+          {
+            model: db.Tag,
+            attributes: ['text'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+        offset: offset,
+        where: { UserId: queryUserID },
+      }),
+      this.postsRepo.count(),
+    ]);
+
+    return {
+      status: data[0].count > 0 ? 200 : 204,
+      data: {
+        result: (data[0].rows as any as PostUserPreview[]).map((p) => {
+          p.likeCount = (p as any).dataValues.likeCount;
+          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          return p;
+        }),
+        count: data[0].count,
+        total: data[1],
+      },
+    };
+  }
+
   async searchForPosts(
     userID: string,
     query: string,

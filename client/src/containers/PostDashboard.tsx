@@ -19,6 +19,7 @@ function RecentPosts(props: {
   query: string;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
   pageNum: number;
+  userId: string;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
   const [openedPost, setOpenedPost] = React.useState(false);
@@ -26,7 +27,13 @@ function RecentPosts(props: {
   const checkForPosts = React.useCallback(() => {
     if (!openedPost) {
       let result;
-      if (!props.query) {
+      if (props.userId !== '') {
+        result = api.fetchUserPosts(
+          props.userId,
+          POSTS_PER_PAGE,
+          POSTS_PER_PAGE * (props.pageNum - 1)
+        );
+      } else if (!props.query) {
         result = api.fetchRecentPosts(
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
@@ -83,6 +90,8 @@ export default function PostDashboard() {
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
 
+  const [userId, setUserId] = React.useState('');
+
   const useQuery = (): [string, (q: string) => void] => {
     const [query, setQuery] = React.useState('');
 
@@ -99,7 +108,7 @@ export default function PostDashboard() {
 
   return (
     <>
-      <Header setEscapedQuery={setEscapedQuery} />
+      <Header setUserId={setUserId} setEscapedQuery={setEscapedQuery} />
       <main>
         <Container
           sx={{ py: 5 }}
@@ -120,6 +129,7 @@ export default function PostDashboard() {
             </Grid>
 
             <RecentPosts
+              userId={userId}
               query={query}
               setPageCount={setPageCount}
               pageNum={page}

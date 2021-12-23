@@ -96,6 +96,7 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
 
   const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSignupForm({ ...signupForm, [e.target.name]: e.target.value });
+    setSignupFormErrors({ ...signupFormErrors, [e.target.name]: '' });
   };
 
   const handleError =
@@ -285,7 +286,10 @@ function SignUp(props: { handleChange: Function; showAlert: Function }) {
               label='Confirm Password'
               size='small'
               variant='standard'
-              onChange={(e) => setConfirmPass(e.target.value)}
+              onChange={(e) => {
+                setConfirmPass(e.target.value);
+                setConfirmPassError('');
+              }}
               fullWidth
               required
               data-testid='confirmPassForm'

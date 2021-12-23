@@ -102,6 +102,10 @@ function PassReset(props: { handleChange: Function; showAlert: Function }) {
 
   const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassResetForm({ ...passResetForm, [e.target.name]: e.target.value });
+    setPassResetFormErrors({
+      ...passResetFormErrors,
+      [e.target.name]: '',
+    });
   };
 
   const handleError =

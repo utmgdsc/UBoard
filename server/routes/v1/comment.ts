@@ -4,14 +4,14 @@ import CommentController from '../../controllers/v1/comment';
 import { getAuthUser } from '../../middleware/auth';
 
 const commentRouter = express.Router();
-const commentController = new CommentController(db.Post);
+const commentController = new CommentController(db.Comment);
 
 commentRouter.get('', async (req: Request, res: Response) => {
   try {
     const limit = req.query.limit;
     const offset = req.query.offset;
-    const postID = req.body.postid;
-    if (!limit || offset == undefined) {
+    const postID = req.query.postid;
+    if (!limit || offset == undefined || !postID) {
       return res.status(400).json({
         code: 400,
         message: `Missing ${!limit ? 'limit' : ''} ${
@@ -21,7 +21,7 @@ commentRouter.get('', async (req: Request, res: Response) => {
     }
 
     const result = await commentController.getComments(
-      postID,
+      postID as string,
       Number(limit),
       Number(offset)
     );
@@ -55,9 +55,9 @@ commentRouter.delete('/:commentid', async (req: Request, res: Response) => {
 commentRouter.post('', async (req: Request, res: Response) => {
   try {
     const result = await commentController.createComment(
+      req.body.body,
       getAuthUser(res).id,
-      req.body.postid,
-      req.body.body
+      req.body.postid
     );
     res.status(result.status).json(result);
   } catch (err) {

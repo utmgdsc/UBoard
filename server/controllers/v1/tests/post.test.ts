@@ -10,6 +10,8 @@ import {
 import FileManager from '../../../services/fileManager';
 import PostController from '../post';
 
+jest.mock('backblaze-b2');
+
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,

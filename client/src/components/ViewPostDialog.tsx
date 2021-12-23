@@ -347,8 +347,7 @@ export default function ViewPostDialog() {
           }}
         >
           <img
-            // TODO src={props.postUser.thumbnail}
-            src='https://i.imgur.com/8EYKtwP.png'
+            src={props.postUser.thumbnail}
             alt='Thumbnail'
             height='400px'
             width='400px'

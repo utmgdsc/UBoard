@@ -78,7 +78,7 @@ export function LocationPickerMap(props: {
         onChange={(e) => setInput(e.target.value)}
         size='small'
         id='pac-input'
-        inputProps={{ 'data-testid': 'pac-test' }}
+        data-testid='pac-input-test'
       />
       <FormGroup sx={{ pt: 1 }}>
         <FormControlLabel

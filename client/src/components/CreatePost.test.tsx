@@ -72,6 +72,38 @@ describe('verifying launch of create post component', () => {
     expect(screen.getByTestId('online-loc-input')).toBeInTheDocument();
   });
 
+  it('Switching between online to offline event clears previous input', () => {
+    const toggler = screen.getByTestId('online-toggler');
+    toggler.click();
+  
+    const online = screen.getByTestId('online-loc-input').querySelector('input');
+
+    fireEvent.change(online!, {
+      target: {
+        value: 'online123'
+      }
+    });
+    
+    expect(online?.value).toEqual('online123');
+    toggler.click();
+    toggler.click();
+    expect(screen.getByTestId('online-loc-input').querySelector('input')?.value).toEqual('');
+    toggler.click();
+
+    const offline = screen.getByTestId('pac-input-test').querySelector('input');
+    fireEvent.change(offline!, {
+      target: {
+        value: 'addr'
+      }
+    });
+    expect(offline?.value).toEqual('addr');
+    toggler.click();
+    expect(screen.queryByTestId('pac-input-test')).not.toBeInTheDocument();
+    toggler.click();
+    expect(screen.getByTestId('pac-input-test').querySelector('input')?.value).toEqual('');
+
+  })
+
   it('View map switch properly hides/shows map', () => {
     screen.getByTestId('map-toggle').click();
     const map = screen.getByTestId('picker-map');

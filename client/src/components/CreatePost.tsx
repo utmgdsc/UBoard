@@ -339,7 +339,7 @@ function CreatePost() {
                       fullWidth
                       label='Enter a Location'
                       placeholder='Zoom'
-                      inputProps={{'data-testid':'online-loc-input'}}
+                      data-testid='online-loc-input'
                       size='small'
                       onChange={(
                         e: React.ChangeEvent<

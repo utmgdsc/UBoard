@@ -61,7 +61,10 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function AccountMenu(props: { setSearch: Function, setEscapedQuery: Function }) {
+function AccountMenu(props: {
+  setSearch: Function;
+  setEscapedQuery: Function;
+}) {
   const [isOpen, openMenu] = React.useState(false);
   const authedUser = React.useContext(UserContext);
   const navigate = useNavigate();
@@ -100,8 +103,8 @@ function AccountMenu(props: { setSearch: Function, setEscapedQuery: Function }) 
             try {
               const result = await api.me();
               const user = result.data;
-              if (!user) { 
-                throw new Error("Current user could not be found.");
+              if (!user) {
+                throw new Error('Current user could not be found.');
               }
 
               const query = `${user.firstName} ${user.lastName}`;
@@ -166,7 +169,10 @@ export default function Header(props: { setEscapedQuery: Function }) {
             }}
           />
         </Search>
-        <AccountMenu setSearch={setSearch} setEscapedQuery={props.setEscapedQuery} />
+        <AccountMenu
+          setSearch={setSearch}
+          setEscapedQuery={props.setEscapedQuery}
+        />
       </Toolbar>
     </AppBar>
   );

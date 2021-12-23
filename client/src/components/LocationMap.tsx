@@ -187,7 +187,10 @@ export function LocationMap(props: {
         sx={{ mt: 2 }}
       >
         <GoogleMapReact
-          bootstrapURLKeys={{ key: process.env.REACT_APP_MAPS_API as string }}
+          bootstrapURLKeys={{
+            key: process.env.REACT_APP_MAPS_API as string,
+            libraries: ['places'],
+          }}
           defaultCenter={center}
           defaultZoom={15}
           options={getOptions}

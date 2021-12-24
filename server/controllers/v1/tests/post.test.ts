@@ -15,6 +15,7 @@ jest.mock('backblaze-b2');
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
+  db.UserReports,
   db.Tag,
   new FileManager()
 );
@@ -340,11 +341,38 @@ describe('Test v1 - Post Controller', () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
 
-      const result = await postController.report(post.id);
+      const result = await postController.report(author.id, post.id);
+      const postResult = await postController.getPost(author.id, post.id);
 
       expect(result.status).toBe(204);
-      await post.reload();
-      expect(post.feedbackScore).toBe(9);
+      expect(postResult.data.result!.didUserReport).toBeTruthy();
+    });
+
+    it('should only allow one report per user', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+
+      let result = 0;
+      for (let i = 0; i <= MAX_REPORTS; i++) {
+        result = (await postController.report(author.id, post.id)).status;
+      }
+
+      expect(result).toBe(204);
+    });
+
+    it('should delete a post after the required number of reports', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+
+      let result = 0;
+      for (let i = 0; i < MAX_REPORTS; i++) {
+        let user = await makeUser(`report${i}`, `report${i}@mail.utoronto.ca`);
+        result = (await postController.report(user.id, post.id)).status;
+      }
+
+      expect(result).toBe(200);
+
+      expect(await db.Post.findOne({ where: { id: post.id } })).toBeNull();
     });
 
     it('deleting a post is reflected on the total count returned by getposts', async () => {

@@ -48,6 +48,7 @@ export default class EmailService {
     To continue with your account registration, please confirm your email address by visiting: 
     
     ${confirmURL}`;
+    console.log(body);
 
     return await this.sendEmail(emailAddress, subjectLine, body, body);
   }

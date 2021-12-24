@@ -159,27 +159,43 @@ function LikeButton(props: { numLikes: number }) {
   );
 }
 
-function CapacityBar(props: { maxCapacity: number }) {
+function CapacityBar(props: {
+  maxCapacity: number;
+  postID: string;
+  isUserCheckedIn: boolean;
+}) {
   // TODO: This data should be synced with db -- models needs to be updated
   const [capacity, setCapacity] = React.useState(0);
-  const [isCheckedin, toggleCheckin] = React.useState(false);
   const maxCapacity = !isNaN(props.maxCapacity) ? props.maxCapacity : 0;
 
-  const handleCheckIn = () => {
-    toggleCheckin((prev) => !prev);
+  const handleCheckIn = async () => {
+    if (props.isUserCheckedIn) {
+      await api.checkout(props.postID);
+      // As there is no global state management system, we would have to wait
+      // for the autoreload system to update the post info. This is a hack to
+      // ensure that the checked in state is immediately updated.
+      props.isUserCheckedIn = false;
+    } else {
+      const result = await api.checkin(props.postID);
+      if (result.status !== 409) {
+        props.isUserCheckedIn = true;
+      }
+      // TODO indicate a standard alert to the user that the event could not be
+      // checked into (over capacity)
+    }
   };
 
   React.useEffect(() => {
-    if (isCheckedin) {
+    if (props.isUserCheckedIn) {
       setCapacity((prev) => prev + 1);
     } else {
       setCapacity((prev) => (prev > 0 ? prev - 1 : prev));
     }
-  }, [isCheckedin]);
+  }, [props.isUserCheckedIn]);
 
   const buttonHandler =
     capacity < props.maxCapacity ? (
-      isCheckedin ? (
+      props.isUserCheckedIn ? (
         <Button onClick={handleCheckIn} variant='contained'>
           Undo
         </Button>
@@ -217,7 +233,7 @@ function LocationHandler(props: {
     props.coords && props.coords.lat !== -1 && props.coords.lng !== -1; // disable google maps with invalid coords
 
   return (
-    <Box sx={{pl: 4, pb: 1}}>
+    <Box sx={{ pl: 4, pb: 1 }}>
       <Typography variant='body2' sx={{ pt: 2 }}>
         Location: {props.location}
         {isOfflineEvent && (
@@ -371,13 +387,20 @@ export default function ViewPostDialog(props: {
           </Typography>
           <Stack direction='row' sx={{ px: 4, pb: 5 }}>
             {Number(postData.capacity) > 0 ? (
-              <CapacityBar maxCapacity={Number(postData.capacity)} />
+              <CapacityBar
+                maxCapacity={Number(postData.capacity)}
+                postID={postData.id}
+                isUserCheckedIn={postData.isUserCheckedIn}
+              />
             ) : (
               <></>
             )}
             <LikeButton numLikes={Number(postData.feedbackScore)} />
           </Stack>
-            <LocationHandler coords={postData.coords} location={postData.location} />
+          <LocationHandler
+            coords={postData.coords}
+            location={postData.location}
+          />
         </Stack>
 
         {/* Comment Section */}

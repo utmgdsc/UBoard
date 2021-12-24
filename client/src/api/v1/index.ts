@@ -8,6 +8,7 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
+  isUserCheckedIn: boolean;
   User: { id: string; firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -22,6 +23,7 @@ export type PostUserPreview = {
   createdAt: string;
   likeCount: number;
   doesUserLike: boolean;
+  isUserCheckedIn: boolean;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -161,6 +163,14 @@ export default class ServerApi {
 
   async reportPost(postID: string) {
     return await this.put<{ status: number }>(`/posts/${postID}/report`);
+  }
+
+  async checkin(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/checkin`);
+  }
+
+  async checkout(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/checkout`);
   }
 
   async createPost(form: {

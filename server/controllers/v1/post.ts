@@ -2,6 +2,7 @@ import sequelize from 'sequelize';
 import { latLng, Post } from '../../models/post';
 import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
+import { UserCheckin } from '../../models/usercheckin';
 import { PostTag } from '../../models/PostTags';
 import db from '../../models';
 
@@ -9,6 +10,7 @@ import db from '../../models';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
+  isUserCheckedIn: boolean;
   User: { id: string; firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -23,6 +25,7 @@ export type PostUserPreview = {
   createdAt: Date;
   likeCount: number;
   doesUserLike: boolean;
+  isUserCheckedIn: boolean;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -36,15 +39,18 @@ const MAX_RESULTS = 50;
 export default class PostController {
   protected postsRepo: typeof Post;
   protected userPostLikesRepo: typeof UserPostLikes;
+  protected userCheckinRepo: typeof UserCheckin;
   protected tagsRepo: typeof Tag;
 
   constructor(
     postsRepo: typeof Post,
     userPostLikesRepo: typeof UserPostLikes,
+    userCheckinRepo: typeof UserCheckin,
     tagsRepo: typeof Tag
   ) {
     this.postsRepo = postsRepo;
     this.userPostLikesRepo = userPostLikesRepo;
+    this.userCheckinRepo = userCheckinRepo;
     this.tagsRepo = tagsRepo;
   }
 
@@ -89,6 +95,16 @@ export default class PostController {
             ),
             'doesUserLike',
           ],
+
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'isUserCheckedIn',
+          ],
         ],
         include: [
           {
@@ -114,6 +130,7 @@ export default class PostController {
           // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
           p.likeCount = (p as any).dataValues.likeCount;
           p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          p.isUserCheckedIn = (p as any).dataValues.isUserCheckedIn == 1;
           return p;
         }),
         count: data[0].count,
@@ -163,6 +180,15 @@ export default class PostController {
           ),
           'doesUserLike',
         ],
+        [
+          sequelize.literal(
+            `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = ${db.sequelize.escape(
+                  `${userID}`
+                )})`
+          ),
+          'isUserCheckedIn',
+        ],
       ],
       include: [
         {
@@ -189,6 +215,9 @@ export default class PostController {
 
     result.data.result.likeCount = (data as any).dataValues.likeCount;
     result.data.result.doesUserLike = (data as any).dataValues.doesUserLike;
+    result.data.result.isUserCheckedIn = (
+      data as any
+    ).dataValues.isUserCheckedIn;
 
     return result;
   }
@@ -304,6 +333,61 @@ export default class PostController {
     return {
       status: 500,
       data: { message: `Could not unlike the post: ${postID}` },
+    };
+  }
+
+  /**
+   * Checkin to a specific event.
+   */
+  async checkin(
+    userID: string,
+    postID: string
+  ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
+    const post = await this.getPost(userID, postID);
+
+    if (!post || post.status != 200) {
+      return {
+        status: 500,
+        data: { message: `Could not check-in to the event: ${postID}` },
+      };
+    }
+
+    const howManyCheckedIn = await this.userCheckinRepo.howManyCheckedIn(
+      postID
+    );
+
+    if (howManyCheckedIn + 1 > post.data.result!.capacity) {
+      return {
+        status: 409,
+        data: { message: `Could not check-in to the event: ${postID}` },
+      };
+    }
+
+    const result = await this.userCheckinRepo.checkin(userID, postID);
+
+    if (result) {
+      return { status: 204 };
+    }
+    return {
+      status: 500,
+      data: { message: `Could not check-in to the event: ${postID}` },
+    };
+  }
+
+  /**
+   * Check a user out of an event.
+   */
+  async checkout(
+    userID: string,
+    postID: string
+  ): Promise<{ status: number; data?: { result?: Post; message?: string } }> {
+    const result = await this.userCheckinRepo.checkout(userID, postID);
+    if (result) {
+      return { status: 204 };
+    }
+    return {
+      status: 500,
+      data: { message: `Could not check-out of the event: ${postID}` },
     };
   }
 

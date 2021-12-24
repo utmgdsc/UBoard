@@ -143,6 +143,7 @@ export default class PostController {
         'body',
         'thumbnail',
         'location',
+        'createdAt',
         'coords',
         'capacity',
         'feedbackScore',

@@ -11,6 +11,8 @@ import GenerateTags from './Tags';
 import ViewPostDialog from './ViewPostDialog';
 
 import { PostUserPreview } from '../api/v1/index';
+import { useNavigate } from 'react-router-dom';
+import Button from '@mui/material/Button';
 
 /**
  * Return a string of the date relative to now in minutes, hours or days. If the date
@@ -50,11 +52,11 @@ export default function PostPreview(props: {
   // generate tags (if the post has any)
   const tags = (
     <GenerateTags
-      tags={
-        props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []
-      }
+      tags={props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []}
     />
   );
+
+  const navigate = useNavigate();
 
   return (
     <Grid data-testid='test-postpreview' item xs={12} sm={6} md={4} lg={4}>
@@ -93,11 +95,16 @@ export default function PostPreview(props: {
         </CardContent>
         <CardActions>
           <Stack sx={{ pl: 1 }}>
-            <ViewPostDialog
-              postUser={props.postUser}
-              tags={tags}
-              setOpenedPost={props.setOpenedPost}
-            />
+            <Button
+              data-testid='test-btn-preview'
+              variant='outlined'
+              onClick={() => {
+                navigate(`/${props.postUser.id}`);
+              }}
+              sx={{ mb: 3 }}
+            >
+              Read More
+            </Button>
             {tags}
           </Stack>
         </CardActions>

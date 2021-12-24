@@ -155,9 +155,8 @@ function CapacityBar(props: {
   maxCapacity: number;
   postID: string;
   isUserCheckedIn: boolean;
+  usersCheckedIn: number;
 }) {
-  // TODO: This data should be synced with db -- models needs to be updated
-  const [capacity, setCapacity] = React.useState(0);
   const maxCapacity = !isNaN(props.maxCapacity) ? props.maxCapacity : 0;
 
   const handleCheckIn = async () => {
@@ -167,6 +166,7 @@ function CapacityBar(props: {
       // for the autoreload system to update the post info. This is a hack to
       // ensure that the checked in state is immediately updated.
       props.isUserCheckedIn = false;
+      props.usersCheckedIn -= 1;
     } else {
       const result = await api.checkin(props.postID);
       if (result.status !== 409) {
@@ -177,35 +177,19 @@ function CapacityBar(props: {
     }
   };
 
-  React.useEffect(() => {
-    if (props.isUserCheckedIn) {
-      setCapacity((prev) => prev + 1);
-    } else {
-      const result = await api.checkin(props.postID);
-      if (result.status !== 409) {
-        props.isUserCheckedIn = '1';
-      }
-      // TODO indicate a standard alert to the user that the event could not be
-      // checked into (over capacity)
-    }
-  }, [props.isUserCheckedIn]);
-
-  const buttonHandler =
-    capacity < props.maxCapacity ? (
-      props.isUserCheckedIn ? (
-        <Button onClick={handleCheckIn} variant='contained'>
-          Undo
-        </Button>
-      ) : (
-        <Button onClick={handleCheckIn} variant='outlined'>
-          Check In
-        </Button>
-      )
-    ) : (
-      <Button disabled variant='outlined'>
-        AT CAPACITY
-      </Button>
-    );
+  const buttonHandler = props.isUserCheckedIn ? (
+    <Button onClick={handleCheckIn} variant='contained'>
+      Undo
+    </Button>
+  ) : props.usersCheckedIn < props.maxCapacity ? (
+    <Button onClick={handleCheckIn} variant='outlined'>
+      Check In
+    </Button>
+  ) : (
+    <Button disabled variant='outlined'>
+      AT CAPACITY
+    </Button>
+  );
 
   return (
     <Stack spacing={1} sx={{ mr: 4 }}>

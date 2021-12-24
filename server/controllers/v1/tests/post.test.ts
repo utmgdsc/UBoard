@@ -15,6 +15,7 @@ jest.mock('backblaze-b2');
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
+  db.UserCheckin,
   db.Tag,
   new FileManager()
 );

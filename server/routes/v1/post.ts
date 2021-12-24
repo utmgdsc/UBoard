@@ -10,6 +10,7 @@ const postRouter = express.Router();
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
+  db.UserCheckin,
   db.Tag,
   fileManager
 );

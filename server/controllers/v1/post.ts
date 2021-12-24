@@ -15,6 +15,7 @@ export type PostUser = Post & {
   doesUserLike: boolean;
   User: { firstName: string; lastName: string };
   UserId: string;
+  isUserCheckedIn: boolean;
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];
@@ -29,7 +30,6 @@ export type PostUserPreview = {
   likeCount: number;
   doesUserLike: boolean;
   isUserCheckedIn: boolean;
-  usersCheckedIn: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -50,6 +50,7 @@ export default class PostController {
   constructor(
     postsRepo: typeof Post,
     userPostLikesRepo: typeof UserPostLikes,
+    userCheckinRepo: typeof UserCheckin,
     tagsRepo: typeof Tag,
     fileManager: FileManager
   ) {
@@ -112,13 +113,6 @@ export default class PostController {
             ),
             'isUserCheckedIn',
           ],
-          [
-            sequelize.literal(
-              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
-                  WHERE "Checkin"."postID" = "Post"."id")`
-            ),
-            'usersCheckedIn',
-          ],
         ],
         include: [
           {
@@ -143,11 +137,8 @@ export default class PostController {
           // Must case to `any` as dataValues is not typed at the moment.
           // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
           p.likeCount = (p as any).dataValues.likeCount;
-          (p as any).dataValues.doesUserLike =
-            (p as any).dataValues.doesUserLike == 1;
-          (p as any).dataValues.isUserCheckedIn =
-            (p as any).dataValues.isUserCheckedIn == 1;
-          p.usersCheckedIn = (p as any).dataValues.usersCheckedIn;
+          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          p.isUserCheckedIn = (p as any).dataValues.isUserCheckedIn == 1;
           return p;
         }),
         count: data[0].count,
@@ -361,13 +352,6 @@ export default class PostController {
           ),
           'isUserCheckedIn',
         ],
-        [
-          sequelize.literal(
-            `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
-                WHERE "Checkin"."postID" = "Post"."id")`
-          ),
-          'usersCheckedIn',
-        ],
       ],
       include: [
         {
@@ -393,11 +377,10 @@ export default class PostController {
     };
 
     result.data.result.likeCount = (data as any).dataValues.likeCount;
-    result.data.result.doesUserLike =
-      (data as any).dataValues.doesUserLike == 1;
-    result.data.result.isUserCheckedIn =
-      (data as any).dataValues.isUserCheckedIn == 1;
-    result.data.result.usersCheckedIn = (data as any).dataValues.usersCheckedIn;
+    result.data.result.doesUserLike = (data as any).dataValues.doesUserLike;
+    result.data.result.isUserCheckedIn = (
+      data as any
+    ).dataValues.isUserCheckedIn;
 
     return result;
   }

@@ -154,19 +154,32 @@ function LikeButton(props: { numLikes: number }) {
 function CapacityBar(props: {
   maxCapacity: number;
   postID: string;
-  isUserCheckedIn: string;
-  usersCheckedIn: number;
+  isUserCheckedIn: boolean;
 }) {
+  // TODO: This data should be synced with db -- models needs to be updated
+  const [capacity, setCapacity] = React.useState(0);
   const maxCapacity = !isNaN(props.maxCapacity) ? props.maxCapacity : 0;
 
   const handleCheckIn = async () => {
-    if (props.isUserCheckedIn === '1') {
+    if (props.isUserCheckedIn) {
       await api.checkout(props.postID);
       // As there is no global state management system, we would have to wait
       // for the autoreload system to update the post info. This is a hack to
       // ensure that the checked in state is immediately updated.
-      props.isUserCheckedIn = '0';
-      props.usersCheckedIn -= 1;
+      props.isUserCheckedIn = false;
+    } else {
+      const result = await api.checkin(props.postID);
+      if (result.status !== 409) {
+        props.isUserCheckedIn = true;
+      }
+      // TODO indicate a standard alert to the user that the event could not be
+      // checked into (over capacity)
+    }
+  };
+
+  React.useEffect(() => {
+    if (props.isUserCheckedIn) {
+      setCapacity((prev) => prev + 1);
     } else {
       const result = await api.checkin(props.postID);
       if (result.status !== 409) {
@@ -175,17 +188,19 @@ function CapacityBar(props: {
       // TODO indicate a standard alert to the user that the event could not be
       // checked into (over capacity)
     }
-  };
+  }, [props.isUserCheckedIn]);
 
   const buttonHandler =
-    props.isUserCheckedIn === '1' ? (
-      <Button onClick={handleCheckIn} variant='contained'>
-        Undo
-      </Button>
-    ) : props.usersCheckedIn < props.maxCapacity ? (
-      <Button onClick={handleCheckIn} variant='outlined'>
-        Check In
-      </Button>
+    capacity < props.maxCapacity ? (
+      props.isUserCheckedIn ? (
+        <Button onClick={handleCheckIn} variant='contained'>
+          Undo
+        </Button>
+      ) : (
+        <Button onClick={handleCheckIn} variant='outlined'>
+          Check In
+        </Button>
+      )
     ) : (
       <Button disabled variant='outlined'>
         AT CAPACITY
@@ -352,23 +367,23 @@ function PostEditor(props: {
         </Stack>
 
         <Stack direction='row' sx={{ pt: 1, pb: 1 }}>
-            <Button
-              data-testid='test-btn-edit'
-              variant='contained'
-              onClick={handleSubmit}
-              sx={{ mr: 2 }}
-            >
-              Update Post
-            </Button>
+          <Button
+            data-testid='test-btn-edit'
+            variant='contained'
+            onClick={handleSubmit}
+            sx={{ mr: 2 }}
+          >
+            Update Post
+          </Button>
 
-            <Button
-              data-testid='test-btn-edit'
-              variant='contained'
-              color='secondary'
-              onClick={() => props.toggleEdit()}
-            >
-              Cancel
-            </Button>
+          <Button
+            data-testid='test-btn-edit'
+            variant='contained'
+            color='secondary'
+            onClick={() => props.toggleEdit()}
+          >
+            Cancel
+          </Button>
         </Stack>
       </Stack>
       <Snackbar
@@ -453,10 +468,11 @@ export default function ViewPostDialog() {
   });
 
   React.useEffect(() => {
-    if (!isEditing && !error) { // ensure data updates instantly for the user that finished editing
+    if (!isEditing && !error) {
+      // ensure data updates instantly for the user that finished editing
       fetchData();
     }
-  }, [isEditing])
+  }, [isEditing]);
 
   React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
@@ -475,7 +491,8 @@ export default function ViewPostDialog() {
           The post you requested does not exist.{' '}
         </Typography>
         <a href='/dashboard'>Return home?</a>
-      </>);
+      </>
+    );
   } else if (!postData || !postData.User) {
     return (
       <>
@@ -484,7 +501,8 @@ export default function ViewPostDialog() {
     );
   }
 
-  return (<> 
+  return (
+    <>
       {isEditing ? ( // show the editing UI instead of normal post
         <PostEditor
           id={postData.id}
@@ -494,105 +512,107 @@ export default function ViewPostDialog() {
           capacity={Number(postData.capacity)}
           coords={postData.coords}
           toggleEdit={() => toggleEditor(false)}
-        /> 
-      ) : <>
-      <AppBar sx={{ position: 'relative' }}>
-        <IconButton
-          data-testid='test-btn-close'
-          edge='start'
-          color='inherit'
-          onClick={() => {
-            navigate(-1);
-          }}
-          aria-label='close'
-        >
-          <ArrowBack />
-        </IconButton>
-      </AppBar>
-
-      {/* Title and Options (3 dots) */ }
-      <Grid>
-        <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
-          <Grid item xs={11}>
-            <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
-              {postData.title}
-            </Typography>
-          </Grid>
-          <MoreOptions
-            postID={postData.id}
-            userHasCreatedPost={isAuthor}
-            useNavigate={navigate}
-            toggleEdit={toggleEditor}
-          />
-        </Stack>
-      </Grid>
-      {/* Top information (author, date, tags..) */}
-      <Stack sx={{ pl: 4 }}>
-        <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
-          Posted on {new Date(postData.createdAt).toString()} by{' '}
-          {postData.User.firstName} {postData.User.lastName}
-        </Typography>
-        {
-          <GenerateTags
-            tags={postData.Tags ? postData.Tags.map((t) => t.text) : []}
-          />
-        }
-      </Stack>
-
-      {/* Post image and body */}
-      <Stack sx={{ pl: 4 }}>
-        <Box
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {!!postData.thumbnail ? (
-            <img
-              src={postData.thumbnail}
-              alt='Thumbnail'
-              style={{ maxHeight: '400px', maxWidth: '400px' }}
-            />
-          ) : undefined}
-        </Box>
-        <Typography
-          variant='body1'
-          sx={{ px: 4, py: 1, pb: 4 }}
-          style={{ wordWrap: 'break-word' }}
-        >
-          {postData.body}
-        </Typography>
-        <Stack direction='row' sx={{ px: 4, pb: 5 }}>
-          {Number(postData.capacity) > 0 ? (
-            <CapacityBar maxCapacity={Number(postData.capacity)} />
-          ) : (
-            <></>
-          )}
-          <LikeButton numLikes={Number(postData.feedbackScore)} />
-        </Stack>
-        <LocationHandler
-          coords={postData.coords}
-          location={postData.location}
         />
-      </Stack>
+      ) : (
+        <>
+          <AppBar sx={{ position: 'relative' }}>
+            <IconButton
+              data-testid='test-btn-close'
+              edge='start'
+              color='inherit'
+              onClick={() => {
+                navigate(-1);
+              }}
+              aria-label='close'
+            >
+              <ArrowBack />
+            </IconButton>
+          </AppBar>
 
-      {/* Comment Section */}
-      <Stack sx={{ px: 8, pb: 5 }}>
-        <Typography variant='h5' sx={{ py: 2 }}>
-          Comments
-        </Typography>
-        <TextField
-          variant='filled'
-          placeholder='Write a comment'
-          size='small'
-        ></TextField>
-        <Button variant='contained' sx={{ mt: 2 }}>
-          Add Comment
-        </Button>
-      </Stack>
-      {/* TODO: Create Comment component later */}
-      </>
-    } </>
+          {/* Title and Options (3 dots) */}
+          <Grid>
+            <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
+              <Grid item xs={11}>
+                <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
+                  {postData.title}
+                </Typography>
+              </Grid>
+              <MoreOptions
+                postID={postData.id}
+                userHasCreatedPost={isAuthor}
+                useNavigate={navigate}
+                toggleEdit={toggleEditor}
+              />
+            </Stack>
+          </Grid>
+          {/* Top information (author, date, tags..) */}
+          <Stack sx={{ pl: 4 }}>
+            <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
+              Posted on {new Date(postData.createdAt).toString()} by{' '}
+              {postData.User.firstName} {postData.User.lastName}
+            </Typography>
+            {
+              <GenerateTags
+                tags={postData.Tags ? postData.Tags.map((t) => t.text) : []}
+              />
+            }
+          </Stack>
+
+          {/* Post image and body */}
+          <Stack sx={{ pl: 4 }}>
+            <Box
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {!!postData.thumbnail ? (
+                <img
+                  src={postData.thumbnail}
+                  alt='Thumbnail'
+                  style={{ maxHeight: '400px', maxWidth: '400px' }}
+                />
+              ) : undefined}
+            </Box>
+            <Typography
+              variant='body1'
+              sx={{ px: 4, py: 1, pb: 4 }}
+              style={{ wordWrap: 'break-word' }}
+            >
+              {postData.body}
+            </Typography>
+            <Stack direction='row' sx={{ px: 4, pb: 5 }}>
+              {Number(postData.capacity) > 0 ? (
+                <CapacityBar maxCapacity={Number(postData.capacity)} />
+              ) : (
+                <></>
+              )}
+              <LikeButton numLikes={Number(postData.feedbackScore)} />
+            </Stack>
+            <LocationHandler
+              coords={postData.coords}
+              location={postData.location}
+            />
+          </Stack>
+
+          {/* Comment Section */}
+          <Stack sx={{ px: 8, pb: 5 }}>
+            <Typography variant='h5' sx={{ py: 2 }}>
+              Comments
+            </Typography>
+            <TextField
+              variant='filled'
+              placeholder='Write a comment'
+              size='small'
+            ></TextField>
+            <Button variant='contained' sx={{ mt: 2 }}>
+              Add Comment
+            </Button>
+          </Stack>
+          {/* TODO: Create Comment component later */}
+        </>
+      )}{' '}
+    </>
   );
 }

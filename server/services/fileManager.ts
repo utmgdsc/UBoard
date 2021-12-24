@@ -29,6 +29,10 @@ export default class FileManager {
       uploadAuthToken: uploadUrl.data.authorizationToken,
     });
 
-    return `https://f004.backblazeb2.com/file/${process.env.BACKBLAZE_BUCKET_NAME}/${fileName}`;
+    return `${
+      process.env.ENV === 'production' ? 'https' : 'http'
+    }://${process.env.PAGE_URL!.replace('/', '')}/file/${
+      process.env.BACKBLAZE_BUCKET_NAME
+    }/${fileName}`;
   }
 }

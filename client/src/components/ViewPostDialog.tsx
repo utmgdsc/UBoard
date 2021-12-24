@@ -233,15 +233,15 @@ function LocationHandler(props: {
 export default function ViewPostDialog() {
   const [postData, setData] = React.useState({} as PostUser);
   const [isAuthor, setIsAuthor] = React.useState(false);
-  const [error, toggleError] = React.useState(false);
   const userContext = React.useContext(UserContext);
   const { postid } = useParams();
   const navigate = useNavigate();
+  const [error, toggleError] = React.useState(false);
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = () => {
     api
-      .fetchPost(postid ? postid : '')
+      .fetchPost(postid!)
       .then((res) => {
         if (res.data && res.data.data && res.data.data.result) {
           setData(res.data.data.result);
@@ -249,6 +249,8 @@ export default function ViewPostDialog() {
             setIsAuthor(userContext.data.id === res.data.data.result.User.id);
             toggleError(false);
           }
+        } else {
+          toggleError(true);
         }
       })
       .catch((err) => {
@@ -258,8 +260,7 @@ export default function ViewPostDialog() {
   };
 
   React.useEffect(() => {
-    // Fetch data (on initiual load)
-    // Prevent fetching again if an error occurred
+    // Fetch data (on initial load)
     if (!postData.User && !error) {
       fetchData();
     }
@@ -267,18 +268,29 @@ export default function ViewPostDialog() {
 
   React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
-    const interval = setInterval(() => {
-      fetchData();
-    }, 5000);
-    return () => clearInterval(interval);
+    if (!error) {
+      const interval = setInterval(() => {
+        fetchData();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
   });
 
-
   if (error) {
-    return <><h1>The post you are looking for may have been deleted. </h1> <a href='/dashboard'>Go back</a> </>;
-  }
-  else if (!postData || !postData.User) {
-    return <h1>Loading..</h1>;
+    return (
+      <>
+        <Typography variant='h4'>
+          The post you requested does not exist.{' '}
+        </Typography>
+        <a href='/dashboard'>Return home?</a>
+      </>
+    );
+  } else if (!postData || !postData.User) {
+    return (
+      <>
+        <Typography variant='h4'>Loading</Typography>
+      </>
+    );
   }
 
   return (

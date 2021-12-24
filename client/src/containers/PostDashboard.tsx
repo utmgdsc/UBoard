@@ -80,7 +80,6 @@ export default function PostDashboard() {
 
   return (
     <>
-      
       <Header />
       <main>
         <Container

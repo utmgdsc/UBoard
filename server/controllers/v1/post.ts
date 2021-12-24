@@ -11,6 +11,7 @@ export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
   isUserCheckedIn: boolean;
+  usersCheckedIn: number;
   User: { id: string; firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -26,6 +27,7 @@ export type PostUserPreview = {
   likeCount: number;
   doesUserLike: boolean;
   isUserCheckedIn: boolean;
+  usersCheckedIn: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -105,6 +107,13 @@ export default class PostController {
             ),
             'isUserCheckedIn',
           ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id")`
+            ),
+            'usersCheckedIn',
+          ],
         ],
         include: [
           {
@@ -131,6 +140,7 @@ export default class PostController {
           p.likeCount = (p as any).dataValues.likeCount;
           p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
           p.isUserCheckedIn = (p as any).dataValues.isUserCheckedIn == 1;
+          p.usersCheckedIn = (p as any).dataValues.usersCheckedIn;
           return p;
         }),
         count: data[0].count,
@@ -189,6 +199,13 @@ export default class PostController {
           ),
           'isUserCheckedIn',
         ],
+        [
+          sequelize.literal(
+            `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                WHERE "Checkin"."postID" = "Post"."id")`
+          ),
+          'usersCheckedIn',
+        ],
       ],
       include: [
         {
@@ -218,6 +235,7 @@ export default class PostController {
     result.data.result.isUserCheckedIn = (
       data as any
     ).dataValues.isUserCheckedIn;
+    result.data.result.usersCheckedIn = (data as any).dataValues.usersCheckedIn;
 
     return result;
   }

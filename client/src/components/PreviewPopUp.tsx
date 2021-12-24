@@ -17,11 +17,11 @@ import GenerateTags from './Tags';
 export default function PreviewPopUp(props: {
   title: string;
   body: string;
-  img: string;
+  img: File | undefined;
   tags: string[];
   eventCapacity: Number;
   location: string;
-  coords: { lat: number, lng: number };
+  coords: { lat: number; lng: number };
   openPopup: boolean;
   handleClose: () => void;
 }) {
@@ -45,12 +45,14 @@ export default function PreviewPopUp(props: {
             overflow: 'auto',
           }}
         >
-          <CardMedia
-            component='img'
-            image={img}
-            alt='Image Not Found'
-            sx={{ minWidth: '250px', maxWidth: '700px', maxHeight: '200px' }}
-          />
+          {img ? (
+            <CardMedia
+              component='img'
+              image={URL.createObjectURL(img)}
+              alt='Image Not Found'
+              sx={{ minWidth: '250px', maxWidth: '700px', maxHeight: '200px' }}
+            />
+          ) : undefined}
           <CardContent sx={{ py: 1 }} data-testid='previewCard'>
             <Typography variant='h5' component='h5' fontWeight='bold'>
               {title}
@@ -71,7 +73,7 @@ export default function PreviewPopUp(props: {
               </Grid>
               <Grid item xs={12}>
                 <Typography>Tags: </Typography>
-                <GenerateTags tags={tags}/>
+                <GenerateTags tags={tags} />
               </Grid>
             </Grid>
           </CardContent>

@@ -16,9 +16,12 @@ import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import Snackbar from '@mui/material/Snackbar';
 import Grid from '@mui/material/Grid';
 import Switch from '@mui/material/Switch';
+import Checkbox from '@mui/material/Checkbox';
+import FormGroup from '@mui/material/FormGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { UserContext } from '../App';
-import { LocationMap } from './LocationMap';
+import { LocationMap, LocationPickerMap } from './LocationMap';
 
 import ServerApi, { PostUser } from '../api/v1';
 import GenerateTags from './Tags';
@@ -30,7 +33,8 @@ const api = new ServerApi();
   and edit options are only shown if the user is authorized. */
 function MoreOptions(props: {
   postID: string;
-  isAuth: boolean;
+  userHasCreatedPost: boolean;
+  toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
   useNavigate: NavigateFunction;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
@@ -103,9 +107,9 @@ function MoreOptions(props: {
           'aria-labelledby': 'post-settings',
         }}
       >
-        {props.isAuth ? (
+        {props.userHasCreatedPost ? (
           <>
-            <MenuItem onClick={closeMenu}>Edit</MenuItem>
+            <MenuItem onClick={() => props.toggleEdit(true)}>Edit</MenuItem>
             <MenuItem onClick={deletePost}>Delete</MenuItem>
           </>
         ) : (
@@ -196,6 +200,181 @@ function CapacityBar(props: { maxCapacity: number }) {
   );
 }
 
+function PostEditor(props: {
+  id: string;
+  title: string;
+  body: string;
+  location: string;
+  coords?: { lat: number; lng: number };
+  capacity: number;
+  toggleEdit: () => void;
+}) {
+  const isOnlineInitially = // indicate if prior to editing we are online
+    !props.coords || props.coords.lat === -1 || props.coords.lng === -1;
+  const [form, setForm] = React.useState({
+    title: props.title,
+    body: props.body,
+    capacity: props.capacity,
+    location: props.location,
+    coords: props.coords,
+  });
+  const [location, setLocation] = React.useState({
+    location: props.location,
+    coords: props.coords ? props.coords : { lat: -1, lng: -1 },
+  });
+
+  const [alertMsg, setMsg] = React.useState(
+    'Error. Ensure all fields are filled'
+  );
+  const [capacityError, setCapacityError] = React.useState('');
+  const [isAlertOpen, showAlert] = React.useState(false);
+  const [isOnlineEvent, toggleOnlineEvent] = React.useState(isOnlineInitially);
+
+  const locationHandler = (
+    location: string,
+    lat: number = -1,
+    lng: number = -1
+  ) => {
+    setLocation({ location, coords: { lat, lng } });
+  };
+
+  React.useEffect(() => {
+    setForm((form) => {
+      return {
+        ...form,
+        location: location.location,
+        coords: { lat: location.coords.lat, lng: location.coords.lng },
+      };
+    });
+  }, [location]);
+
+  const handleSubmit = () => {
+    if (form.body.length < 25) {
+      setMsg('Body must be atleast 25 characters');
+      showAlert(true);
+    } else if (form.title === '' || form.location === '') {
+      setMsg('Enter all required fields');
+      showAlert(true);
+    } else if (isNaN(form.capacity)) {
+      setMsg('Capacity must be a number');
+      showAlert(true);
+    } else {
+      api.updatePost(props.id, form);
+      props.toggleEdit();
+    }
+  };
+
+  return (
+    <>
+      <AppBar sx={{ position: 'relative' }}>
+        <IconButton
+          data-testid='test-btn-edit-close'
+          edge='start'
+          color='inherit'
+          onClick={props.toggleEdit}
+          aria-label='close'
+        >
+          <ArrowBack />
+        </IconButton>
+      </AppBar>
+
+      <Stack sx={{ pt: 5, pl: 4, px: 4 }}>
+        <Typography> Title </Typography>
+        <TextField
+          fullWidth
+          defaultValue={props.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
+      </Stack>
+
+      <Stack sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isOnlineEvent}
+                onChange={(e) => {
+                  toggleOnlineEvent(e.target.checked);
+                  locationHandler('');
+                }}
+              />
+            }
+            label='Online Event'
+          />
+        </FormGroup>
+        <Typography> Location </Typography>
+        {!isOnlineEvent ? (
+          <LocationPickerMap
+            defaultInput={!isOnlineInitially ? props.location : undefined}
+            defaultCenter={!isOnlineInitially ? props.coords : undefined}
+            setLocation={locationHandler}
+          />
+        ) : (
+          <TextField
+            size='small'
+            defaultValue={isOnlineInitially ? props.location : ''}
+            onChange={(e) => locationHandler(e.target.value)}
+          />
+        )}
+      </Stack>
+      <Stack sx={{ pl: 4, px: 4 }}>
+        <Typography> Body </Typography>
+        <TextField
+          defaultValue={props.body}
+          fullWidth
+          multiline
+          onChange={(e) => setForm({ ...form, body: e.target.value })}
+        />
+        <Stack sx={{ pt: 2, pb: 2 }}>
+          <Typography> Capacity </Typography>
+          <TextField
+            size='small'
+            defaultValue={props.capacity}
+            onChange={(e) =>
+              setForm({ ...form, capacity: Number(e.target.value) })
+            }
+            onBlur={() => {
+              if (!/^[0-9]*$/.test(form.capacity.toString())) {
+                setCapacityError('Only numbers allowed!');
+              } else {
+                setCapacityError('');
+              }
+            }}
+            error={capacityError !== ''}
+            helperText={capacityError}
+          />
+        </Stack>
+
+        <Stack direction='row' sx={{ pt: 1, pb: 1 }}>
+            <Button
+              data-testid='test-btn-edit'
+              variant='contained'
+              onClick={handleSubmit}
+              sx={{ mr: 2 }}
+            >
+              Update Post
+            </Button>
+
+            <Button
+              data-testid='test-btn-edit'
+              variant='contained'
+              color='secondary'
+              onClick={() => props.toggleEdit()}
+            >
+              Cancel
+            </Button>
+        </Stack>
+      </Stack>
+      <Snackbar
+        open={isAlertOpen}
+        autoHideDuration={6000}
+        onClose={() => showAlert(false)}
+        message={alertMsg}
+      />
+    </>
+  );
+}
+
 function LocationHandler(props: {
   coords?: { lat: number; lng: number };
   location: string;
@@ -233,6 +412,7 @@ function LocationHandler(props: {
 export default function ViewPostDialog() {
   const [postData, setData] = React.useState({} as PostUser);
   const [isAuthor, setIsAuthor] = React.useState(false);
+  const [isEditing, toggleEditor] = React.useState(false);
   const userContext = React.useContext(UserContext);
   const { postid } = useParams();
   const navigate = useNavigate();
@@ -267,6 +447,12 @@ export default function ViewPostDialog() {
   });
 
   React.useEffect(() => {
+    if (!isEditing && !error) { // ensure data updates instantly for the user that finished editing
+      fetchData();
+    }
+  }, [isEditing])
+
+  React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
     if (!error) {
       const interval = setInterval(() => {
@@ -283,8 +469,7 @@ export default function ViewPostDialog() {
           The post you requested does not exist.{' '}
         </Typography>
         <a href='/dashboard'>Return home?</a>
-      </>
-    );
+      </>);
   } else if (!postData || !postData.User) {
     return (
       <>
@@ -293,8 +478,18 @@ export default function ViewPostDialog() {
     );
   }
 
-  return (
-    <>
+  return (<> 
+      {isEditing ? ( // show the editing UI instead of normal post
+        <PostEditor
+          id={postData.id}
+          title={postData.title}
+          body={postData.body}
+          location={postData.location}
+          capacity={Number(postData.capacity)}
+          coords={postData.coords}
+          toggleEdit={() => toggleEditor(false)}
+        /> 
+      ) : <>
       <AppBar sx={{ position: 'relative' }}>
         <IconButton
           data-testid='test-btn-close'
@@ -309,7 +504,7 @@ export default function ViewPostDialog() {
         </IconButton>
       </AppBar>
 
-      {/* Title and Options (3 dots) */}
+      {/* Title and Options (3 dots) */ }
       <Grid>
         <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
           <Grid item xs={11}>
@@ -319,8 +514,9 @@ export default function ViewPostDialog() {
           </Grid>
           <MoreOptions
             postID={postData.id}
-            isAuth={isAuthor}
+            userHasCreatedPost={isAuthor}
             useNavigate={navigate}
+            toggleEdit={toggleEditor}
           />
         </Stack>
       </Grid>
@@ -390,6 +586,7 @@ export default function ViewPostDialog() {
         </Button>
       </Stack>
       {/* TODO: Create Comment component later */}
-    </>
+      </>
+    } </>
   );
 }

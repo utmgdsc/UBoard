@@ -231,10 +231,10 @@ export default class PostController {
     };
 
     result.data.result.likeCount = (data as any).dataValues.likeCount;
-    result.data.result.doesUserLike = (data as any).dataValues.doesUserLike;
-    result.data.result.isUserCheckedIn = (
-      data as any
-    ).dataValues.isUserCheckedIn;
+    result.data.result.doesUserLike =
+      (data as any).dataValues.doesUserLike == 1;
+    result.data.result.isUserCheckedIn =
+      (data as any).dataValues.isUserCheckedIn == 1;
     result.data.result.usersCheckedIn = (data as any).dataValues.usersCheckedIn;
 
     return result;

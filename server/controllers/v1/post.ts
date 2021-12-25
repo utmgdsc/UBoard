@@ -9,7 +9,8 @@ import db from '../../models';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
-  User: { id: string; firstName: string; lastName: string };
+  User: { firstName: string; lastName: string };
+  UserId: string;
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];

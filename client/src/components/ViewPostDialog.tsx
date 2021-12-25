@@ -426,7 +426,7 @@ export default function ViewPostDialog() {
         if (res.data && res.data.data && res.data.data.result) {
           setData(res.data.data.result);
           if (userContext.data) {
-            setIsAuthor(userContext.data.id === res.data.data.result.User.id);
+            setIsAuthor(userContext.data.id === res.data.data.result.UserId);
             toggleError(false);
           }
         } else {

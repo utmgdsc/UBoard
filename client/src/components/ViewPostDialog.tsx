@@ -118,11 +118,13 @@ function MoreOptions(props: {
         ) : (
           <></>
         )}
-        {!props.didUserReport ? (
-          <MenuItem onClick={reportPost}>Report</MenuItem>
-        ) : (
-          <MenuItem disabled>Reported</MenuItem>
-        )}
+        {!props.isAuth ? (
+          !props.didUserReport ? (
+            <MenuItem onClick={reportPost}>Report</MenuItem>
+          ) : (
+            <MenuItem disabled>Reported</MenuItem>
+          )
+        ) : undefined}
       </Menu>
       <Snackbar
         open={isAlertOpen}

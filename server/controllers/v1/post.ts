@@ -140,8 +140,8 @@ export default class PostController {
           // Must case to `any` as dataValues is not typed at the moment.
           // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
           p.likeCount = (p as any).dataValues.likeCount;
-          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
-          p.didUserReport = (p as any).dataValues.didUserReport == 1;
+          p.doesUserLike = (p as any).dataValues.doesUserLike === 1;
+          p.didUserReport = (p as any).dataValues.didUserReport === 1;
           return p;
         }),
         count: data[0].count,
@@ -381,8 +381,10 @@ export default class PostController {
     };
 
     result.data.result.likeCount = (data as any).dataValues.likeCount;
-    result.data.result.doesUserLike = (data as any).dataValues.doesUserLike;
-    result.data.result.didUserReport = (data as any).dataValues.didUserReport;
+    result.data.result.doesUserLike =
+      (data as any).dataValues.doesUserLike == 1;
+    result.data.result.didUserReport =
+      (data as any).dataValues.didUserReport == 1;
 
     return result;
   }

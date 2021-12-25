@@ -33,7 +33,8 @@ const api = new ServerApi();
   and edit options are only shown if the user is authorized. */
 function MoreOptions(props: {
   postID: string;
-  isAuth: boolean;
+  userHasCreatedPost: boolean;
+  toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
   useNavigate: NavigateFunction;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
@@ -452,6 +453,12 @@ export default function ViewPostDialog() {
   });
 
   React.useEffect(() => {
+    if (!isEditing && !error) { // ensure data updates instantly for the user that finished editing
+      fetchData();
+    }
+  }, [isEditing])
+
+  React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
     if (!error) {
       const interval = setInterval(() => {
@@ -468,8 +475,7 @@ export default function ViewPostDialog() {
           The post you requested does not exist.{' '}
         </Typography>
         <a href='/dashboard'>Return home?</a>
-      </>
-    );
+      </>);
   } else if (!postData || !postData.User) {
     return (
       <>
@@ -478,8 +484,18 @@ export default function ViewPostDialog() {
     );
   }
 
-  return (
-    <>
+  return (<> 
+      {isEditing ? ( // show the editing UI instead of normal post
+        <PostEditor
+          id={postData.id}
+          title={postData.title}
+          body={postData.body}
+          location={postData.location}
+          capacity={Number(postData.capacity)}
+          coords={postData.coords}
+          toggleEdit={() => toggleEditor(false)}
+        /> 
+      ) : <>
       <AppBar sx={{ position: 'relative' }}>
         <IconButton
           data-testid='test-btn-close'
@@ -494,7 +510,7 @@ export default function ViewPostDialog() {
         </IconButton>
       </AppBar>
 
-      {/* Title and Options (3 dots) */}
+      {/* Title and Options (3 dots) */ }
       <Grid>
         <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
           <Grid item xs={11}>
@@ -504,8 +520,9 @@ export default function ViewPostDialog() {
           </Grid>
           <MoreOptions
             postID={postData.id}
-            isAuth={isAuthor}
+            userHasCreatedPost={isAuthor}
             useNavigate={navigate}
+            toggleEdit={toggleEditor}
           />
         </Stack>
       </Grid>
@@ -575,6 +592,7 @@ export default function ViewPostDialog() {
         </Button>
       </Stack>
       {/* TODO: Create Comment component later */}
-    </>
+      </>
+    } </>
   );
 }

@@ -215,6 +215,21 @@ export default class ServerApi {
     );
   }
 
+  async updatePost(
+    postID: string,
+    form: {
+      title: string;
+      body: string;
+      location: string;
+      capacity: number;
+    }
+  ) {
+    return await this.put<typeof form, { result?: Post; message?: string }>(
+      `/posts/${postID}`,
+      form
+    );
+  }
+
   async signUp(form: {
     email: string;
     userName: string;

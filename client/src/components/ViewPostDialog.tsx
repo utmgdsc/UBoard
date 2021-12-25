@@ -33,8 +33,7 @@ const api = new ServerApi();
   and edit options are only shown if the user is authorized. */
 function MoreOptions(props: {
   postID: string;
-  userHasCreatedPost: boolean;
-  toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
+  isAuth: boolean;
   useNavigate: NavigateFunction;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
@@ -432,7 +431,7 @@ export default function ViewPostDialog() {
         if (res.data && res.data.data && res.data.data.result) {
           setData(res.data.data.result);
           if (userContext.data) {
-            setIsAuthor(userContext.data.id === res.data.data.result.UserId);
+            setIsAuthor(userContext.data.id === res.data.data.result.User.id);
             toggleError(false);
           }
         } else {
@@ -453,12 +452,6 @@ export default function ViewPostDialog() {
   });
 
   React.useEffect(() => {
-    if (!isEditing && !error) { // ensure data updates instantly for the user that finished editing
-      fetchData();
-    }
-  }, [isEditing])
-
-  React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
     if (!error) {
       const interval = setInterval(() => {
@@ -475,7 +468,8 @@ export default function ViewPostDialog() {
           The post you requested does not exist.{' '}
         </Typography>
         <a href='/dashboard'>Return home?</a>
-      </>);
+      </>
+    );
   } else if (!postData || !postData.User) {
     return (
       <>
@@ -484,18 +478,8 @@ export default function ViewPostDialog() {
     );
   }
 
-  return (<> 
-      {isEditing ? ( // show the editing UI instead of normal post
-        <PostEditor
-          id={postData.id}
-          title={postData.title}
-          body={postData.body}
-          location={postData.location}
-          capacity={Number(postData.capacity)}
-          coords={postData.coords}
-          toggleEdit={() => toggleEditor(false)}
-        /> 
-      ) : <>
+  return (
+    <>
       <AppBar sx={{ position: 'relative' }}>
         <IconButton
           data-testid='test-btn-close'
@@ -510,7 +494,7 @@ export default function ViewPostDialog() {
         </IconButton>
       </AppBar>
 
-      {/* Title and Options (3 dots) */ }
+      {/* Title and Options (3 dots) */}
       <Grid>
         <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
           <Grid item xs={11}>
@@ -520,9 +504,8 @@ export default function ViewPostDialog() {
           </Grid>
           <MoreOptions
             postID={postData.id}
-            userHasCreatedPost={isAuthor}
+            isAuth={isAuthor}
             useNavigate={navigate}
-            toggleEdit={toggleEditor}
           />
         </Stack>
       </Grid>
@@ -548,13 +531,13 @@ export default function ViewPostDialog() {
             alignItems: 'center',
           }}
         >
-          {!!postData.thumbnail ? (
-            <img
-              src={postData.thumbnail}
-              alt='Thumbnail'
-              style={{ maxHeight: '400px', maxWidth: '400px' }}
-            />
-          ) : undefined}
+          <img
+            // TODO src={props.postUser.thumbnail}
+            src='https://i.imgur.com/8EYKtwP.png'
+            alt='Thumbnail'
+            height='400px'
+            width='400px'
+          />
         </Box>
         <Typography
           variant='body1'
@@ -564,16 +547,11 @@ export default function ViewPostDialog() {
           {postData.body}
         </Typography>
         <Stack direction='row' sx={{ px: 4, pb: 5 }}>
-        {Number(postData.capacity) > 0 ? (
-              <CapacityBar
-                maxCapacity={Number(postData.capacity)}
-                postID={postData.id}
-                isUserCheckedIn={postData.isUserCheckedIn}
-                usersCheckedIn={postData.usersCheckedIn}
-              />
-            ) : (
-              <></>
-            )}
+          {Number(postData.capacity) > 0 ? (
+            <CapacityBar maxCapacity={Number(postData.capacity)} />
+          ) : (
+            <></>
+          )}
           <LikeButton numLikes={Number(postData.feedbackScore)} />
         </Stack>
         <LocationHandler
@@ -597,7 +575,6 @@ export default function ViewPostDialog() {
         </Button>
       </Stack>
       {/* TODO: Create Comment component later */}
-      </>
-    } </>
+    </>
   );
 }

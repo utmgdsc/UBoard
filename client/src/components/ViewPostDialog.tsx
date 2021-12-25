@@ -107,6 +107,7 @@ function MoreOptions(props: {
         onClose={closeMenu}
         MenuListProps={{
           'aria-labelledby': 'post-settings',
+          style: { minWidth: '110px' },
         }}
       >
         {props.userHasCreatedPost ? (
@@ -119,7 +120,9 @@ function MoreOptions(props: {
         )}
         {!props.didUserReport ? (
           <MenuItem onClick={reportPost}>Report</MenuItem>
-        ) : undefined}
+        ) : (
+          <MenuItem disabled>Reported</MenuItem>
+        )}
       </Menu>
       <Snackbar
         open={isAlertOpen}

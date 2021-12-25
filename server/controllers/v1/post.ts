@@ -138,8 +138,10 @@ export default class PostController {
           // Must case to `any` as dataValues is not typed at the moment.
           // Context: https://github.com/RobinBuschmann/sequelize-typescript/issues/760
           p.likeCount = (p as any).dataValues.likeCount;
-          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
-          p.isUserCheckedIn = (p as any).dataValues.isUserCheckedIn == 1;
+          (p as any).dataValues.doesUserLike =
+            (p as any).dataValues.doesUserLike == 1;
+          (p as any).dataValues.isUserCheckedIn =
+            (p as any).dataValues.isUserCheckedIn == 1;
           p.usersCheckedIn = (p as any).dataValues.usersCheckedIn;
           return p;
         }),

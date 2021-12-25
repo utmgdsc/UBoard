@@ -15,6 +15,7 @@ import './App.css';
 import { User } from 'models/user';
 
 import ServerApi from './api/v1';
+import ViewPostDialog from './components/ViewPostDialog';
 
 const api = new ServerApi();
 
@@ -43,7 +44,7 @@ const theme = createTheme({
   },
 });
 
-function ProtectedRoute() {
+function ProtectedRoute(props: { destination: JSX.Element }) {
   const [currentUser, setUser] = React.useState({} as User);
   const [isLoading, setLoading] = React.useState(true);
 
@@ -76,7 +77,7 @@ function ProtectedRoute() {
       <UserContext.Provider
         value={{ data: currentUser, setLoading: setLoading }}
       >
-        {<PostDashboard />}
+        {props.destination}
       </UserContext.Provider>
     );
   }
@@ -91,7 +92,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<AuthContainer />} />
-          <Route path='/dashboard' element={<ProtectedRoute />} />
+          <Route path='/dashboard' element={<ProtectedRoute destination={<PostDashboard />} />} />
+          <Route path=':postid' element={<ProtectedRoute destination={<ViewPostDialog />} />}  /> 
           <Route path='/confirm-account' element={<EmailConfirmContainer />} />
           <Route path='/password-reset' element={<PassResetContainer />} />
         </Routes>

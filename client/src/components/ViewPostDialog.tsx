@@ -447,6 +447,12 @@ export default function ViewPostDialog() {
   });
 
   React.useEffect(() => {
+    if (!isEditing && !error) { // ensure data updates instantly for the user that finished editing
+      fetchData();
+    }
+  }, [isEditing])
+
+  React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
     if (!error) {
       const interval = setInterval(() => {

@@ -498,7 +498,7 @@ export default function ViewPostDialog() {
         </IconButton>
       </AppBar>
 
-      /* Title and Options (3 dots) */
+      {/* Title and Options (3 dots) */ }
       <Grid>
         <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
           <Grid item xs={11}>

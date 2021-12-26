@@ -531,6 +531,7 @@ export default function ViewPostDialog() {
               <MoreOptions
                 postID={postData.id}
                 userHasCreatedPost={isAuthor}
+                didUserReport={postData.didUserReport}
                 useNavigate={navigate}
                 toggleEdit={toggleEditor}
               />

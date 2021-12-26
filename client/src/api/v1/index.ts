@@ -8,10 +8,10 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
+  didUserReport: string;
   createdAt: string;
+  User: { firstName: string; lastName: string };
   UserId: string;
-  didUserReport: boolean;
-  User: { id: string; firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];

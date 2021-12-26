@@ -36,6 +36,9 @@ function MoreOptions(props: {
   userHasCreatedPost: boolean;
   toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
   useNavigate: NavigateFunction;
+  isAuth: boolean;
+  closeDialog: Function;
+  didUserReport: string;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
@@ -66,14 +69,14 @@ function MoreOptions(props: {
     api
       .reportPost(props.postID)
       .then((res) => {
-        props.didUserReport = true;
+        props.didUserReport = '1';
         if (res.status === 204) {
           setMsg('Post has been reported.');
         } else if (res.status === 200) {
           setMsg('Post has been reported and deleted.');
         } else {
           setMsg('Failed to report post.');
-          props.didUserReport = false;
+          props.didUserReport = '0';
         }
       })
       .catch(() => {
@@ -119,7 +122,7 @@ function MoreOptions(props: {
           <></>
         )}
         {!props.isAuth ? (
-          !props.didUserReport ? (
+          props.didUserReport === '0' ? (
             <MenuItem onClick={reportPost}>Report</MenuItem>
           ) : (
             <MenuItem disabled>Reported</MenuItem>

@@ -7,6 +7,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 
 import GoogleMapReact from 'google-map-react';
+import { PostUserPreview } from '../api/v1';
 
 export function LocationPickerMap(props: {
   setLocation: (location: string, lat?: number, lng?: number) => void;
@@ -137,6 +138,112 @@ export function LocationPickerMap(props: {
     </Stack>
   );
 }
+
+
+export function EventsMapView(props: {
+  posts: PostUserPreview[];
+}) {
+
+  const [googleMap, setMap] = React.useState(
+    {} as {
+      map: google.maps.Map;
+      maps: typeof google.maps;
+      markers: google.maps.Marker[];
+      info: google.maps.InfoWindow[];
+    }
+  );
+
+  // TODO: update on event change
+  // React.useEffect(() => {
+  //   if (googleMap.map) {
+  //     // if map has loaded before, update markers on position change (occurs on post edit)
+      
+     
+      
+  //   }
+  // }, [googleMap, props.posts]);
+
+  // enable additional options (i.e streetview)
+  const getOptions = (maps: GoogleMapReact.Maps) => {
+    return {
+      mapTypeControl: true,
+      streetViewControl: true,
+      fullScreenControl: true,
+      fullSCreenControlOptions: true,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'on' }],
+        },
+      ],
+    };
+  };
+
+  const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
+    let info = [] as google.maps.InfoWindow[];
+    let markers = [] as google.maps.Marker[];
+
+    for (let i = 0; i < props.posts.length; i++ ) {
+      const curr = props.posts[i];
+      const { lat, lng } = curr.coords;
+      if (lat !== -1 && lng !== -1) {
+
+        const tmpInfo = new google.maps.InfoWindow({
+          content: `<div><h2>${curr.title.slice(0, 100)}</h2> 
+          <p> ${curr.body.slice(0, 120) + "..."} </p>
+          <p> Located at ${curr.location} </p> 
+          <p> Capacity: 0/0 </p>
+          <a href="/${curr.id}"> Read More </a>
+          </div>`,
+        });
+    
+        // TODO: color code based on capacity
+        const tmpMarker = new maps.Marker({
+          position: { lat, lng },
+          map,
+        });
+
+        tmpMarker.addListener('click', () => {
+          tmpInfo.open({
+            anchor: tmpMarker,
+            map,
+            shouldFocus: false,
+          });
+        });
+
+        info.push(tmpInfo);
+        markers.push(tmpMarker);
+        
+      }
+    }
+
+    setMap({ map, maps, markers, info });
+  };
+
+  return (
+    <>
+      <Paper
+        elevation={5}
+        style={{ height: '90vh', width: '150vh' }}
+        sx={{ mt: 2}}
+      >
+        <GoogleMapReact
+          bootstrapURLKeys={{
+            key: process.env.REACT_APP_MAPS_API as string ,
+            libraries: ['places'],
+          }}
+          defaultCenter={ { lat: 43.59, lng: -79.65 }}
+          defaultZoom={8}
+          options={getOptions}
+          onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
+          yesIWantToUseGoogleMapApiInternals
+        />
+      </Paper>
+    </>
+  );
+}
+
 
 export function LocationMap(props: {
   visible: boolean;

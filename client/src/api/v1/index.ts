@@ -24,6 +24,8 @@ export type PostUserPreview = {
   createdAt: string;
   likeCount: number;
   doesUserLike: boolean;
+  coords: { lat: number; lng: number };
+  location: string;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name

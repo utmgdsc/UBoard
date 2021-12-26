@@ -8,7 +8,7 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
-  isUserCheckedIn: boolean;
+  isUserCheckedIn: string;
   usersCheckedIn: number;
   User: { id: string; firstName: string; lastName: string };
   Tags: {
@@ -24,7 +24,7 @@ export type PostUserPreview = {
   createdAt: string;
   likeCount: number;
   doesUserLike: boolean;
-  isUserCheckedIn: boolean;
+  isUserCheckedIn: string;
   usersCheckedIn: number;
 } & {
   Tags: {

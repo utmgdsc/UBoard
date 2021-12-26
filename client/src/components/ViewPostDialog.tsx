@@ -162,42 +162,43 @@ function LikeButton(props: { numLikes: number }) {
 function CapacityBar(props: {
   maxCapacity: number;
   postID: string;
-  isUserCheckedIn: boolean;
+  isUserCheckedIn: string;
   usersCheckedIn: number;
 }) {
   const maxCapacity = !isNaN(props.maxCapacity) ? props.maxCapacity : 0;
 
   const handleCheckIn = async () => {
-    if (props.isUserCheckedIn) {
+    if (props.isUserCheckedIn === '1') {
       await api.checkout(props.postID);
       // As there is no global state management system, we would have to wait
       // for the autoreload system to update the post info. This is a hack to
       // ensure that the checked in state is immediately updated.
-      props.isUserCheckedIn = false;
+      props.isUserCheckedIn = '0';
       props.usersCheckedIn -= 1;
     } else {
       const result = await api.checkin(props.postID);
       if (result.status !== 409) {
-        props.isUserCheckedIn = true;
+        props.isUserCheckedIn = '1';
       }
       // TODO indicate a standard alert to the user that the event could not be
       // checked into (over capacity)
     }
   };
 
-  const buttonHandler = props.isUserCheckedIn ? (
-    <Button onClick={handleCheckIn} variant='contained'>
-      Undo
-    </Button>
-  ) : props.usersCheckedIn < props.maxCapacity ? (
-    <Button onClick={handleCheckIn} variant='outlined'>
-      Check In
-    </Button>
-  ) : (
-    <Button disabled variant='outlined'>
-      AT CAPACITY
-    </Button>
-  );
+  const buttonHandler =
+    props.isUserCheckedIn === '1' ? (
+      <Button onClick={handleCheckIn} variant='contained'>
+        Undo
+      </Button>
+    ) : props.usersCheckedIn < props.maxCapacity ? (
+      <Button onClick={handleCheckIn} variant='outlined'>
+        Check In
+      </Button>
+    ) : (
+      <Button disabled variant='outlined'>
+        AT CAPACITY
+      </Button>
+    );
 
   return (
     <Stack spacing={1} sx={{ mr: 4 }}>

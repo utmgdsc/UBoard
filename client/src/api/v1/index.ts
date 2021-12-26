@@ -10,7 +10,8 @@ export type PostUser = Post & {
   doesUserLike: boolean;
   createdAt: string;
   UserId: string;
-  isUserCheckedIn: boolean;
+  isUserCheckedIn: string;
+  usersCheckedIn: number;
   User: { id: string; firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -25,7 +26,7 @@ export type PostUserPreview = {
   createdAt: string;
   likeCount: number;
   doesUserLike: boolean;
-  isUserCheckedIn: boolean;
+  isUserCheckedIn: string;
   usersCheckedIn: number;
 } & {
   Tags: {

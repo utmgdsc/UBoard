@@ -10,8 +10,12 @@ import GoogleMapReact from 'google-map-react';
 
 export function LocationPickerMap(props: {
   setLocation: (location: string, lat?: number, lng?: number) => void;
+  defaultCenter?: { lat: number; lng: number };
+  defaultInput?: string;
 }) {
-  const [locationInput, setInput] = React.useState('');
+  const [locationInput, setInput] = React.useState(
+    props.defaultInput ? props.defaultInput : ''
+  );
   const [showMap, toggleMap] = React.useState(true);
 
   const getOptions = (maps: GoogleMapReact.Maps) => {
@@ -36,7 +40,7 @@ export function LocationPickerMap(props: {
     const geocoder = new google.maps.Geocoder();
 
     const marker = new maps.Marker({
-      position: { lat: 0, lng: 0 }, // changed on autofill
+      position: props.defaultCenter ? props.defaultCenter : { lat: 0, lng: 0 }, // changed on autofill
       map,
       draggable: true,
     });
@@ -54,8 +58,6 @@ export function LocationPickerMap(props: {
         });
     });
 
-    marker.setVisible(false); // only show this when user autofills a place
-
     const autocomplete = new google.maps.places.Autocomplete(
       document.getElementById('pac-input') as HTMLInputElement,
       {
@@ -71,6 +73,8 @@ export function LocationPickerMap(props: {
     );
 
     autocomplete.addListener('place_changed', () => {
+      marker.setVisible(false); // only show this when user autofills a place
+
       const place = autocomplete.getPlace();
 
       if (!place.geometry || !place.geometry.location || !place.name) {
@@ -119,8 +123,12 @@ export function LocationPickerMap(props: {
             key: process.env.REACT_APP_MAPS_API as string,
             libraries: ['places'],
           }}
-          defaultCenter={{ lat: 43.59, lng: -79.65 }} // default to GTA
-          defaultZoom={8}
+          defaultCenter={
+            props.defaultCenter
+              ? props.defaultCenter
+              : { lat: 43.59, lng: -79.65 }
+          } // GTA if default not provided
+          defaultZoom={props.defaultCenter ? 15 : 8}
           options={getOptions}
           yesIWantToUseGoogleMapApiInternals
           onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
@@ -140,6 +148,31 @@ export function LocationMap(props: {
     lat: props.lat,
     lng: props.lng,
   };
+
+  const [googleMap, setMap] = React.useState(
+    {} as {
+      map: google.maps.Map;
+      maps: typeof google.maps;
+      marker: google.maps.Marker;
+      info: google.maps.InfoWindow;
+    }
+  );
+
+  React.useEffect(() => {
+    if (googleMap.map) {
+      // if map has loaded before, update markers on position change (occurs on post edit)
+      googleMap.info.setContent(`<p>${props.location}</p>`);
+      googleMap.marker.setPosition(googleMap.map.getCenter());
+
+      googleMap.marker.addListener('click', () => {
+        googleMap.info.open({
+          anchor: googleMap.marker,
+          map: googleMap.map,
+          shouldFocus: false,
+        });
+      });
+    }
+  }, [googleMap, props.location]);
 
   // enable additional options (i.e streetview)
   const getOptions = (maps: GoogleMapReact.Maps) => {
@@ -177,6 +210,8 @@ export function LocationMap(props: {
         shouldFocus: false,
       });
     });
+
+    setMap({ map, maps, marker, info });
   };
 
   return props.visible ? (
@@ -192,6 +227,7 @@ export function LocationMap(props: {
             libraries: ['places'],
           }}
           defaultCenter={center}
+          center={center}
           defaultZoom={15}
           options={getOptions}
           onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}

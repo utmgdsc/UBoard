@@ -12,7 +12,7 @@ export type PostUser = Post & {
   UserId: string;
   isUserCheckedIn: string;
   usersCheckedIn: number;
-  User: { id: string; firstName: string; lastName: string };
+  User: { firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];

@@ -7,13 +7,16 @@ import {
   makeValidPost,
   makeValidUser,
 } from '../../../models/tests/testHelpers';
+import FileManager from '../../../services/fileManager';
 import PostController from '../post';
+
+jest.mock('backblaze-b2');
 
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
-  db.UserCheckin,
-  db.Tag
+  db.Tag,
+  new FileManager()
 );
 
 beforeEach(async () => {

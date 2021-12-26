@@ -2,9 +2,17 @@ import express, { Request, Response } from 'express';
 import db from '../../models';
 import PostController from '../../controllers/v1/post';
 import { getAuthUser } from '../../middleware/auth';
+import FileManager from '../../services/fileManager';
+
+const fileManager = new FileManager();
 
 const postRouter = express.Router();
-const postController = new PostController(db.Post, db.UserPostLikes, db.Tag);
+const postController = new PostController(
+  db.Post,
+  db.UserPostLikes,
+  db.Tag,
+  fileManager
+);
 
 postRouter.get('', async (req: Request, res: Response) => {
   const limit = req.query.limit;
@@ -92,7 +100,8 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.location,
       req.body.capacity,
       req.body.tags,
-      req.body.coords
+      req.body.coords,
+      req.file
     );
     res.status(result.status).json(result);
   } catch (err) {

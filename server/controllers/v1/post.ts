@@ -4,6 +4,8 @@ import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
 import { PostTag } from '../../models/PostTags';
 import db from '../../models';
+import { File } from '../../middleware/file-upload';
+import FileManager from '../../services/fileManager';
 
 // The return type of a Post associated with the Post's User.
 export type PostUser = Post & {
@@ -38,15 +40,18 @@ export default class PostController {
   protected postsRepo: typeof Post;
   protected userPostLikesRepo: typeof UserPostLikes;
   protected tagsRepo: typeof Tag;
+  protected fileManager: FileManager;
 
   constructor(
     postsRepo: typeof Post,
     userPostLikesRepo: typeof UserPostLikes,
-    tagsRepo: typeof Tag
+    tagsRepo: typeof Tag,
+    fileManager: FileManager
   ) {
     this.postsRepo = postsRepo;
     this.userPostLikesRepo = userPostLikesRepo;
     this.tagsRepo = tagsRepo;
+    this.fileManager = fileManager;
   }
 
   /**
@@ -319,13 +324,21 @@ export default class PostController {
     location?: string,
     capacity?: number,
     tags?: string[],
-    coords?: latLng
+    coords?: latLng,
+    file?: File
   ): Promise<{
     status: number;
     data: { result?: Post; message?: string };
   }> {
     if (!title || !body || !location || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
+    }
+
+    let filePath: string | undefined = undefined;
+
+    if (file) {
+      // A post should be able to be created without a file.
+      filePath = await this.fileManager.upload(file.path, file.filename);
     }
 
     const post = await this.postsRepo.create({
@@ -335,6 +348,7 @@ export default class PostController {
       capacity,
       coords,
       UserId: userID,
+      thumbnail: filePath,
     });
 
     if (!post) {

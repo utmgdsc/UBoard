@@ -542,13 +542,13 @@ export default function ViewPostDialog() {
             alignItems: 'center',
           }}
         >
-          <img
-            // TODO src={props.postUser.thumbnail}
-            src='https://i.imgur.com/8EYKtwP.png'
-            alt='Thumbnail'
-            height='400px'
-            width='400px'
-          />
+          {!!postData.thumbnail ? (
+            <img
+              src={postData.thumbnail}
+              alt='Thumbnail'
+              style={{ maxHeight: '400px', maxWidth: '400px' }}
+            />
+          ) : undefined}
         </Box>
         <Typography
           variant='body1'

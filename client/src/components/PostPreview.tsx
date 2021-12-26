@@ -67,13 +67,14 @@ export default function PostPreview(props: {
           maxWidth: 500,
         }}
       >
-        <CardMedia
-          component='img'
-          //TODO: once we set this up src={props.postUser.thumbnail}
-          src='https://i.imgur.com/8EYKtwP.png'
-          alt='placeholder'
-          sx={{ maxWidth: '500px', maxHeight: '145px' }}
-        />
+        {!!props.postUser.thumbnail ? (
+          <CardMedia
+            component='img'
+            src={props.postUser.thumbnail}
+            alt='placeholder'
+            sx={{ maxWidth: '500px', maxHeight: '145px' }}
+          />
+        ) : undefined}
         <CardContent sx={{ flexGrow: 1, mb: -2 }}>
           <Typography
             variant='h5'

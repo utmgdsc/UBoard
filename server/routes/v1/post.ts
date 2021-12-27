@@ -38,6 +38,58 @@ postRouter.get('', async (req: Request, res: Response) => {
   }
 });
 
+postRouter.get('/search', async (req: Request, res: Response) => {
+  const query = req.query.query;
+  const limit = req.query.limit;
+  const offset = req.query.offset;
+
+  if (!limit || offset == undefined) {
+    return res.status(400).json({
+      code: 400,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
+    });
+  }
+  try {
+    const result = await postController.searchForPosts(
+      getAuthUser(res).id,
+      query as string,
+      Number(limit),
+      Number(offset)
+    );
+    return res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+postRouter.get('/user/:userId', async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const limit = req.query.limit;
+  const offset = req.query.offset;
+
+  if (!limit || offset == undefined) {
+    return res.status(400).json({
+      code: 400,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
+    });
+  }
+  try {
+    const result = await postController.getUserPosts(
+      getAuthUser(res).id,
+      userId as string,
+      Number(limit),
+      Number(offset)
+    );
+    return res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 postRouter.get('/:postid', async (req: Request, res: Response) => {
   try {
     const result = await postController.getPost(

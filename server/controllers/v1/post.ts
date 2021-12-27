@@ -5,6 +5,7 @@ import { UserPostLikes } from '../../models/userPostLikes';
 import { UserCheckin } from '../../models/usercheckin';
 import { PostTag } from '../../models/PostTags';
 import db from '../../models';
+import { QueryTypes } from 'sequelize';
 import { File } from '../../middleware/file-upload';
 import FileManager from '../../services/fileManager';
 
@@ -93,10 +94,11 @@ export default class PostController {
           [
             sequelize.literal(
               // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
-                  WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
-                    `${userID}`
-                  )})`
+              `(
+                SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                WHERE "Likes"."postID" = "Post"."id" 
+                  AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+              )`
             ),
             'doesUserLike',
           ],
@@ -154,6 +156,159 @@ export default class PostController {
     };
   }
 
+  async getUserPosts(
+    userID: string,
+    queryUserID: string,
+    limit: number,
+    offset: number
+  ): Promise<{
+    status: number;
+    data: { result?: PostUserPreview[]; count: number; total: number };
+  }> {
+    const data = await Promise.all([
+      this.postsRepo.findAndCountAll({
+        limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
+        // Since we are returning multiple results, we want to limit the data.
+        attributes: [
+          'id',
+          'body',
+          'title',
+          'createdAt',
+          'thumbnail',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
+            ),
+            'likeCount',
+          ],
+          [
+            sequelize.literal(
+              // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+              `(
+                SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                WHERE "Likes"."postID" = "Post"."id" 
+                  AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+              )`
+            ),
+            'doesUserLike',
+          ],
+        ],
+        include: [
+          {
+            model: db.User,
+            attributes: ['firstName', 'lastName', 'id'],
+          },
+          {
+            model: db.Tag,
+            attributes: ['text'],
+          },
+        ],
+        order: [['createdAt', 'DESC']],
+        offset: offset,
+        where: { UserId: queryUserID },
+      }),
+      this.postsRepo.count({ where: { UserId: queryUserID } }),
+    ]);
+
+    return {
+      status: data[0].count > 0 ? 200 : 204,
+      data: {
+        result: (data[0].rows as any as PostUserPreview[]).map((p) => {
+          p.likeCount = (p as any).dataValues.likeCount;
+          p.doesUserLike = (p as any).dataValues.doesUserLike == 1;
+          return p;
+        }),
+        count: data[0].count,
+        total: data[1],
+      },
+    };
+  }
+
+  async searchForPosts(
+    userID: string,
+    query: string,
+    limit: number,
+    offset: number
+  ): Promise<{
+    status: number;
+    data: { result?: PostUserPreview[]; count: number; total: number };
+  }> {
+    const weights = `(
+      setweight(to_tsvector(coalesce("Post"."title", '')), 'A') || 
+      setweight(to_tsvector(coalesce("User"."firstName", '')), 'B') || 
+      setweight(to_tsvector(coalesce("User"."lastName", '')), 'B') || 
+      setweight(to_tsvector(coalesce("PostTag"."TagText", '')), 'C') || 
+      setweight(to_tsvector(coalesce("Post"."location", '')), 'C') || 
+      setweight(to_tsvector(coalesce("Post"."body", '')), 'D') 
+    )`;
+    const data = await Promise.all([
+      db.sequelize.query(
+        `SELECT 
+          "Post"."id", 
+          "Post"."body", 
+          "Post"."title", 
+          "Post"."createdAt", 
+          "Post"."thumbnail", 
+          (
+            SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
+            WHERE "Likes"."postID" = "Post"."id"
+          ) AS "likeCount", 
+          (
+            SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
+            WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $userID
+          ) AS "doesUserLike", 
+          json_build_object(
+            'firstName', "User"."firstName", 
+            'lastName', "User"."lastName",
+            'id', "User"."id"
+          ) AS "User",
+          (
+            SELECT json_agg(json_build_object('text', "PostTag"."TagText", 'PostTags', row_to_json("PostTag"))) 
+            FROM "PostTags" AS "PostTag" WHERE "PostTag"."PostId" = "Post"."id"
+          ) AS "Tags",
+          ts_rank_cd(${weights}, "query", 1|4) AS "rank" 
+        FROM "Posts" AS "Post" 
+        LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
+        LEFT OUTER JOIN (
+          SELECT "PostId", string_agg("TagText", ' ') AS "TagText" 
+          FROM "PostTags" GROUP BY 1
+        ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
+        CROSS JOIN to_tsquery($query) AS "query" 
+        WHERE "query" @@ ${weights} 
+        ORDER BY "rank" DESC 
+        LIMIT $limit 
+        OFFSET $offset;`,
+        {
+          bind: { userID, query, limit, offset },
+          type: QueryTypes.SELECT,
+        }
+      ) as PostUserPreview[],
+      db.sequelize.query(
+        `SELECT count(*) FROM "Posts" AS "Post" 
+        LEFT OUTER JOIN "Users" AS "User" ON "Post"."UserId" = "User"."id" 
+        LEFT OUTER JOIN (
+          SELECT "PostId", string_agg("TagText", ' ') AS "TagText" 
+          FROM "PostTags" GROUP BY 1
+        ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
+        CROSS JOIN to_tsquery($query) AS "query" 
+        WHERE "query" @@ ${weights}`,
+        {
+          bind: { query },
+          type: QueryTypes.SELECT,
+        }
+      ),
+    ]);
+
+    return {
+      status: data[0].length > 0 ? 200 : 204,
+      data: {
+        result: data[0],
+        count: data[0].length,
+        total: Number(data[1][0].count),
+      },
+    };
+  }
+
   /**
    * Search for the post by the given ID if it exists.
    *
@@ -189,10 +344,11 @@ export default class PostController {
         [
           sequelize.literal(
             // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
-                  WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = ${db.sequelize.escape(
-                    `${userID}`
-                  )})`
+            `(
+              SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+              WHERE "Likes"."postID" = "Post"."id" 
+                AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+            )`
           ),
           'doesUserLike',
         ],

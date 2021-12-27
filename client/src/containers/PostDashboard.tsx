@@ -17,7 +17,10 @@ const api = new ServerApi();
 
 function RecentPosts(props: {
   query: string;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
+  prevState: string;
+  setPrevState: React.Dispatch<React.SetStateAction<string>>;
   pageNum: number;
   userId: string;
 }) {
@@ -27,18 +30,28 @@ function RecentPosts(props: {
   const checkForPosts = React.useCallback(() => {
     if (!openedPost) {
       let result;
+      let newState = '';
       if (props.userId !== '') {
+        if (props.prevState !== 'user') {
+          newState = 'user';
+        }
         result = api.fetchUserPosts(
           props.userId,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
       } else if (!props.query) {
+        if (props.prevState !== 'search') {
+          newState = 'search';
+        }
         result = api.fetchRecentPosts(
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
       } else {
+        if (props.prevState !== 'recent') {
+          newState = 'recent';
+        }
         result = api.searchForPosts(
           props.query,
           POSTS_PER_PAGE,
@@ -56,6 +69,10 @@ function RecentPosts(props: {
           }
         })
         .catch((err) => console.log(err));
+      if (newState !== '') {
+        props.setPage(1);
+        props.setPrevState(newState);
+      }
     }
   }, [props, openedPost]);
 
@@ -91,6 +108,8 @@ export default function PostDashboard() {
   const [page, setPage] = React.useState(1);
 
   const [userId, setUserId] = React.useState('');
+
+  const [prevState, setPrevState] = React.useState('recent');
 
   const useQuery = (): [string, (q: string) => void] => {
     const [query, setQuery] = React.useState('');
@@ -131,7 +150,10 @@ export default function PostDashboard() {
             <RecentPosts
               userId={userId}
               query={query}
+              setPage={setPage}
               setPageCount={setPageCount}
+              prevState={prevState}
+              setPrevState={setPrevState}
               pageNum={page}
             />
           </Grid>

@@ -587,6 +587,7 @@ export default function ViewPostDialog() {
             ) : (
               <></>
             )}
+
           <LikeButton numLikes={Number(postData.feedbackScore)} />
         </Stack>
         <LocationHandler

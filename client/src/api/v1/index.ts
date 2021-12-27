@@ -8,7 +8,9 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
-  User: { id: string; firstName: string; lastName: string };
+  createdAt: string;
+  User: { firstName: string; lastName: string };
+  UserId: string;
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];
@@ -194,13 +196,39 @@ export default class ServerApi {
   async createPost(form: {
     title: string;
     body: string;
-    file: string;
+    file?: File;
     tags: string[];
     capacity: number;
     location: string;
   }) {
-    return await this.post<typeof form, { result?: Post; message?: string }>(
-      '/posts/',
+    const formData = new FormData();
+    formData.append('title', form.title);
+    formData.append('body', form.body);
+    form.tags.forEach((tag) => formData.append('tags[]', tag));
+    formData.append('capacity', String(form.capacity));
+    formData.append('location', form.location);
+
+    if (form.file) {
+      formData.append('file', form.file);
+    }
+
+    return await this.post<
+      typeof formData,
+      { result?: Post; message?: string }
+    >('/posts/', formData);
+  }
+
+  async updatePost(
+    postID: string,
+    form: {
+      title: string;
+      body: string;
+      location: string;
+      capacity: number;
+    }
+  ) {
+    return await this.put<typeof form, { result?: Post; message?: string }>(
+      `/posts/${postID}`,
       form
     );
   }

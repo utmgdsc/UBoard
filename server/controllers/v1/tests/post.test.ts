@@ -7,9 +7,17 @@ import {
   makeValidPost,
   makeValidUser,
 } from '../../../models/tests/testHelpers';
+import FileManager from '../../../services/fileManager';
 import PostController from '../post';
 
-const postController = new PostController(db.Post, db.UserPostLikes, db.Tag);
+jest.mock('backblaze-b2');
+
+const postController = new PostController(
+  db.Post,
+  db.UserPostLikes,
+  db.Tag,
+  new FileManager()
+);
 
 beforeEach(async () => {
   await dbSync().catch((err) => fail(err));

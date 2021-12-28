@@ -36,8 +36,6 @@ function MoreOptions(props: {
   userHasCreatedPost: boolean;
   toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
   useNavigate: NavigateFunction;
-  isAuth: boolean;
-  closeDialog: Function;
   didUserReport: string;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
@@ -121,7 +119,7 @@ function MoreOptions(props: {
         ) : (
           <></>
         )}
-        {!props.isAuth ? (
+        {!props.userHasCreatedPost ? (
           props.didUserReport === '0' ? (
             <MenuItem onClick={reportPost}>Report</MenuItem>
           ) : (

@@ -8,7 +8,7 @@ import {
   makeValidUser,
 } from '../../../models/tests/testHelpers';
 import FileManager from '../../../services/fileManager';
-import PostController from '../post';
+import PostController, { MAX_REPORTS } from '../post';
 
 jest.mock('backblaze-b2');
 

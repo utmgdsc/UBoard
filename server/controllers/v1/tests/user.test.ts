@@ -1,5 +1,4 @@
 import argon2 from 'argon2';
-import mockdate from 'mockdate';
 import db from '../../../models';
 import {
   dbSync,
@@ -176,13 +175,14 @@ describe('v1 - User Controller', () => {
           response = await uContr.signIn(user.userName, 'someBadPassword');
         }
 
-        mockdate.set(Date.now() + 60 * 60 * 1000);
+        jest.useFakeTimers('modern');
+        jest.setSystemTime(Date.now() + 60 * 60 * 1000);
 
         // with a good password after waiting for a while
         response = await uContr.signIn(user.userName, 'pass');
         expect(response!.status).toBe(204);
 
-        mockdate.reset();
+        jest.useRealTimers();
       });
 
       it('Should allow a user to sign in after waiting with a single failed password', async () => {
@@ -198,7 +198,8 @@ describe('v1 - User Controller', () => {
           response = await uContr.signIn(user.userName, 'someBadPassword');
         }
 
-        mockdate.set(Date.now() + 60 * 60 * 1000);
+        jest.useFakeTimers('modern');
+        jest.setSystemTime(Date.now() + 60 * 60 * 1000);
 
         // One bad password attempt after waiting
         response = await uContr.signIn(user.userName, 'badPassword');
@@ -208,7 +209,7 @@ describe('v1 - User Controller', () => {
         response = await uContr.signIn(user.userName, 'pass');
         expect(response!.status).toBe(204);
 
-        mockdate.reset();
+        jest.useRealTimers();
       });
     });
   });

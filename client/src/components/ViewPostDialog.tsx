@@ -583,7 +583,7 @@ export default function ViewPostDialog() {
               location={postData.location}
             />
           </Stack>
-          {/* Comment Section */}s
+          {/* Comment Section */}
           <Stack sx={{ px: 8, pb: 5 }}>
             <Typography variant='h5' sx={{ py: 2 }}>
               Comments

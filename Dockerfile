@@ -34,6 +34,7 @@ COPY nginx/conf.d/default.conf.template /etc/nginx/conf.d/default.conf.template
 WORKDIR /app
 COPY --from=client_builder /app/client/build/. /usr/share/nginx/html/.
 COPY --from=server_builder /app/server/ server
+COPY nginx/html/404.html /usr/share/nginx/html/404.html
 
 # Start Nginx server
 CMD /bin/sh -c "envsubst '\$PORT' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf" && nginx && node server/build/server.js

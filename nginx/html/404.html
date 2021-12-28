@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="The official University of Toronto bulletin board."
+    />
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+      nav {
+        min-height: 64px;
+        transition: box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+        box-shadow: rgb(0 0 0 / 20%) 0px 2px 4px -1px,
+          rgb(0 0 0 / 14%) 0px 4px 5px 0px, rgb(0 0 0 / 12%) 0px 1px 10px 0px;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        position: static;
+        background-color: rgb(25, 118, 210);
+        color: rgb(255, 255, 255);
+      }
+      nav > div {
+        padding: 20px;
+        font-family: Roboto, Helvetica, Arial, sans-serif;
+        font-weight: 500;
+        font-size: 1.25rem;
+        line-height: 1.6;
+        letter-spacing: 0.0075em;
+        color: rgb(255, 255, 255);
+        text-decoration: none;
+      }
+      main {
+        text-align: center;
+        padding-top: 15vh;
+      }
+      .error {
+        font-size: 6rem;
+      }
+      .msg {
+        font-size: 1.25rem;
+      }
+    </style>
+    <title>UofTBoard</title>
+  </head>
+  <body>
+    <nav>
+      <div>UBoard</div>
+    </nav>
+    <main>
+      <div class="error">404</div>
+      <div class="msg">The page you are looking for cannot be found</div>
+      <div class="msg">Please navigate back</div>
+    </main>
+  </body>
+</html>

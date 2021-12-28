@@ -1,9 +1,11 @@
 import argon2 from 'argon2';
+import mockdate from 'mockdate';
 import db from '../../../models';
 import {
   dbSync,
   makeUser,
   makeUserWithPass,
+  makeValidUser,
 } from '../../../models/tests/testHelpers';
 import { User } from '../../../models/user';
 import UserController, { TOKEN_TYPE } from '../user';
@@ -142,6 +144,71 @@ describe('v1 - User Controller', () => {
 
       test('Password should not be included in serialized result', () => {
         expect(signInResponse.data.result.password).not.toBeDefined();
+      });
+
+      it('Should prevent a user from signing in after max failed attempts', async () => {
+        const user = await makeValidUser();
+        user.confirmed = true;
+        await user.save();
+
+        let response = await uContr.signIn(user.userName, 'someBadPassword');
+        for (let i = 0; i <= 20; i++) {
+          response = await uContr.signIn(user.userName, 'someBadPassword');
+        }
+
+        expect(response!.status).toBe(401);
+
+        // with a good password
+        response = await uContr.signIn(user.userName, 'pass');
+        expect(response!.status).toBe(401);
+      });
+
+      it('Should allow a user to sign in after waiting', async () => {
+        const user = await makeUserWithPass(
+          'valid1',
+          'valid1@mail.utoronto.ca'
+        );
+        user.confirmed = true;
+        await user.save();
+
+        let response = await uContr.signIn(user.userName, 'someBadPassword');
+        for (let i = 0; i <= 20; i++) {
+          response = await uContr.signIn(user.userName, 'someBadPassword');
+        }
+
+        mockdate.set(Date.now() + 60 * 60 * 1000);
+
+        // with a good password after waiting for a while
+        response = await uContr.signIn(user.userName, 'pass');
+        expect(response!.status).toBe(204);
+
+        mockdate.reset();
+      });
+
+      it('Should allow a user to sign in after waiting with a single failed password', async () => {
+        const user = await makeUserWithPass(
+          'valid2',
+          'valid2@mail.utoronto.ca'
+        );
+        user.confirmed = true;
+        await user.save();
+
+        let response = await uContr.signIn(user.userName, 'someBadPassword');
+        for (let i = 0; i <= 20; i++) {
+          response = await uContr.signIn(user.userName, 'someBadPassword');
+        }
+
+        mockdate.set(Date.now() + 60 * 60 * 1000);
+
+        // One bad password attempt after waiting
+        response = await uContr.signIn(user.userName, 'badPassword');
+        expect(response!.status).toBe(400);
+
+        // with a good password right afterwards
+        response = await uContr.signIn(user.userName, 'pass');
+        expect(response!.status).toBe(204);
+
+        mockdate.reset();
       });
     });
   });

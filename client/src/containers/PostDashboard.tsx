@@ -4,10 +4,14 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
+import { EventsMapView } from '../components/LocationMap';
 
 import ServerApi, { PostUserPreview } from '../api/v1';
 
@@ -18,6 +22,7 @@ const api = new ServerApi();
 function RecentPosts(props: {
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
   pageNum: number;
+  mapView: boolean;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
   const [openedPost, setOpenedPost] = React.useState(false);
@@ -63,13 +68,19 @@ function RecentPosts(props: {
 
   return (
     <>
-      {recentPosts.map((data) => (
-        <PostPreview
-          key={data.id}
-          postUser={data}
-          setOpenedPost={setOpenedPost}
-        />
-      ))}
+      {!props.mapView ? (
+        recentPosts.map((data) => (
+          <PostPreview
+            key={data.id}
+            postUser={data}
+            setOpenedPost={setOpenedPost}
+          />
+        ))
+      ) : (
+        <Box sx={{ mt: 2, ml: 1, px: 2, pl: 8, pr: 4 }}>
+          <EventsMapView posts={recentPosts} />
+        </Box>
+      )}
     </>
   );
 }
@@ -77,6 +88,7 @@ function RecentPosts(props: {
 export default function PostDashboard() {
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
+  const [isMapView, toggleMapView] = React.useState(false);
 
   return (
     <>
@@ -93,14 +105,34 @@ export default function PostDashboard() {
               xs={12}
               style={{
                 display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
               }}
             >
+              <FormControl>
+                <FormControlLabel
+                  value='mapview'
+                  control={
+                    <Switch
+                      color='primary'
+                      checked={isMapView}
+                      onChange={(e) => {
+                        toggleMapView(e.target.checked);
+                      }}
+                    />
+                  }
+                  label='Toggle Map View'
+                  labelPlacement='start'
+                />
+              </FormControl>
               <CreatePost />
             </Grid>
 
-            <RecentPosts setPageCount={setPageCount} pageNum={page} />
+            <RecentPosts
+              setPageCount={setPageCount}
+              pageNum={page}
+              mapView={isMapView}
+            />
           </Grid>
         </Container>
       </main>

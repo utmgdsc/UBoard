@@ -8,6 +8,9 @@ import Switch from '@mui/material/Switch';
 
 import GoogleMapReact from 'google-map-react';
 import { PostUserPreview } from '../api/v1';
+import Grid from '@mui/material/Grid';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import useTheme from '@mui/system/useTheme';
 
 export function LocationPickerMap(props: {
   setLocation: (location: string, lat?: number, lng?: number) => void;
@@ -139,11 +142,7 @@ export function LocationPickerMap(props: {
   );
 }
 
-
-export function EventsMapView(props: {
-  posts: PostUserPreview[];
-}) {
-
+export function EventsMapView(props: { posts: PostUserPreview[] }) {
   const [googleMap, setMap] = React.useState(
     {} as {
       map: google.maps.Map;
@@ -153,13 +152,18 @@ export function EventsMapView(props: {
     }
   );
 
+  // kinda hacky, but we need to explicitly define height/width for google maps in sx
+  const theme = useTheme();
+  const smQuery = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const bgQuery = useMediaQuery(theme.breakpoints.between('md', 'lg'));
+  const xbgQuery = useMediaQuery(theme.breakpoints.up('lg'));
+  const mapSize = smQuery ? '65vh' : bgQuery ? '90vh' : xbgQuery ? '150vh' : '30vh';
+
   // TODO: update on event change
   // React.useEffect(() => {
   //   if (googleMap.map) {
   //     // if map has loaded before, update markers on position change (occurs on post edit)
-      
-     
-      
+
   //   }
   // }, [googleMap, props.posts]);
 
@@ -184,20 +188,21 @@ export function EventsMapView(props: {
     let info = [] as google.maps.InfoWindow[];
     let markers = [] as google.maps.Marker[];
 
-    for (let i = 0; i < props.posts.length; i++ ) {
+    for (let i = 0; i < props.posts.length; i++) {
       const curr = props.posts[i];
       const { lat, lng } = curr.coords;
       if (lat !== -1 && lng !== -1) {
+        // show markers for in-person events
 
         const tmpInfo = new google.maps.InfoWindow({
           content: `<div><h2>${curr.title.slice(0, 100)}</h2> 
-          <p> ${curr.body.slice(0, 120) + "..."} </p>
+          <p> ${curr.body.slice(0, 120) + '...'} </p>
           <p> Located at ${curr.location} </p> 
           <p> Capacity: 0/0 </p>
           <a href="/${curr.id}"> Read More </a>
           </div>`,
         });
-    
+
         // TODO: color code based on capacity
         const tmpMarker = new maps.Marker({
           position: { lat, lng },
@@ -214,7 +219,6 @@ export function EventsMapView(props: {
 
         info.push(tmpInfo);
         markers.push(tmpMarker);
-        
       }
     }
 
@@ -225,15 +229,19 @@ export function EventsMapView(props: {
     <>
       <Paper
         elevation={5}
-        style={{ height: '90vh', width: '150vh' }}
-        sx={{ mt: 2}}
+        style={{
+          height: mapSize,
+          width: mapSize,
+          justifyContent: 'center',
+        }}
+        sx={{ mt: 4, mb: 4 }}
       >
         <GoogleMapReact
           bootstrapURLKeys={{
-            key: process.env.REACT_APP_MAPS_API as string ,
+            key: process.env.REACT_APP_MAPS_API as string,
             libraries: ['places'],
           }}
-          defaultCenter={ { lat: 43.59, lng: -79.65 }}
+          defaultCenter={{ lat: 43.59, lng: -79.65 }}
           defaultZoom={8}
           options={getOptions}
           onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
@@ -243,7 +251,6 @@ export function EventsMapView(props: {
     </>
   );
 }
-
 
 export function LocationMap(props: {
   visible: boolean;

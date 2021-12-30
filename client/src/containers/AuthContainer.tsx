@@ -69,7 +69,7 @@ function AuthContainer() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       hideAlert();
-    }, 5000);
+    }, 500);
 
     return () => {
       clearTimeout(timeout);

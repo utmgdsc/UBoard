@@ -8,6 +8,7 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
+  didUserReport: string;
   createdAt: string;
   User: { firstName: string; lastName: string };
   UserId: string;

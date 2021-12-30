@@ -36,6 +36,7 @@ function MoreOptions(props: {
   userHasCreatedPost: boolean;
   toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
   useNavigate: NavigateFunction;
+  didUserReport: string;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
@@ -63,15 +64,17 @@ function MoreOptions(props: {
   };
 
   const reportPost = () => {
-    // TODO need to fix spam / backend interactions
-
     api
       .reportPost(props.postID)
       .then((res) => {
+        props.didUserReport = '1';
         if (res.status === 204) {
           setMsg('Post has been reported.');
+        } else if (res.status === 200) {
+          setMsg('Post has been reported and deleted.');
         } else {
           setMsg('Failed to report post.');
+          props.didUserReport = '0';
         }
       })
       .catch(() => {
@@ -105,6 +108,7 @@ function MoreOptions(props: {
         onClose={closeMenu}
         MenuListProps={{
           'aria-labelledby': 'post-settings',
+          style: { minWidth: '110px' },
         }}
       >
         {props.userHasCreatedPost ? (
@@ -115,7 +119,13 @@ function MoreOptions(props: {
         ) : (
           <></>
         )}
-        <MenuItem onClick={reportPost}>Report</MenuItem>
+        {!props.userHasCreatedPost ? (
+          props.didUserReport === '0' ? (
+            <MenuItem onClick={reportPost}>Report</MenuItem>
+          ) : (
+            <MenuItem disabled>Reported</MenuItem>
+          )
+        ) : undefined}
       </Menu>
       <Snackbar
         open={isAlertOpen}
@@ -346,23 +356,23 @@ function PostEditor(props: {
         </Stack>
 
         <Stack direction='row' sx={{ pt: 1, pb: 1 }}>
-            <Button
-              data-testid='test-btn-edit'
-              variant='contained'
-              onClick={handleSubmit}
-              sx={{ mr: 2 }}
-            >
-              Update Post
-            </Button>
+          <Button
+            data-testid='test-btn-edit'
+            variant='contained'
+            onClick={handleSubmit}
+            sx={{ mr: 2 }}
+          >
+            Update Post
+          </Button>
 
-            <Button
-              data-testid='test-btn-edit'
-              variant='contained'
-              color='secondary'
-              onClick={() => props.toggleEdit()}
-            >
-              Cancel
-            </Button>
+          <Button
+            data-testid='test-btn-edit'
+            variant='contained'
+            color='secondary'
+            onClick={() => props.toggleEdit()}
+          >
+            Cancel
+          </Button>
         </Stack>
       </Stack>
       <Snackbar
@@ -447,17 +457,18 @@ export default function ViewPostDialog() {
   });
 
   React.useEffect(() => {
-    if (!isEditing && !error) { // ensure data updates instantly for the user that finished editing
+    if (!isEditing && !error) {
+      // ensure data updates instantly for the user that finished editing
       fetchData();
     }
-  }, [isEditing])
+  }, [isEditing]);
 
   React.useEffect(() => {
     /* Fetch incase data has changed / post was edited */
     if (!error) {
       const interval = setInterval(() => {
         fetchData();
-      }, 5000);
+      }, 500);
       return () => clearInterval(interval);
     }
   });
@@ -469,7 +480,8 @@ export default function ViewPostDialog() {
           The post you requested does not exist.{' '}
         </Typography>
         <a href='/dashboard'>Return home?</a>
-      </>);
+      </>
+    );
   } else if (!postData || !postData.User) {
     return (
       <>
@@ -478,7 +490,8 @@ export default function ViewPostDialog() {
     );
   }
 
-  return (<> 
+  return (
+    <>
       {isEditing ? ( // show the editing UI instead of normal post
         <PostEditor
           id={postData.id}
@@ -488,105 +501,108 @@ export default function ViewPostDialog() {
           capacity={Number(postData.capacity)}
           coords={postData.coords}
           toggleEdit={() => toggleEditor(false)}
-        /> 
-      ) : <>
-      <AppBar sx={{ position: 'relative' }}>
-        <IconButton
-          data-testid='test-btn-close'
-          edge='start'
-          color='inherit'
-          onClick={() => {
-            navigate(-1);
-          }}
-          aria-label='close'
-        >
-          <ArrowBack />
-        </IconButton>
-      </AppBar>
-
-      {/* Title and Options (3 dots) */ }
-      <Grid>
-        <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
-          <Grid item xs={11}>
-            <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
-              {postData.title}
-            </Typography>
-          </Grid>
-          <MoreOptions
-            postID={postData.id}
-            userHasCreatedPost={isAuthor}
-            useNavigate={navigate}
-            toggleEdit={toggleEditor}
-          />
-        </Stack>
-      </Grid>
-      {/* Top information (author, date, tags..) */}
-      <Stack sx={{ pl: 4 }}>
-        <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
-          Posted on {new Date(postData.createdAt).toString()} by{' '}
-          {postData.User.firstName} {postData.User.lastName}
-        </Typography>
-        {
-          <GenerateTags
-            tags={postData.Tags ? postData.Tags.map((t) => t.text) : []}
-          />
-        }
-      </Stack>
-
-      {/* Post image and body */}
-      <Stack sx={{ pl: 4 }}>
-        <Box
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {!!postData.thumbnail ? (
-            <img
-              src={postData.thumbnail}
-              alt='Thumbnail'
-              style={{ maxHeight: '400px', maxWidth: '400px' }}
-            />
-          ) : undefined}
-        </Box>
-        <Typography
-          variant='body1'
-          sx={{ px: 4, py: 1, pb: 4 }}
-          style={{ wordWrap: 'break-word' }}
-        >
-          {postData.body}
-        </Typography>
-        <Stack direction='row' sx={{ px: 4, pb: 5 }}>
-          {Number(postData.capacity) > 0 ? (
-            <CapacityBar maxCapacity={Number(postData.capacity)} />
-          ) : (
-            <></>
-          )}
-          <LikeButton numLikes={Number(postData.feedbackScore)} />
-        </Stack>
-        <LocationHandler
-          coords={postData.coords}
-          location={postData.location}
         />
-      </Stack>
+      ) : (
+        <>
+          <AppBar sx={{ position: 'relative' }}>
+            <IconButton
+              data-testid='test-btn-close'
+              edge='start'
+              color='inherit'
+              onClick={() => {
+                navigate(-1);
+              }}
+              aria-label='close'
+            >
+              <ArrowBack />
+            </IconButton>
+          </AppBar>
 
-      {/* Comment Section */}
-      <Stack sx={{ px: 8, pb: 5 }}>
-        <Typography variant='h5' sx={{ py: 2 }}>
-          Comments
-        </Typography>
-        <TextField
-          variant='filled'
-          placeholder='Write a comment'
-          size='small'
-        ></TextField>
-        <Button variant='contained' sx={{ mt: 2 }}>
-          Add Comment
-        </Button>
-      </Stack>
-      {/* TODO: Create Comment component later */}
-      </>
-    } </>
+          {/* Title and Options (3 dots) */}
+          <Grid>
+            <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
+              <Grid item xs={11}>
+                <Typography variant='h5' style={{ wordWrap: 'break-word' }}>
+                  {postData.title}
+                </Typography>
+              </Grid>
+              <MoreOptions
+                postID={postData.id}
+                userHasCreatedPost={isAuthor}
+                didUserReport={postData.didUserReport}
+                useNavigate={navigate}
+                toggleEdit={toggleEditor}
+              />
+            </Stack>
+          </Grid>
+          {/* Top information (author, date, tags..) */}
+          <Stack sx={{ pl: 4 }}>
+            <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
+              Posted on {new Date(postData.createdAt).toString()} by{' '}
+              {postData.User.firstName} {postData.User.lastName}
+            </Typography>
+            {
+              <GenerateTags
+                tags={postData.Tags ? postData.Tags.map((t) => t.text) : []}
+              />
+            }
+          </Stack>
+
+          {/* Post image and body */}
+          <Stack sx={{ pl: 4 }}>
+            <Box
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {!!postData.thumbnail ? (
+                <img
+                  src={postData.thumbnail}
+                  alt='Thumbnail'
+                  style={{ maxHeight: '400px', maxWidth: '400px' }}
+                />
+              ) : undefined}
+            </Box>
+            <Typography
+              variant='body1'
+              sx={{ px: 4, py: 1, pb: 4 }}
+              style={{ wordWrap: 'break-word' }}
+            >
+              {postData.body}
+            </Typography>
+            <Stack direction='row' sx={{ px: 4, pb: 5 }}>
+              {Number(postData.capacity) > 0 ? (
+                <CapacityBar maxCapacity={Number(postData.capacity)} />
+              ) : (
+                <></>
+              )}
+              <LikeButton numLikes={Number(postData.feedbackScore)} />
+            </Stack>
+            <LocationHandler
+              coords={postData.coords}
+              location={postData.location}
+            />
+          </Stack>
+
+          {/* Comment Section */}
+          <Stack sx={{ px: 8, pb: 5 }}>
+            <Typography variant='h5' sx={{ py: 2 }}>
+              Comments
+            </Typography>
+            <TextField
+              variant='filled'
+              placeholder='Write a comment'
+              size='small'
+            ></TextField>
+            <Button variant='contained' sx={{ mt: 2 }}>
+              Add Comment
+            </Button>
+          </Stack>
+          {/* TODO: Create Comment component later */}
+        </>
+      )}{' '}
+    </>
   );
 }

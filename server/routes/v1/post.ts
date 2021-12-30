@@ -10,6 +10,7 @@ const postRouter = express.Router();
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
+  db.UserReports,
   db.Tag,
   fileManager
 );
@@ -139,8 +140,15 @@ postRouter.put('/:postid/downvote', async (req: Request, res: Response) => {
 });
 
 postRouter.put('/:postid/report', async (req: Request, res: Response) => {
-  const result = await postController.report(req.params.postid);
-  res.status(result.status);
+  try {
+    const result = await postController.report(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.post('/', async (req: Request, res: Response) => {

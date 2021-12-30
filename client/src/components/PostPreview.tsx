@@ -77,16 +77,14 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
           setHover(false);
         }}
       >
-        <CardMedia
-          component='img'
-          //TODO: once we set this up src={props.postUser.thumbnail}
-          src='https://i.imgur.com/8EYKtwP.png'
-          alt='placeholder'
-          sx={{
-            maxWidth: '500px',
-            maxHeight: '145px',
-          }}
-        />
+        {!!props.postUser.thumbnail ? (
+          <CardMedia
+            component='img'
+            src={props.postUser.thumbnail}
+            alt='placeholder'
+            sx={{ maxWidth: '500px', maxHeight: '145px' }}
+          />
+        ) : undefined}
         <CardContent sx={{ flexGrow: 1, mb: -2 }}>
           <Typography
             variant='h5'
@@ -116,11 +114,10 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
               <ChatBubbleIcon />
               <Typography>0</Typography>
             </Grid>
-            {/* TODO: Update type when checkins is merged */}
-            {Number((props.postUser as any).capacity) > 0 ? (
+            {Number(props.postUser.capacity) > 0 ? (
               <Grid item xs={3}>
                 <PeopleAltIcon />
-                <Typography>0/{(props.postUser as any).capacity} </Typography>
+                <Typography>{props.postUser.usersCheckedIn}/{props.postUser.capacity}</Typography>
               </Grid>
             ) : (
               <> </>

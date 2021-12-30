@@ -22,6 +22,8 @@ export default class UserController {
    */
   private updateLastLogin = async (user: User): Promise<void> => {
     user.lastLogin = new Date();
+    user.canLoginAfter = null;
+    user.failedLoginAttempts = 0;
     await user.save();
   };
 
@@ -45,6 +47,11 @@ export default class UserController {
       });
       if (!userWithPass) {
         return { status: 404, data: { message: "User doesn't exist" } };
+      } else if (userWithPass.hasTooManyLogins()) {
+        return {
+          status: 401,
+          data: { message: 'Too many failed login attempts' },
+        };
       }
 
       const isPasswordCorrect = await argon2.verify(
@@ -54,7 +61,9 @@ export default class UserController {
           type: argon2.argon2id,
         }
       );
+
       if (!isPasswordCorrect) {
+        await userWithPass.updateFailedLogin();
         return { status: 400, data: { message: 'Invalid credentials' } };
       }
 

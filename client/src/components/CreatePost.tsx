@@ -22,6 +22,16 @@ import { LocationPickerMap } from './LocationMap';
 
 const api = new ServerApi();
 
+interface FormState {
+  title: string;
+  body: string;
+  file: File | undefined;
+  tags: string[];
+  capacity: number;
+  location: string;
+  coords: { lat: number; lng: number };
+}
+
 function CreatePost() {
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
@@ -35,10 +45,10 @@ function CreatePost() {
     {} as { location: string; lat: number; lng: number }
   );
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     title: '',
     body: '',
-    file: '',
+    file: undefined,
     tags: [] as string[],
     capacity: 0,
     location: '',
@@ -86,7 +96,7 @@ function CreatePost() {
     setForm({
       title: '',
       body: '',
-      file: '',
+      file: undefined,
       tags: [],
       capacity: 0,
       location: '',
@@ -147,8 +157,7 @@ function CreatePost() {
 
   const handleImageUpload = (event: React.ChangeEvent<{}>) => {
     const target = event.target as HTMLInputElement;
-    let url = URL.createObjectURL((target.files as FileList)[0]);
-    setForm({ ...form, file: url });
+    setForm({ ...form, file: (target.files as FileList)[0] });
   };
 
   return (

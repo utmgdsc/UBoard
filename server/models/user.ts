@@ -1,5 +1,11 @@
 import { Sequelize, Model, UUIDV4, DataTypes, Optional } from 'sequelize';
 
+// How many failed login attempts before we lock the user out.
+export const MAX_LOGIN_ATTEMPTS = 5;
+
+// How long to lock the user out after failed login attempts.
+export const LOGIN_TIMEOUT = 15;
+
 export interface UserAttributes {
   /* Login Specific */
   id: string;
@@ -14,6 +20,8 @@ export interface UserAttributes {
 
   /* Logs */
   lastLogin: Date;
+  canLoginAfter: Date | null;
+  failedLoginAttempts: Number;
   karma: Number;
 }
 
@@ -25,6 +33,8 @@ interface UserCreationAttributes
     | 'confirmationToken'
     | 'confirmationTokenExpires'
     | 'lastLogin'
+    | 'canLoginAfter'
+    | 'failedLoginAttempts'
     | 'karma'
   > {}
 
@@ -43,7 +53,27 @@ export class User
   confirmationTokenExpires!: Date;
 
   lastLogin!: Date;
+  canLoginAfter!: Date | null;
+  failedLoginAttempts!: number;
   karma!: Number; // Should not be revealed to public
+
+  hasTooManyLogins() {
+    return (
+      this.failedLoginAttempts >= MAX_LOGIN_ATTEMPTS &&
+      this.canLoginAfter &&
+      this.canLoginAfter > new Date()
+    );
+  }
+
+  async updateFailedLogin() {
+    if (this.canLoginAfter && this.canLoginAfter < new Date()) {
+      this.failedLoginAttempts = 0;
+    }
+
+    this.canLoginAfter = new Date(Date.now() + LOGIN_TIMEOUT * 60 * 1000);
+    this.failedLoginAttempts += 1;
+    await this.save();
+  }
 
   static associate(model: any) {
     User.hasMany(model.Post, {
@@ -115,6 +145,13 @@ module.exports = (sequelize: Sequelize) => {
       },
       confirmationTokenExpires: {
         type: DataTypes.DATE,
+      },
+      canLoginAfter: {
+        type: DataTypes.DATE,
+      },
+      failedLoginAttempts: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0,
       },
     },
     {

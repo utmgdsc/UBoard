@@ -61,7 +61,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
-function AccountMenu() {
+function AccountMenu(props: {
+  setUserId: Function;
+  setSearch: Function;
+  setEscapedQuery: Function;
+}) {
   const [isOpen, openMenu] = React.useState(false);
   const authedUser = React.useContext(UserContext);
   const navigate = useNavigate();
@@ -95,7 +99,15 @@ function AccountMenu() {
           'aria-labelledby': 'menu-btn',
         }}
       >
-        <MenuItem onClick={closeMenu}>My Posts</MenuItem>
+        <MenuItem
+          onClick={async () => {
+            props.setUserId(authedUser.data.id);
+
+            closeMenu();
+          }}
+        >
+          My Posts
+        </MenuItem>
         <MenuItem
           onClick={() => {
             api.signOut();
@@ -110,7 +122,22 @@ function AccountMenu() {
   );
 }
 
-export default function Header() {
+export default function Header(props: {
+  setUserId: Function;
+  setEscapedQuery: Function;
+}) {
+  const [search, setSearch] = React.useState('');
+
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      props.setEscapedQuery(search);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  });
+
   return (
     <AppBar position='static'>
       <Toolbar sx={{ alignItems: 'center' }}>
@@ -124,9 +151,23 @@ export default function Header() {
           <StyledInputBase
             placeholder='Search'
             inputProps={{ 'aria-label': 'search' }}
+            onChange={(e) => {
+              props.setUserId('');
+              setSearch(e.target.value);
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                props.setUserId('');
+                props.setEscapedQuery(search);
+              }
+            }}
           />
         </Search>
-        <AccountMenu />
+        <AccountMenu
+          setUserId={props.setUserId}
+          setSearch={setSearch}
+          setEscapedQuery={props.setEscapedQuery}
+        />
       </Toolbar>
     </AppBar>
   );

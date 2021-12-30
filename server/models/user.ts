@@ -71,7 +71,7 @@ export class User
     }
 
     this.canLoginAfter = new Date(Date.now() + LOGIN_TIMEOUT * 60 * 1000);
-    this.failedLoginAttempts = (this.failedLoginAttempts as number) + 1;
+    this.failedLoginAttempts = this.failedLoginAttempts.valueOf() + 1;
     await this.save();
   }
 

@@ -105,24 +105,23 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
           </Typography>
         </CardContent>
         <CardActions>
-          <Grid container sx={{ pl: 1 }} spacing={2}>
-            <Grid item sx={{ ml: 2 }} xs={3}>
+          <Grid container style={{textAlign: "center"}} spacing={2}>
+            <Grid item xs={4}>
               <ThumbUpIcon />
               <Typography>{props.postUser.likeCount}</Typography>
             </Grid>
-            <Grid item xs={3}>
-              <ChatBubbleIcon />
-              <Typography>0</Typography>
-            </Grid>
             {Number(props.postUser.capacity) > 0 ? (
-              <Grid item xs={3}>
+              <Grid item xs={4}>
                 <PeopleAltIcon />
-                <Typography>{props.postUser.usersCheckedIn}/{props.postUser.capacity}</Typography>
+                <Typography>{props.postUser.usersCheckedIn ? props.postUser.usersCheckedIn : 0}/{props.postUser.capacity}</Typography>
               </Grid>
             ) : (
               <> </>
             )}
-
+            <Grid item xs={4}>
+              <ChatBubbleIcon />
+              <Typography>{props.postUser.totalComments}</Typography>
+            </Grid>
             <Grid item md={12}>
               {tags}
             </Grid>

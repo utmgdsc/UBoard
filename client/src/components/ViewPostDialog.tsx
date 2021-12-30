@@ -153,9 +153,13 @@ function LikeButton(props: { numLikes: number, doesUserLike: string, id: string 
   };
 
   const likeButton = isLiked ? (
-    <ThumbUpIcon onClick={handleClick} fontSize='large' />
+    <ThumbUpIcon onClick={handleClick} fontSize='large' style={{
+      cursor: 'pointer',
+    }} />
   ) : (
-    <ThumbUpOffAltIcon onClick={handleClick} fontSize='large' />
+    <ThumbUpOffAltIcon onClick={handleClick} fontSize='large' style={{
+      cursor: 'pointer',
+    }} />
   );
 
   return (

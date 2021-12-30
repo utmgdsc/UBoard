@@ -17,7 +17,6 @@ export type PostUser = Post & {
   UserId: string;
   didUserReport: boolean;
   User: { id: string; firstName: string; lastName: string };
-  UserId: string;
   isUserCheckedIn: boolean;
   usersCheckedIn: number;
 
@@ -65,7 +64,7 @@ export default class PostController {
     userCheckinRepo: typeof UserCheckin,
     userReports: typeof UserReports,
     tagsRepo: typeof Tag,
-    fileManager: FileManager,
+    fileManager: FileManager
   ) {
     this.postsRepo = postsRepo;
     this.userPostLikesRepo = userPostLikesRepo;
@@ -394,12 +393,11 @@ export default class PostController {
           'usersCheckedIn',
         ],
         [
-            // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-            `(SELECT COUNT(*) FROM "UserReports" as "Reports" 
-                WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = ${db.sequelize.escape(
-                  `${userID}`
-                )})`
-          ),
+          // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+          `(SELECT COUNT(*) FROM "UserReports" as "Reports" 
+              WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = ${db.sequelize.escape(
+                `${userID}`
+              )})`,
           'didUserReport',
         ],
       ],

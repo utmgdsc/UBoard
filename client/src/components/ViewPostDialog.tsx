@@ -144,7 +144,7 @@ function LikeButton(props: { numLikes: number, doesUserLike: string, id: string 
   const isLiked = props.doesUserLike == '1';
 
   const handleClick = async () => {
-    if (isLiked) {
+    if (!isLiked) {
       await api.likePost(props.id);
     }
     else {

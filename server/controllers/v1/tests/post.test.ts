@@ -7,9 +7,19 @@ import {
   makeValidPost,
   makeValidUser,
 } from '../../../models/tests/testHelpers';
-import PostController from '../post';
+import FileManager from '../../../services/fileManager';
+import PostController, { MAX_REPORTS } from '../post';
 
-const postController = new PostController(db.Post, db.UserPostLikes, db.Tag);
+jest.mock('backblaze-b2');
+
+const postController = new PostController(
+  db.Post,
+  db.UserPostLikes,
+  db.UserCheckin,
+  db.UserReports,
+  db.Tag,
+  new FileManager()
+);
 
 beforeEach(async () => {
   await dbSync().catch((err) => fail(err));
@@ -328,15 +338,94 @@ describe('Test v1 - Post Controller', () => {
       expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(1);
     });
 
+    it('should check a user into (out of) an event', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      let result = await postController.checkin(user.id, post.id);
+      expect(result.status).toBe(204);
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(1);
+
+      result = await postController.checkout(user.id, post.id);
+      expect(result.status).toBe(204);
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(0);
+    });
+
+    it('should check multiple users into an event', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      await postController.checkin(author.id, post.id);
+      await postController.checkin(user.id, post.id);
+
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(2);
+    });
+
+    it('should checkout the correct user', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      await postController.checkin(author.id, post.id);
+      await postController.checkin(user.id, post.id);
+      await postController.checkout(user.id, post.id);
+
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(1);
+      const result = await postController.getPost(author.id, post.id);
+      expect(result.data.result!.isUserCheckedIn).toBeTruthy();
+    });
+
+    it('should not check a user into a full event', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id, 1);
+
+      let result = await postController.checkin(author.id, post.id);
+      expect(result.status).toBe(204);
+
+      result = await postController.checkin(user.id, post.id);
+      expect(result.status).toBe(409);
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(1);
+    });
+
     it('should report a post', async () => {
       const author = await makeValidUser();
       const post = await makeValidPost(author.id);
 
-      const result = await postController.report(post.id);
+      const result = await postController.report(author.id, post.id);
+      const postResult = await postController.getPost(author.id, post.id);
 
       expect(result.status).toBe(204);
-      await post.reload();
-      expect(post.feedbackScore).toBe(9);
+      expect(postResult.data.result!.didUserReport).toBeTruthy();
+    });
+
+    it('should only allow one report per user', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+
+      let result = 0;
+      for (let i = 0; i <= MAX_REPORTS; i++) {
+        result = (await postController.report(author.id, post.id)).status;
+      }
+
+      expect(result).toBe(204);
+    });
+
+    it('should delete a post after the required number of reports', async () => {
+      const author = await makeValidUser();
+      const post = await makeValidPost(author.id);
+
+      let result = 0;
+      for (let i = 0; i < MAX_REPORTS; i++) {
+        let user = await makeUser(`report${i}`, `report${i}@mail.utoronto.ca`);
+        result = (await postController.report(user.id, post.id)).status;
+      }
+
+      expect(result).toBe(200);
+
+      expect(await db.Post.findOne({ where: { id: post.id } })).toBeNull();
     });
 
     it('deleting a post is reflected on the total count returned by getposts', async () => {

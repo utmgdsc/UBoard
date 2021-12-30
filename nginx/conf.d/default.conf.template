@@ -2,6 +2,13 @@ server {
     listen       $PORT;
     server_name  localhost;
 
+    location /file/ {
+                proxy_pass https://f004.backblazeb2.com;
+                proxy_set_header Host 'f004.backblazeb2.com';
+				proxy_set_header Authorization '';
+                proxy_buffering on;
+    }
+
     location / {
         root   /usr/share/nginx/html;
         index  index.html index.htm;
@@ -13,8 +20,14 @@ server {
         root   /usr/share/nginx/html;
     }
 
+    error_page   404 /404.html;
+    location = /404 {
+        root   /usr/share/nginx/html/404.html;
+    }
+
     location /api/ {
         proxy_pass  http://localhost:8080;
         proxy_set_header Host $host;
     }
+
 }

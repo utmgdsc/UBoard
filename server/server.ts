@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import db from './models/index';
 import v1Routes from './routes/v1';
 import auth from './middleware/auth';
+import fileUpload from './middleware/file-upload';
 
 if (!process.env.JWT_SECRET) {
   const err = 'Missing jwt secret';
@@ -20,6 +21,7 @@ if (!process.env.PAGE_URL) {
 const app = express();
 const port = 8080;
 
+app.use(fileUpload);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

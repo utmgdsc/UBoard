@@ -117,6 +117,7 @@ function SignIn(props: { handleChange: Function; showAlert: Function }) {
 
   const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSignInForm({ ...signinForm, [e.target.name]: e.target.value });
+    setSignInFormErrors({ ...signinFormErrors, [e.target.name]: '' });
   };
 
   const handleError =

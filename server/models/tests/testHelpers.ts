@@ -1,3 +1,4 @@
+import argon2 from 'argon2';
 import db from '../index';
 import { latLng, Post } from '../post';
 import { PostTag } from '../PostTags';
@@ -15,11 +16,14 @@ Create a User entry in our database with the given user and email string. Return
 the entry that was created on success, or throws an error on failure.
 */
 export async function makeUser(user: string, email: string): Promise<User> {
+  const hashedPassword = await argon2.hash('pass', {
+    type: argon2.argon2id,
+  });
   const testUser: User = await UserModel.create({
     firstName: 'test',
     lastName: 'test',
     userName: user,
-    password: 'pass',
+    password: hashedPassword,
     email: email,
   }).catch((err: Error) => {
     throw err;
@@ -37,12 +41,15 @@ export async function makeUserWithPass(
   user: string,
   email: string
 ): Promise<User> {
+  const hashedPassword = await argon2.hash('pass', {
+    type: argon2.argon2id,
+  });
   const testUser: User = await UserModel.scope('withPassword')
     .create({
       firstName: 'test',
       lastName: 'test',
       userName: user,
-      password: 'pass',
+      password: hashedPassword,
       email: email,
     })
     .catch((err: Error) => {
@@ -66,13 +73,14 @@ export async function makePost(
   authorid: string,
   title: string,
   body: string,
-  coords?: latLng
+  coords?: latLng,
+  capacity = 10
 ): Promise<Post> {
   return await PostModel.create({
     title: title,
     body: body,
     feedbackScore: 10,
-    capacity: 10,
+    capacity,
     location: 'toronto',
     thumbnail: 'some-path',
     UserId: authorid,
@@ -104,11 +112,16 @@ export async function makePostWithTags(
   return post;
 }
 
-export async function makeValidPost(authorID: string): Promise<Post> {
+export async function makeValidPost(
+  authorID: string,
+  capacity = 10
+): Promise<Post> {
   return makePost(
     authorID,
     'This is a new post!',
-    'This is a new post!This is a new post!'
+    'This is a new post!This is a new post!',
+    undefined,
+    capacity
   );
 }
 

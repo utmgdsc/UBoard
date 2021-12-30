@@ -8,7 +8,12 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
-  User: { id: string; firstName: string; lastName: string };
+  didUserReport: string;
+  createdAt: string;
+  UserId: string;
+  isUserCheckedIn: string;
+  usersCheckedIn: number;
+  User: { firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];
@@ -22,6 +27,9 @@ export type PostUserPreview = {
   createdAt: string;
   likeCount: number;
   doesUserLike: boolean;
+  isUserCheckedIn: string;
+  usersCheckedIn: number;
+  capacity: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -134,6 +142,34 @@ export default class ServerApi {
     return await this.get<{}, User>('/users/me', {});
   }
 
+  async searchForPosts(query: string, limit: number, offset: number) {
+    return await this.get<
+      { query: string; limit: number; offset: number },
+      {
+        data: {
+          result?: PostUserPreview[];
+          count: number;
+          total: number;
+          message?: string;
+        };
+      }
+    >('/posts/search', { query, limit, offset });
+  }
+
+  async fetchUserPosts(userId: string, limit: number, offset: number) {
+    return await this.get<
+      { limit: number; offset: number },
+      {
+        data: {
+          result?: PostUserPreview[];
+          count: number;
+          total: number;
+          message?: string;
+        };
+      }
+    >(`/posts/user/${userId}`, { limit, offset });
+  }
+
   async fetchRecentPosts(limit: number, offset: number) {
     return await this.get<
       { limit: number; offset: number },
@@ -163,16 +199,50 @@ export default class ServerApi {
     return await this.put<{ status: number }>(`/posts/${postID}/report`);
   }
 
+  async checkin(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/checkin`);
+  }
+
+  async checkout(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/checkout`);
+  }
+
   async createPost(form: {
     title: string;
     body: string;
-    file: string;
+    file?: File;
     tags: string[];
     capacity: number;
     location: string;
   }) {
-    return await this.post<typeof form, { result?: Post; message?: string }>(
-      '/posts/',
+    const formData = new FormData();
+    formData.append('title', form.title);
+    formData.append('body', form.body);
+    form.tags.forEach((tag) => formData.append('tags[]', tag));
+    formData.append('capacity', String(form.capacity));
+    formData.append('location', form.location);
+
+    if (form.file) {
+      formData.append('file', form.file);
+    }
+
+    return await this.post<
+      typeof formData,
+      { result?: Post; message?: string }
+    >('/posts/', formData);
+  }
+
+  async updatePost(
+    postID: string,
+    form: {
+      title: string;
+      body: string;
+      location: string;
+      capacity: number;
+    }
+  ) {
+    return await this.put<typeof form, { result?: Post; message?: string }>(
+      `/posts/${postID}`,
       form
     );
   }

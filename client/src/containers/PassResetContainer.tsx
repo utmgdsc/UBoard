@@ -123,6 +123,7 @@ export default function PassResetContainer() {
 
   const handleFormInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassResetForm({ ...passResetForm, [e.target.name]: e.target.value });
+    setPassResetFormErrors({ ...passResetFormErrors, [e.target.name]: '' });
   };
 
   const handleError =
@@ -245,7 +246,10 @@ export default function PassResetContainer() {
             label='Confirm New Password'
             type='password'
             data-testid='confirmPassword'
-            onChange={(e) => setConfirmPass(e.target.value)}
+            onChange={(e) => {
+              setConfirmPass(e.target.value);
+              setConfirmPassError('');
+            }}
             onBlur={(e) => validateConfirmPass()}
             error={confirmPassError !== ''}
             helperText={confirmPassError}

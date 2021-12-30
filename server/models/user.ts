@@ -54,7 +54,7 @@ export class User
 
   lastLogin!: Date;
   canLoginAfter!: Date | null;
-  failedLoginAttempts!: number;
+  failedLoginAttempts!: Number;
   karma!: Number; // Should not be revealed to public
 
   hasTooManyLogins() {
@@ -71,7 +71,7 @@ export class User
     }
 
     this.canLoginAfter = new Date(Date.now() + LOGIN_TIMEOUT * 60 * 1000);
-    this.failedLoginAttempts += 1;
+    this.failedLoginAttempts = (this.failedLoginAttempts as number) + 1;
     await this.save();
   }
 

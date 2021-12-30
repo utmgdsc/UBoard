@@ -2,8 +2,17 @@ import axios, { AxiosInstance } from 'axios';
 
 import { Post } from 'models/post';
 import { User } from 'models/user';
+import { Comment } from 'models/comment';
 import { UserAttributes } from 'models/user';
 import { PostTag } from 'models/PostTags';
+
+export type CommentsUser = Comment & {
+  User: {
+    firstName: string;
+    lastName: string;
+    id: string;
+  };
+};
 
 export type PostUser = Post & {
   likeCount: number;
@@ -30,6 +39,7 @@ export type PostUserPreview = {
   isUserCheckedIn: string;
   usersCheckedIn: number;
   capacity: number;
+  totalComments: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name

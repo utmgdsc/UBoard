@@ -37,11 +37,11 @@ module.exports = (sequelize: Sequelize) => {
         unique: true,
       },
       body: {
-        type: DataTypes.STRING(200),
+        type: DataTypes.STRING(250), // cap comments to 250 char
         allowNull: false,
         validate: {
           len: {
-            args: [25, 1000],
+            args: [10, 250],
             msg: 'Length Validation Failed', // Error handling
           },
         },

@@ -16,10 +16,9 @@ export type PostUser = Post & {
   doesUserLike: boolean;
   UserId: string;
   didUserReport: boolean;
-  User: { id: string; firstName: string; lastName: string };
+  User: { firstName: string; lastName: string };
   isUserCheckedIn: boolean;
   usersCheckedIn: number;
-
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];
@@ -37,6 +36,7 @@ export type PostUserPreview = {
   usersCheckedIn: number;
   capacity: number;
   didUserReport: boolean;
+  totalComments: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -143,6 +143,13 @@ export default class PostController {
                   )})`
             ),
             'didUserReport',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "Comments"
+                  WHERE "Comments"."PostId" = "Post"."id")`
+            ),
+            'totalComments',
           ],
         ],
         include: [

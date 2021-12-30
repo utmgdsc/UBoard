@@ -41,7 +41,7 @@ export default class CommentController {
       this.commentsRepo.findAll({
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
-        attributes: ['id', 'body', 'UserId'],
+        attributes: ['id', 'body'],
         include: [
           {
             model: db.User,
@@ -56,20 +56,13 @@ export default class CommentController {
       this.commentsRepo.count({ where: { PostId: postID } }),
     ]);
 
-    if (!data[0]) {
+    if (!data || !data[0] || !data[1]) {
       return {
         status: 404,
         data: { message: `Post ${postID} could not be found` },
       };
     }
-    if (!data[1]) {
-      return {
-        status: 404,
-        data: {
-          message: `Total comments under Post ${postID} could not be found`,
-        },
-      };
-    }
+
     return {
       status: 200,
       data: {

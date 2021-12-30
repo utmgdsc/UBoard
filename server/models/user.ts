@@ -150,7 +150,7 @@ module.exports = (sequelize: Sequelize) => {
         type: DataTypes.DATE,
       },
       failedLoginAttempts: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0,
       },
     },

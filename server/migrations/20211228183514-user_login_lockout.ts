@@ -15,7 +15,7 @@ module.exports = {
       'Users', // table name
       'failed_login_attempts', // new field name
       {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       }

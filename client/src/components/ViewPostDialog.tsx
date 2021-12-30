@@ -161,35 +161,41 @@ function LikeButton(props: { numLikes: number }) {
   );
 }
 
-function CapacityBar(props: { maxCapacity: number }) {
-  // TODO: This data should be synced with db -- models needs to be updated
-  const [capacity, setCapacity] = React.useState(0);
-  const [isCheckedin, toggleCheckin] = React.useState(false);
+function CapacityBar(props: {
+  maxCapacity: number;
+  postID: string;
+  isUserCheckedIn: string;
+  usersCheckedIn: number;
+}) {
   const maxCapacity = !isNaN(props.maxCapacity) ? props.maxCapacity : 0;
 
-  const handleCheckIn = () => {
-    toggleCheckin((prev) => !prev);
+  const handleCheckIn = async () => {
+    if (props.isUserCheckedIn === '1') {
+      await api.checkout(props.postID);
+      // As there is no global state management system, we would have to wait
+      // for the autoreload system to update the post info. This is a hack to
+      // ensure that the checked in state is immediately updated.
+      props.isUserCheckedIn = '0';
+      props.usersCheckedIn -= 1;
+    } else {
+      const result = await api.checkin(props.postID);
+      if (result.status !== 409) {
+        props.isUserCheckedIn = '1';
+      }
+      // TODO indicate a standard alert to the user that the event could not be
+      // checked into (over capacity)
+    }
   };
 
-  React.useEffect(() => {
-    if (isCheckedin) {
-      setCapacity((prev) => prev + 1);
-    } else {
-      setCapacity((prev) => (prev > 0 ? prev - 1 : prev));
-    }
-  }, [isCheckedin]);
-
   const buttonHandler =
-    capacity < props.maxCapacity ? (
-      isCheckedin ? (
-        <Button onClick={handleCheckIn} variant='contained'>
-          Undo
-        </Button>
-      ) : (
-        <Button onClick={handleCheckIn} variant='outlined'>
-          Check In
-        </Button>
-      )
+    props.isUserCheckedIn === '1' ? (
+      <Button onClick={handleCheckIn} variant='contained'>
+        Undo
+      </Button>
+    ) : props.usersCheckedIn < props.maxCapacity ? (
+      <Button onClick={handleCheckIn} variant='outlined'>
+        Check In
+      </Button>
     ) : (
       <Button disabled variant='outlined'>
         AT CAPACITY
@@ -199,11 +205,11 @@ function CapacityBar(props: { maxCapacity: number }) {
   return (
     <Stack spacing={1} sx={{ mr: 4 }}>
       <Typography variant='body1' sx={{ pr: 2 }}>
-        Capacity: {capacity}/{maxCapacity}
+        Capacity: {props.usersCheckedIn}/{maxCapacity}
       </Typography>
       <LinearProgress
         variant='determinate'
-        value={(capacity * 100) / maxCapacity}
+        value={(props.usersCheckedIn * 100) / maxCapacity}
       ></LinearProgress>
       {buttonHandler}
     </Stack>
@@ -574,7 +580,12 @@ export default function ViewPostDialog() {
             </Typography>
             <Stack direction='row' sx={{ px: 4, pb: 5 }}>
               {Number(postData.capacity) > 0 ? (
-                <CapacityBar maxCapacity={Number(postData.capacity)} />
+                <CapacityBar
+                  maxCapacity={Number(postData.capacity)}
+                  postID={postData.id}
+                  isUserCheckedIn={postData.isUserCheckedIn}
+                  usersCheckedIn={postData.usersCheckedIn}
+                />
               ) : (
                 <></>
               )}
@@ -585,7 +596,6 @@ export default function ViewPostDialog() {
               location={postData.location}
             />
           </Stack>
-
           {/* Comment Section */}
           <Stack sx={{ px: 8, pb: 5 }}>
             <Typography variant='h5' sx={{ py: 2 }}>

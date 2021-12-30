@@ -7,7 +7,7 @@ import { PostTag } from 'models/PostTags';
 
 export type PostUser = Post & {
   likeCount: number;
-  doesUserLike: boolean;
+  doesUserLike: string;
   didUserReport: string;
   createdAt: string;
   UserId: string;
@@ -26,7 +26,7 @@ export type PostUserPreview = {
   title: string;
   createdAt: string;
   likeCount: number;
-  doesUserLike: boolean;
+  doesUserLike: string;
   isUserCheckedIn: string;
   usersCheckedIn: number;
   capacity: number;
@@ -193,6 +193,10 @@ export default class ServerApi {
 
   async likePost(postID: string) {
     return await this.put<{ status: number }>(`/posts/${postID}/upvote`);
+  }
+
+  async unlikePost(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/downvote`);
   }
 
   async reportPost(postID: string) {

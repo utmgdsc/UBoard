@@ -80,7 +80,7 @@ function RecentPosts(props: {
   React.useEffect(() => {
     const interval = setInterval(() => {
       checkForPosts();
-    }, 5000);
+    }, 500);
 
     return () => clearInterval(interval);
   });

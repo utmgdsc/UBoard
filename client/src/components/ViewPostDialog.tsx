@@ -464,7 +464,7 @@ export default function ViewPostDialog() {
     if (!error) {
       const interval = setInterval(() => {
         fetchData();
-      }, 5000);
+      }, 500);
       return () => clearInterval(interval);
     }
   });

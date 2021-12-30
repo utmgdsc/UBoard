@@ -28,6 +28,7 @@ export type PostUserPreview = {
   doesUserLike: boolean;
   isUserCheckedIn: string;
   usersCheckedIn: number;
+  capacity: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name

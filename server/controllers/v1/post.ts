@@ -32,6 +32,7 @@ export type PostUserPreview = {
   doesUserLike: boolean;
   isUserCheckedIn: boolean;
   usersCheckedIn: number;
+  capacity: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -88,6 +89,7 @@ export default class PostController {
           'title',
           'createdAt',
           'thumbnail',
+          'capacity',
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`

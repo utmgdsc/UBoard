@@ -1,3 +1,4 @@
+import argon2 from 'argon2';
 import db from '../index';
 import { latLng, Post } from '../post';
 import { PostTag } from '../PostTags';
@@ -13,11 +14,14 @@ Create a User entry in our database with the given user and email string. Return
 the entry that was created on success, or throws an error on failure.
 */
 export async function makeUser(user: string, email: string): Promise<User> {
+  const hashedPassword = await argon2.hash('pass', {
+    type: argon2.argon2id,
+  });
   const testUser: User = await UserModel.create({
     firstName: 'test',
     lastName: 'test',
     userName: user,
-    password: 'pass',
+    password: hashedPassword,
     email: email,
   }).catch((err: Error) => {
     throw err;
@@ -35,12 +39,15 @@ export async function makeUserWithPass(
   user: string,
   email: string
 ): Promise<User> {
+  const hashedPassword = await argon2.hash('pass', {
+    type: argon2.argon2id,
+  });
   const testUser: User = await UserModel.scope('withPassword')
     .create({
       firstName: 'test',
       lastName: 'test',
       userName: user,
-      password: 'pass',
+      password: hashedPassword,
       email: email,
     })
     .catch((err: Error) => {

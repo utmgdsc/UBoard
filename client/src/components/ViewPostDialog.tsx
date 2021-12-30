@@ -36,6 +36,7 @@ function MoreOptions(props: {
   userHasCreatedPost: boolean;
   toggleEdit: React.Dispatch<React.SetStateAction<boolean>>;
   useNavigate: NavigateFunction;
+  didUserReport: string;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
@@ -63,15 +64,17 @@ function MoreOptions(props: {
   };
 
   const reportPost = () => {
-    // TODO need to fix spam / backend interactions
-
     api
       .reportPost(props.postID)
       .then((res) => {
+        props.didUserReport = '1';
         if (res.status === 204) {
           setMsg('Post has been reported.');
+        } else if (res.status === 200) {
+          setMsg('Post has been reported and deleted.');
         } else {
           setMsg('Failed to report post.');
+          props.didUserReport = '0';
         }
       })
       .catch(() => {
@@ -105,6 +108,7 @@ function MoreOptions(props: {
         onClose={closeMenu}
         MenuListProps={{
           'aria-labelledby': 'post-settings',
+          style: { minWidth: '110px' },
         }}
       >
         {props.userHasCreatedPost ? (
@@ -115,7 +119,13 @@ function MoreOptions(props: {
         ) : (
           <></>
         )}
-        <MenuItem onClick={reportPost}>Report</MenuItem>
+        {!props.userHasCreatedPost ? (
+          props.didUserReport === '0' ? (
+            <MenuItem onClick={reportPost}>Report</MenuItem>
+          ) : (
+            <MenuItem disabled>Reported</MenuItem>
+          )
+        ) : undefined}
       </Menu>
       <Snackbar
         open={isAlertOpen}
@@ -513,6 +523,7 @@ export default function ViewPostDialog() {
               <ArrowBack />
             </IconButton>
           </AppBar>
+
           {/* Title and Options (3 dots) */}
           <Grid>
             <Stack direction='row' sx={{ pt: 5, pl: 4 }}>
@@ -524,6 +535,7 @@ export default function ViewPostDialog() {
               <MoreOptions
                 postID={postData.id}
                 userHasCreatedPost={isAuthor}
+                didUserReport={postData.didUserReport}
                 useNavigate={navigate}
                 toggleEdit={toggleEditor}
               />
@@ -541,6 +553,7 @@ export default function ViewPostDialog() {
               />
             }
           </Stack>
+
           {/* Post image and body */}
           <Stack sx={{ pl: 4 }}>
             <Box

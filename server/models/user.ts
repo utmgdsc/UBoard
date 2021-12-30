@@ -54,7 +54,7 @@ export class User
 
   lastLogin!: Date;
   canLoginAfter!: Date | null;
-  failedLoginAttempts!: Number;
+  failedLoginAttempts!: number;
   karma!: Number; // Should not be revealed to public
 
   hasTooManyLogins() {
@@ -71,7 +71,7 @@ export class User
     }
 
     this.canLoginAfter = new Date(Date.now() + LOGIN_TIMEOUT * 60 * 1000);
-    this.failedLoginAttempts = this.failedLoginAttempts.valueOf() + 1;
+    this.failedLoginAttempts += 1;
     await this.save();
   }
 
@@ -150,7 +150,7 @@ module.exports = (sequelize: Sequelize) => {
         type: DataTypes.DATE,
       },
       failedLoginAttempts: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0,
       },
     },

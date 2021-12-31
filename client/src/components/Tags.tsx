@@ -7,9 +7,9 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 
 /* Generate pre-formatted TagItems based on an array of provided tags */
-export default function GenerateTags(props: { tags: string[], spacing?: number }) {
+export default function GenerateTags(props: { tags: string[], space?: number }) {
   return (
-    <Stack direction='row' spacing={props.spacing ? props.spacing: 1} style={{ alignItems: 'center' }}>
+    <Stack direction='row' spacing={props.space ? props.space : 1} style={{ alignItems: 'center' }}>
       {props.tags.map((tag: string) => (
         <Tag tag={tag} key={tag} />
       ))}

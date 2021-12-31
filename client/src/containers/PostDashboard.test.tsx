@@ -21,6 +21,9 @@ function fakePostPreview(
     createdAt,
     likeCount: 0,
     doesUserLike: false,
+    isUserCheckedIn: '0',
+    usersCheckedIn: 0,
+    capacity: 0,
     Tags: [],
     User: {
       id: 'user-123',
@@ -207,7 +210,7 @@ describe('Post Preview correctly displayed', () => {
 
     const mockFetch = jest
       .spyOn(ServerApi.prototype, 'fetchRecentPosts')
-      .mockImplementation((limit, offset) => {
+      .mockImplementation((type, limit, offset) => {
         const results = posts.slice(offset, limit + offset);
         return Promise.resolve({
           status: 200,

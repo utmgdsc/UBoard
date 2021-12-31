@@ -161,7 +161,7 @@ export default function PostDashboard() {
               <Grid>
                 <Select
                   variant='standard'
-                  labelId='post-type-select'
+                  labelId='post-type-select-label'
                   id='post-type-select'
                   value={postType}
                   onChange={(e) => {
@@ -171,7 +171,7 @@ export default function PostDashboard() {
                   label='Type'
                 >
                   {postTypes.map((t) => (
-                    <MenuItem value={t}>{t}</MenuItem>
+                    <MenuItem key={t} value={t}>{t}</MenuItem>
                   ))}
                 </Select>
               </Grid>

@@ -234,7 +234,7 @@ function CreatePost() {
                 label='Type'
               >
                 {postTypes.map((t) => (
-                  <MenuItem value={t}>{t}</MenuItem>
+                  <MenuItem key={t} value={t}>{t}</MenuItem>
                 ))}
               </Select>
             </FormControl>

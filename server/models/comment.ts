@@ -1,23 +1,28 @@
-import { Sequelize, Model, DataTypes, UUIDV4 } from 'sequelize';
+import { Sequelize, Model, DataTypes, UUIDV4, Optional } from 'sequelize';
 
-interface CommentAttribute {
+interface CommentAttributes {
   id: string;
   body: string;
+  UserId: string;
+  PostId: string;
 }
 
+interface CommentCreationAttributes extends Optional<CommentAttributes, 'id'> {}
+
 export class Comment
-  extends Model<CommentAttribute>
-  implements CommentAttribute
+  extends Model<CommentAttributes, CommentCreationAttributes>
+  implements CommentAttributes
 {
   id!: string;
   body!: string;
-  UserId?: string;
-  PostId?: string;
+  UserId!: string;
+  PostId!: string;
 
   static associate(models: any) {
     Comment.belongsTo(models.Post, {
       foreignKey: { allowNull: false },
     }); /* Postid will be in Comment */
+    Comment.belongsTo(models.User);
   }
 }
 
@@ -32,11 +37,27 @@ module.exports = (sequelize: Sequelize) => {
         unique: true,
       },
       body: {
-        type: DataTypes.STRING(200),
+        type: DataTypes.STRING(250), // cap comments to 250 char
         allowNull: false,
         validate: {
-          len: [25, 200],
-          msg: 'Length Validation Failed',
+          len: {
+            args: [10, 250],
+            msg: 'Length Validation Failed', // Error handling
+          },
+        },
+      },
+      UserId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
+        },
+      },
+      PostId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+          notEmpty: true,
         },
       },
     },

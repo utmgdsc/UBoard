@@ -1,17 +1,16 @@
 import React from 'react';
 
 import MoreVert from '@mui/icons-material/MoreVert';
-import IconButton from '@mui/material/IconButton/IconButton';
-import Menu from '@mui/material/Menu/Menu';
-import MenuItem from '@mui/material/MenuItem/MenuItem';
-import Snackbar from '@mui/material/Snackbar/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem/';
+import Snackbar from '@mui/material/Snackbar';
 import Paper from '@mui/material/Paper';
-import Typography from '@mui/material/Typography/Typography';
-import Stack from '@mui/material/Stack/Stack';
+import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
-import Grid from '@mui/material/Grid/Grid';
-import Box from '@mui/material/Box/Box';
+import Grid from '@mui/material/Grid';
 import { CommentsUser } from '../api/v1';
 
 function MoreOptions() {

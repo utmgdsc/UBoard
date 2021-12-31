@@ -154,19 +154,38 @@ function MoreOptions(props: {
 }
 
 /* Like button. Handles liking/unliking a post */
-function LikeButton(props: { numLikes: number }) {
-  // TODO: update/get data from db
-  const [isLiked, toggleLiked] = React.useState(false);
+function LikeButton(props: {
+  numLikes: number;
+  doesUserLike: string;
+  id: string;
+}) {
   let numLikes = !isNaN(props.numLikes) ? props.numLikes : 0;
+  const isLiked = props.doesUserLike == '1';
 
-  const handleClick = () => {
-    toggleLiked((prevLike) => !prevLike);
+  const handleClick = async () => {
+    if (!isLiked) {
+      await api.likePost(props.id);
+    } else {
+      await api.unlikePost(props.id);
+    }
   };
 
   const likeButton = isLiked ? (
-    <ThumbUpIcon onClick={handleClick} fontSize='large' />
+    <ThumbUpIcon
+      onClick={handleClick}
+      fontSize='large'
+      style={{
+        cursor: 'pointer',
+      }}
+    />
   ) : (
-    <ThumbUpOffAltIcon onClick={handleClick} fontSize='large' />
+    <ThumbUpOffAltIcon
+      onClick={handleClick}
+      fontSize='large'
+      style={{
+        cursor: 'pointer',
+      }}
+    />
   );
 
   return (
@@ -612,7 +631,11 @@ export default function ViewPostDialog() {
               ) : (
                 <></>
               )}
-              <LikeButton numLikes={Number(postData.feedbackScore)} />
+              <LikeButton
+                numLikes={Number(postData.likeCount)}
+                doesUserLike={postData.doesUserLike}
+                id={postData.id}
+              />
             </Stack>
             {postData.type === 'Events' ? (
               <LocationHandler

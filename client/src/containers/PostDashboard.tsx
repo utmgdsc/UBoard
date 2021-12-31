@@ -15,37 +15,76 @@ import { EventsMapView } from '../components/LocationMap';
 
 import ServerApi, { PostUserPreview } from '../api/v1';
 
-export const POSTS_PER_PAGE = 30; // Maximum (previewable) posts per page.
+export const POSTS_PER_PAGE = 6; // Maximum (previewable) posts per page.
 
 const api = new ServerApi();
 
 function RecentPosts(props: {
+  query: string;
+  setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
+  prevState: string;
+  setPrevState: React.Dispatch<React.SetStateAction<string>>;
   pageNum: number;
   mapView: boolean;
+  userId: string;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
   const [openedPost, setOpenedPost] = React.useState(false);
 
+  const checkForPosts = React.useCallback(() => {
+    if (!openedPost) {
+      let result;
+      let newState = '';
+      if (props.userId !== '') {
+        if (props.prevState !== 'user') {
+          newState = 'user';
+        }
+        result = api.fetchUserPosts(
+          props.userId,
+          POSTS_PER_PAGE,
+          POSTS_PER_PAGE * (props.pageNum - 1)
+        );
+      } else if (!props.query) {
+        if (props.prevState !== 'search') {
+          newState = 'search';
+        }
+        result = api.fetchRecentPosts(
+          POSTS_PER_PAGE,
+          POSTS_PER_PAGE * (props.pageNum - 1)
+        );
+      } else {
+        if (props.prevState !== 'recent') {
+          newState = 'recent';
+        }
+        result = api.searchForPosts(
+          props.query,
+          POSTS_PER_PAGE,
+          POSTS_PER_PAGE * (props.pageNum - 1)
+        );
+      }
+      result
+        .then((res) => {
+          if (res.data && res.data.data.result) {
+            updateRecent(res.data.data.result);
+            props.setPageCount(Math.ceil(res.data.data.total / POSTS_PER_PAGE));
+          } else {
+            updateRecent([]);
+            props.setPageCount(1);
+          }
+        })
+        .catch((err) => console.log(err));
+      if (newState !== '') {
+        props.setPage(1);
+        props.setPrevState(newState);
+      }
+    }
+  }, [props, openedPost]);
+
   /* Fetch new posts by polling */
   React.useEffect(() => {
     const interval = setInterval(() => {
-      if (!openedPost) {
-        api
-          .fetchRecentPosts(
-            POSTS_PER_PAGE,
-            POSTS_PER_PAGE * (props.pageNum - 1)
-          )
-          .then((res) => {
-            if (res.data && res.data.data.result) {
-              updateRecent(res.data.data.result);
-              props.setPageCount(
-                Math.ceil(res.data.data.total / POSTS_PER_PAGE)
-              );
-            }
-          })
-          .catch((err) => console.log(err));
-      }
+      checkForPosts();
     }, 500);
 
     return () => clearInterval(interval);
@@ -53,18 +92,8 @@ function RecentPosts(props: {
 
   /* Fetch posts triggered by page-change or post dialog close */
   React.useEffect(() => {
-    if (!openedPost) {
-      api
-        .fetchRecentPosts(POSTS_PER_PAGE, POSTS_PER_PAGE * (props.pageNum - 1))
-        .then((res) => {
-          if (res.data && res.data.data.result) {
-            updateRecent(res.data.data.result);
-            props.setPageCount(Math.ceil(res.data.data.total / POSTS_PER_PAGE));
-          }
-        })
-        .catch((err) => console.log(err));
-    }
-  }, [props, openedPost]);
+    checkForPosts();
+  }, [checkForPosts]);
 
   return (
     <>
@@ -90,9 +119,27 @@ export default function PostDashboard() {
   const [page, setPage] = React.useState(1);
   const [isMapView, toggleMapView] = React.useState(false);
 
+  const [userId, setUserId] = React.useState('');
+
+  const [prevState, setPrevState] = React.useState('recent');
+
+  const useQuery = (): [string, (q: string) => void] => {
+    const [query, setQuery] = React.useState('');
+
+    const setEscapedQuery = (q: string) => {
+      let escaped = q.replace(/\W+/g, '&');
+      escaped = escaped.replace(/^&+|&+$/g, '');
+      setQuery(escaped);
+    };
+
+    return [query, setEscapedQuery];
+  };
+
+  const [query, setEscapedQuery] = useQuery();
+
   return (
     <>
-      <Header />
+      <Header setUserId={setUserId} setEscapedQuery={setEscapedQuery} />
       <main>
         <Container
           sx={{ py: 5 }}
@@ -129,9 +176,14 @@ export default function PostDashboard() {
             </Grid>
 
             <RecentPosts
-              setPageCount={setPageCount}
-              pageNum={page}
               mapView={isMapView}
+              userId={userId}
+              query={query}
+              setPage={setPage}
+              setPageCount={setPageCount}
+              prevState={prevState}
+              setPrevState={setPrevState}
+              pageNum={page}
             />
           </Grid>
         </Container>

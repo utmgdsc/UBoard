@@ -8,9 +8,12 @@ import { PostTag } from 'models/PostTags';
 export type PostUser = Post & {
   likeCount: number;
   doesUserLike: boolean;
+  didUserReport: string;
   createdAt: string;
-  User: { firstName: string; lastName: string };
   UserId: string;
+  isUserCheckedIn: string;
+  usersCheckedIn: number;
+  User: { firstName: string; lastName: string };
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];
@@ -26,6 +29,9 @@ export type PostUserPreview = {
   doesUserLike: boolean;
   coords: { lat: number; lng: number };
   location: string;
+  isUserCheckedIn: string;
+  usersCheckedIn: number;
+  capacity: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -138,6 +144,34 @@ export default class ServerApi {
     return await this.get<{}, User>('/users/me', {});
   }
 
+  async searchForPosts(query: string, limit: number, offset: number) {
+    return await this.get<
+      { query: string; limit: number; offset: number },
+      {
+        data: {
+          result?: PostUserPreview[];
+          count: number;
+          total: number;
+          message?: string;
+        };
+      }
+    >('/posts/search', { query, limit, offset });
+  }
+
+  async fetchUserPosts(userId: string, limit: number, offset: number) {
+    return await this.get<
+      { limit: number; offset: number },
+      {
+        data: {
+          result?: PostUserPreview[];
+          count: number;
+          total: number;
+          message?: string;
+        };
+      }
+    >(`/posts/user/${userId}`, { limit, offset });
+  }
+
   async fetchRecentPosts(limit: number, offset: number) {
     return await this.get<
       { limit: number; offset: number },
@@ -165,6 +199,14 @@ export default class ServerApi {
 
   async reportPost(postID: string) {
     return await this.put<{ status: number }>(`/posts/${postID}/report`);
+  }
+
+  async checkin(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/checkin`);
+  }
+
+  async checkout(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/checkout`);
   }
 
   async createPost(form: {

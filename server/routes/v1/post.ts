@@ -10,6 +10,8 @@ const postRouter = express.Router();
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
+  db.UserCheckin,
+  db.UserReports,
   db.Tag,
   fileManager
 );
@@ -29,6 +31,58 @@ postRouter.get('', async (req: Request, res: Response) => {
   try {
     const result = await postController.getPosts(
       getAuthUser(res).id,
+      Number(limit),
+      Number(offset)
+    );
+    return res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+postRouter.get('/search', async (req: Request, res: Response) => {
+  const query = req.query.query;
+  const limit = req.query.limit;
+  const offset = req.query.offset;
+
+  if (!limit || offset == undefined) {
+    return res.status(400).json({
+      code: 400,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
+    });
+  }
+  try {
+    const result = await postController.searchForPosts(
+      getAuthUser(res).id,
+      query as string,
+      Number(limit),
+      Number(offset)
+    );
+    return res.status(result.status).json(result);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+postRouter.get('/user/:userId', async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+  const limit = req.query.limit;
+  const offset = req.query.offset;
+
+  if (!limit || offset == undefined) {
+    return res.status(400).json({
+      code: 400,
+      message: `Missing ${!limit ? 'limit' : ''} ${
+        !limit && !offset ? 'and' : ''
+      } ${!offset ? 'offset' : ''}`,
+    });
+  }
+  try {
+    const result = await postController.getUserPosts(
+      getAuthUser(res).id,
+      userId as string,
       Number(limit),
       Number(offset)
     );
@@ -86,9 +140,41 @@ postRouter.put('/:postid/downvote', async (req: Request, res: Response) => {
   }
 });
 
+postRouter.put('/:postid/checkin', async (req: Request, res: Response) => {
+  try {
+    const result = await postController.checkin(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+
+    res.status(result.status);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+postRouter.put('/:postid/checkout', async (req: Request, res: Response) => {
+  try {
+    const result = await postController.checkout(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status);
+  } catch (err) {
+    console.error(err);
+  }
+});
+
 postRouter.put('/:postid/report', async (req: Request, res: Response) => {
-  const result = await postController.report(req.params.postid);
-  res.status(result.status);
+  try {
+    const result = await postController.report(
+      getAuthUser(res).id,
+      req.params.postid
+    );
+    res.status(result.status);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 postRouter.post('/', async (req: Request, res: Response) => {

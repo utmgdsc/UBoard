@@ -6,7 +6,6 @@ import { UserAttributes } from 'models/user';
 import { PostTag } from 'models/PostTags';
 
 export type PostUser = Post & {
-  type: string;
   likeCount: number;
   doesUserLike: boolean;
   didUserReport: string;
@@ -143,9 +142,14 @@ export default class ServerApi {
     return await this.get<{}, User>('/users/me', {});
   }
 
-  async searchForPosts(query: string, limit: number, offset: number) {
+  async searchForPosts(
+    type: string,
+    query: string,
+    limit: number,
+    offset: number
+  ) {
     return await this.get<
-      { query: string; limit: number; offset: number },
+      { type: string; query: string; limit: number; offset: number },
       {
         data: {
           result?: PostUserPreview[];
@@ -154,12 +158,17 @@ export default class ServerApi {
           message?: string;
         };
       }
-    >('/posts/search', { query, limit, offset });
+    >('/posts/search', { type, query, limit, offset });
   }
 
-  async fetchUserPosts(userId: string, limit: number, offset: number) {
+  async fetchUserPosts(
+    userId: string,
+    type: string,
+    limit: number,
+    offset: number
+  ) {
     return await this.get<
-      { limit: number; offset: number },
+      { type: string; limit: number; offset: number },
       {
         data: {
           result?: PostUserPreview[];
@@ -168,12 +177,12 @@ export default class ServerApi {
           message?: string;
         };
       }
-    >(`/posts/user/${userId}`, { limit, offset });
+    >(`/posts/user/${userId}`, { type, limit, offset });
   }
 
-  async fetchRecentPosts(limit: number, offset: number) {
+  async fetchRecentPosts(type: string, limit: number, offset: number) {
     return await this.get<
-      { limit: number; offset: number },
+      { type: string; limit: number; offset: number },
       {
         data: {
           result?: PostUserPreview[];
@@ -182,7 +191,7 @@ export default class ServerApi {
           message?: string;
         };
       }
-    >('/posts/', { limit, offset });
+    >('/posts/', { type, limit, offset });
   }
 
   async fetchPost(postID: string) {
@@ -209,6 +218,7 @@ export default class ServerApi {
   }
 
   async createPost(form: {
+    type: string;
     title: string;
     body: string;
     file?: File;
@@ -217,6 +227,7 @@ export default class ServerApi {
     location: string;
   }) {
     const formData = new FormData();
+    formData.append('type', form.type);
     formData.append('title', form.title);
     formData.append('body', form.body);
     form.tags.forEach((tag) => formData.append('tags[]', tag));

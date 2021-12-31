@@ -24,6 +24,8 @@ import InputLabel from '@mui/material/InputLabel';
 import { LocationPickerMap } from './LocationMap';
 import { FormControl } from '@mui/material';
 
+import { typeLabels } from './ViewPostDialog';
+
 const postTypes = [
   'Events',
   'Clubs',
@@ -227,7 +229,7 @@ function CreatePost() {
                 variant='standard'
                 value={form.type}
                 onChange={(e) => {
-                  setForm({...form, type: e.target.value});
+                  setForm({ ...form, type: e.target.value });
                 }}
                 label='Type'
               >
@@ -284,13 +286,12 @@ function CreatePost() {
                 </Grid>
 
                 <Grid
-                  display={form.type === 'Events' ? undefined : 'none'}
                   item
                   xs={12}
                   md={3}
                 >
                   <TextField
-                    label='Event Capacity'
+                    label={typeLabels[form.type]}
                     placeholder='40'
                     fullWidth
                     size='small'

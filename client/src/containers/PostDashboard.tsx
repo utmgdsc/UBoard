@@ -28,9 +28,12 @@ const postTypes = [
 const api = new ServerApi();
 
 function RecentPosts(props: {
+  type: string;
   query: string;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
+  changedType: boolean;
+  setChangedType: React.Dispatch<React.SetStateAction<boolean>>;
   prevState: string;
   setPrevState: React.Dispatch<React.SetStateAction<string>>;
   pageNum: number;
@@ -49,6 +52,7 @@ function RecentPosts(props: {
         }
         result = api.fetchUserPosts(
           props.userId,
+          props.type,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
@@ -57,6 +61,7 @@ function RecentPosts(props: {
           newState = 'search';
         }
         result = api.fetchRecentPosts(
+          props.type,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
@@ -65,6 +70,7 @@ function RecentPosts(props: {
           newState = 'recent';
         }
         result = api.searchForPosts(
+          props.type,
           props.query,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
@@ -81,8 +87,9 @@ function RecentPosts(props: {
           }
         })
         .catch((err) => console.log(err));
-      if (newState !== '') {
+      if (newState !== '' || props.changedType) {
         props.setPage(1);
+        props.setChangedType(false);
         props.setPrevState(newState);
       }
     }
@@ -123,6 +130,7 @@ export default function PostDashboard() {
 
   const [userId, setUserId] = React.useState('');
 
+  const [changedType, setChangedType] = React.useState(false);
   const [prevState, setPrevState] = React.useState('recent');
 
   const useQuery = (): [string, (q: string) => void] => {
@@ -157,6 +165,7 @@ export default function PostDashboard() {
                   id='post-type-select'
                   value={postType}
                   onChange={(e) => {
+                    setChangedType(true);
                     setPostType(e.target.value);
                   }}
                   label='Type'
@@ -173,9 +182,12 @@ export default function PostDashboard() {
 
             <RecentPosts
               userId={userId}
+              type={postType}
               query={query}
               setPage={setPage}
               setPageCount={setPageCount}
+              changedType={changedType}
+              setChangedType={setChangedType}
               prevState={prevState}
               setPrevState={setPrevState}
               pageNum={page}

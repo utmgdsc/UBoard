@@ -11,6 +11,7 @@ import { PostUserPreview } from '../api/v1';
 import Grid from '@mui/material/Grid';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import useTheme from '@mui/system/useTheme';
+import Typography from '@mui/material/Typography/Typography';
 
 export function LocationPickerMap(props: {
   setLocation: (location: string, lat?: number, lng?: number) => void;
@@ -148,7 +149,6 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
       map: google.maps.Map;
       maps: typeof google.maps;
       markers: google.maps.Marker[];
-      info: google.maps.InfoWindow[];
     }
   );
 
@@ -157,15 +157,20 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
   const smQuery = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const bgQuery = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const xbgQuery = useMediaQuery(theme.breakpoints.up('lg'));
-  const mapSize = smQuery ? '65vh' : bgQuery ? '90vh' : xbgQuery ? '150vh' : '30vh';
+  const mapSize = smQuery
+    ? '65vh'
+    : bgQuery
+    ? '90vh'
+    : xbgQuery
+    ? '150vh'
+    : '30vh';
 
-  // TODO: update on event change
-  // React.useEffect(() => {
-  //   if (googleMap.map) {
-  //     // if map has loaded before, update markers on position change (occurs on post edit)
-
-  //   }
-  // }, [googleMap, props.posts]);
+  // TODO: Manual refresh button
+  const refreshMap = () => {
+    if (googleMap.map) {
+      setupMarkers(googleMap.map, googleMap.maps);
+    }
+  };
 
   // enable additional options (i.e streetview)
   const getOptions = (maps: GoogleMapReact.Maps) => {
@@ -184,8 +189,20 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
     };
   };
 
-  const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
-    let info = [] as google.maps.InfoWindow[];
+  const clearMarkers = () => {
+    if (!googleMap.map) {
+      return;
+    }
+
+    for (let i = 0; i < googleMap.markers.length; i++) {
+      googleMap.markers[i].setMap(null);
+    }
+
+    setMap({ ...googleMap, markers: [] as google.maps.Marker[] });
+  };
+
+  const setupMarkers = (map: google.maps.Map, maps: typeof google.maps) => {
+    clearMarkers();
     let markers = [] as google.maps.Marker[];
 
     for (let i = 0; i < props.posts.length; i++) {
@@ -194,19 +211,31 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
       if (lat !== -1 && lng !== -1) {
         // show markers for in-person events
 
+        const hasAttendance =
+          curr.capacity > 0
+            ? `<p> Capacity: ${curr.usersCheckedIn}/${curr.capacity}</p>`
+            : `<div></div>`;
+
         const tmpInfo = new google.maps.InfoWindow({
           content: `<div><h2>${curr.title.slice(0, 100)}</h2> 
           <p> ${curr.body.slice(0, 120) + '...'} </p>
           <p> Located at ${curr.location} </p> 
-          <p> Capacity: 0/0 </p>
+          ${hasAttendance}
           <a href="/${curr.id}"> Read More </a>
           </div>`,
         });
 
+        const percentFilled =
+          (curr.capacity > 0
+            ? Math.ceil(curr.usersCheckedIn / curr.capacity)
+            : 1) * 100;
+            // percentFilled >= 70 ? null : percentFilled >= 50 ? '../assets/blue-marker.png' : '../assets/green-marker.png'
+ 
         // TODO: color code based on capacity
         const tmpMarker = new maps.Marker({
           position: { lat, lng },
           map,
+          icon: ``,
         });
 
         tmpMarker.addListener('click', () => {
@@ -217,12 +246,15 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
           });
         });
 
-        info.push(tmpInfo);
         markers.push(tmpMarker);
       }
     }
 
-    setMap({ map, maps, markers, info });
+    setMap({ map, maps, markers });
+  };
+
+  const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
+    setupMarkers(map, maps);
   };
 
   return (

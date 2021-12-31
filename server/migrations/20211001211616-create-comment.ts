@@ -10,9 +10,9 @@ module.exports = {
         unique: true,
       },
       body: {
-        type: DataTypes.STRING(200),
+        type: DataTypes.STRING(250),
         validate: {
-          len: [25, 200],
+          len: [10, 250],
           msg: 'Length Validation Failed',
         },
         allowNull: false,

@@ -4,9 +4,11 @@ import { latLng, Post } from '../post';
 import { PostTag } from '../PostTags';
 import { Tag } from '../tags';
 import { User } from '../user';
+import { Comment } from '../comment';
 
 const UserModel: typeof User = db.User;
 const PostModel: typeof Post = db.Post;
+const CommentModel: typeof Comment = db.Comment;
 const TagModel: typeof Tag = db.Tag;
 
 /* 
@@ -124,6 +126,40 @@ export async function makeValidPost(
   );
 }
 
+/*
+Create a (basic) Comment entry in our database with the provided userid of the
+provided post, with  body. Return the comment on success, or throw an error on failure. 
+*/
+export async function makeComment(
+  body: string,
+  UserID: string,
+  PostID: string
+): Promise<Comment> {
+  const testComment: Comment = await CommentModel.create({
+    body: body,
+    UserId: UserID,
+    PostId: PostID,
+  }).catch((err: Error) => {
+    throw err;
+  });
+  return testComment;
+}
+
+/* 
+Create a Comment entry in our databse with the given author id and post 
+id. Return the entry that was created.
+*/
+export async function makeValidComment(
+  authorID: string,
+  postID: string
+): Promise<Comment> {
+  return await makeComment(
+    'This is the body of the comment!\
+    This is the body of the comment!',
+    authorID,
+    postID
+  );
+}
 export async function getAllTags(): Promise<Tag[]> {
   return await TagModel.findAll();
 }

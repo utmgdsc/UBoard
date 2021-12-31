@@ -226,6 +226,7 @@ export default class ServerApi {
     tags: string[];
     capacity: number;
     location: string;
+    coords?: { lat: number; lng: number };
   }) {
     const formData = new FormData();
     formData.append('title', form.title);
@@ -233,6 +234,7 @@ export default class ServerApi {
     form.tags.forEach((tag) => formData.append('tags[]', tag));
     formData.append('capacity', String(form.capacity));
     formData.append('location', form.location);
+    formData.append('coords', JSON.stringify(form.coords));
 
     if (form.file) {
       formData.append('file', form.file);
@@ -251,6 +253,7 @@ export default class ServerApi {
       body: string;
       location: string;
       capacity: number;
+      coords?: { lat: number; lng: number };
     }
   ) {
     return await this.put<typeof form, { result?: Post; message?: string }>(

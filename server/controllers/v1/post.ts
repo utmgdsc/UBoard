@@ -16,10 +16,9 @@ export type PostUser = Post & {
   doesUserLike: boolean;
   UserId: string;
   didUserReport: boolean;
-  User: { id: string; firstName: string; lastName: string };
+  User: { firstName: string; lastName: string };
   isUserCheckedIn: boolean;
   usersCheckedIn: number;
-
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
   }[];
@@ -37,6 +36,7 @@ export type PostUserPreview = {
   usersCheckedIn: number;
   capacity: number;
   didUserReport: boolean;
+  totalComments: number;
 } & {
   Tags: {
     text: string & { PostTags: PostTag }; // sequelize pluarlizes name
@@ -143,6 +143,13 @@ export default class PostController {
                   )})`
             ),
             'didUserReport',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "Comments"
+                  WHERE "Comments"."PostId" = "Post"."id")`
+            ),
+            'totalComments',
           ],
         ],
         include: [
@@ -439,6 +446,7 @@ export default class PostController {
   /**
    * Delete the post by a given ID.
    *
+   * @param userId - The identifier of the Author of the post to destroy
    * @param postID - The identifier of the post to destroy.
    * @returns A status object indicating the results of the action.
    */

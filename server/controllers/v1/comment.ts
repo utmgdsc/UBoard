@@ -8,6 +8,7 @@ export type CommentsUser = Comment & {
     firstName: string;
     lastName: string;
   };
+  createdAt: string;
 };
 
 // The maximum number of results to return.
@@ -41,7 +42,7 @@ export default class CommentController {
       this.commentsRepo.findAll({
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
-        attributes: ['id', 'body'],
+        attributes: ['id', 'body', 'createdAt'],
         include: [
           {
             model: db.User,
@@ -83,11 +84,11 @@ export default class CommentController {
     data: { result?: CommentsUser; message?: string };
   }> {
     const data = (await this.commentsRepo.findByPk(commentID, {
-      attributes: ['id', 'body'],
+      attributes: ['id', 'body', 'createdAt'],
       include: [
         {
           model: db.User,
-          attributes: ['id', 'firstName', 'lastName', 'createdAt'],
+          attributes: ['id', 'firstName', 'lastName'],
         },
       ],
     })) as CommentsUser;

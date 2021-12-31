@@ -12,6 +12,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid/Grid';
 import Box from '@mui/material/Box/Box';
+import { CommentsUser } from '../api/v1';
 
 function MoreOptions() {
   const [isOpen, toggleMenu] = React.useState(false);
@@ -66,27 +67,16 @@ function MoreOptions() {
   );
 }
 
-export function CommentTest() {
-  return (
-    <Grid container>
-      <Grid item xs={6} sx={{ px: 2, py: 2 }}>
-        <Comment />
-      </Grid>
-    </Grid>
-  );
-}
 
-// TODO: Pass thru props
-export default function Comment() {
+export default function PostComment(props: { data: CommentsUser, userHasCreatedComment: boolean }) {
   const [showMoreText, toggleMoreText] = React.useState(false);
-  const placeholder = 'abc'.repeat(200);
+  const body = props.data.body;
 
   return (
     <>
       <Paper elevation={3} style={{ borderRadius: '10px' }}>
         <Grid container spacing={4}>
           <Grid item xs={12}sm={8} md={10} lg={11}>
-            {/* <Box style={{ display: 'flex', justifyContent: 'space-between' }}> */}
             <Stack direction='row'>
             <AccountCircleIcon fontSize='large' sx={{mt: 1, ml: 1}} />
               <Stack>
@@ -94,30 +84,26 @@ export default function Comment() {
                   style={{ fontWeight: 'bold' }}
                   sx={{ pt: 1, pl: 1, pr: 1 }}
                 >
-                  Firstname Lastname
+                  {props.data.User.firstName} {" "} {props.data.User.lastName} 
                 </Typography>
                 <Typography variant='caption' sx={{ pl: 1 }}>
-                  January 1, 2020 at 3:00 PM
+                  {new Date(props.data.createdAt).toString()}
                 </Typography>
               </Stack>
               </Stack>
-            {/* </Box> */}
           </Grid>
           <Grid item xs={12} sm={4} md={2} lg={1}>
-          <MoreOptions />
+          {props.userHasCreatedComment ? <MoreOptions /> : undefined}
           </Grid>
         </Grid>
-
-        {/* HIDE if not author */}
-
         <Typography
           variant='body1'
           sx={{ px: 2, py: 2 }}
           style={{ wordWrap: 'break-word' }}
         >
-          {showMoreText ? placeholder : placeholder.slice(0, 125)}
+          {showMoreText ? body : body.slice(0, 125)}
           {/* For longer comments, show 'read more' */}
-          {placeholder.length >= 25 && !showMoreText ? (
+          {body.length >= 25 && !showMoreText ? (
             <Link
               onClick={() => {
                 toggleMoreText((prev) => !prev);
@@ -127,7 +113,7 @@ export default function Comment() {
             >
               Read more
             </Link>
-          ) : placeholder.length >= 25 ? (
+          ) : body.length >= 25 ? (
             <Link
               onClick={() => {
                 toggleMoreText((prev) => !prev);

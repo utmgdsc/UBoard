@@ -21,13 +21,90 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
 import { UserContext } from '../App';
+import PostComment from './PostComment';
 import { LocationMap, LocationPickerMap } from './LocationMap';
 
-import ServerApi, { PostUser } from '../api/v1';
+import ServerApi, { CommentsUser, PostUser } from '../api/v1';
 import GenerateTags from './Tags';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
+import { User } from 'models/user';
+import Pagination from '@mui/material/Pagination';
 
 const api = new ServerApi();
+const COMMENTS_PER_PAGE = 10;
+
+function CommentsHandler(props: { postID: string; currentUser: User }) {
+  const [recentComments, setComments] = React.useState([] as CommentsUser[]);
+  const [totalPages, setPageCount] = React.useState(0);
+  const [currPage, setPage] = React.useState(1);
+
+  const fetchComments = () => {
+    api
+      .getComments(props.postID, COMMENTS_PER_PAGE, COMMENTS_PER_PAGE * ( currPage - 1 ))
+      .then((res) => {
+        if (res.data && res.data.data.result) {
+          setComments(res.data.data.result);
+          setPageCount(Math.ceil(res.data.data.total / COMMENTS_PER_PAGE));
+        } else {
+          setComments([]);
+          setPageCount(1);
+        }
+      })
+      .catch((err) => console.log(err));
+  };
+
+  /* Fetch comments by polling */
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      fetchComments();
+    }, 500);
+
+    return () => clearInterval(interval);
+  });
+
+  /* Fetch comments triggered by page open */
+  React.useEffect(() => {
+    fetchComments();
+  });
+
+  return (
+    <>
+      <Stack sx={{ px: 8, pb: 5 }}>
+        <Typography variant='h5' sx={{ py: 2 }}>
+          Comments
+        </Typography>
+        <TextField
+          variant='filled'
+          placeholder='Write a comment'
+          size='small'
+        ></TextField>
+        <Button variant='contained' sx={{ mt: 2 }}>
+          Add Comment
+        </Button>
+      </Stack>
+      <Grid container>
+        {recentComments.map((data) => (
+          <Grid item xs={6} sx={{ px: 2, py: 2 }}>
+            <PostComment
+              data={data}
+              userHasCreatedComment={props.currentUser.id === data.User.id}
+            />
+          </Grid>
+        ))}
+      </Grid>
+      <Pagination
+            count={totalPages}
+            page={currPage}
+            onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
+              setPage(pg);
+            }}
+            data-testid='test-paginate'
+            color='primary'
+            variant='outlined'
+          />
+    </>
+  );
+}
 
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
@@ -597,20 +674,10 @@ export default function ViewPostDialog() {
             />
           </Stack>
           {/* Comment Section */}
-          <Stack sx={{ px: 8, pb: 5 }}>
-            <Typography variant='h5' sx={{ py: 2 }}>
-              Comments
-            </Typography>
-            <TextField
-              variant='filled'
-              placeholder='Write a comment'
-              size='small'
-            ></TextField>
-            <Button variant='contained' sx={{ mt: 2 }}>
-              Add Comment
-            </Button>
-          </Stack>
-          {/* TODO: Create Comment component later */}
+          <CommentsHandler
+            postID={postData.id}
+            currentUser={userContext.data}
+          />
         </>
       )}{' '}
     </>

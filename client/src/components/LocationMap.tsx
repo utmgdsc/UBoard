@@ -161,13 +161,21 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
   const smQuery = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const bgQuery = useMediaQuery(theme.breakpoints.between('md', 'lg'));
   const xbgQuery = useMediaQuery(theme.breakpoints.up('lg'));
-  const mapSize = smQuery
+  const mapHeight = smQuery
     ? '65vh'
     : bgQuery
     ? '90vh'
     : xbgQuery
-    ? '150vh'
+    ? '90vh'
     : '30vh';
+
+    const mapWidth = smQuery
+    ? '95vh'
+    : bgQuery
+    ? '100vh'
+    : xbgQuery
+    ? '159vh'
+    : '40vh';
 
   // We want to do manual refresh so that the user is not interrupted when interacting the map if the data is changed/new posts are fetched
   const refreshMap = () => {
@@ -273,8 +281,8 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
       <Paper
         elevation={5}
         style={{
-          height: mapSize,
-          width: mapSize,
+          height: mapHeight,
+          width: mapWidth,
           justifyContent: 'center',
         }}
         sx={{ mt: 4, mb: 4 }}
@@ -285,7 +293,7 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
             libraries: ['places'],
           }}
           defaultCenter={{ lat: 43.59, lng: -79.65 }}
-          defaultZoom={8}
+          defaultZoom={9}
           options={getOptions}
           onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
           yesIWantToUseGoogleMapApiInternals

@@ -2,7 +2,7 @@ import React from 'react';
 import CreatePost from './CreatePost';
 import { unmountComponentAtNode } from 'react-dom';
 import { act } from 'react-dom/test-utils';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 
 let container: HTMLElement | null = null;
 beforeEach(() => {
@@ -26,6 +26,38 @@ afterEach(() => {
 });
 
 describe('verifying launch of create post component', () => {
+  it('should only show dropdown until a post type is selected', () => {
+    const postForm = screen.getByTestId('post-form');
+
+    expect(postForm).not.toBeVisible();
+
+    fireEvent.mouseDown(screen.getByLabelText('Select a post type'));
+    const dropdown = within(screen.getByRole('listbox')); 
+    fireEvent.click(dropdown.getByText('Events'));
+
+    expect(postForm).toBeVisible();
+  });
+
+  it('should display location fields if "Events" is selected', () => {
+    expect(screen.getByTestId('online-toggler')).not.toBeVisible();
+
+    fireEvent.mouseDown(screen.getByLabelText('Select a post type'));
+    const dropdown = within(screen.getByRole('listbox')); 
+    fireEvent.click(dropdown.getByText('Events'));
+    
+    expect(screen.getByTestId('online-toggler')).toBeVisible();
+  });
+
+  it('should not display location fields if "Events" is not selected', () => {
+    expect(screen.getByTestId('online-toggler')).not.toBeVisible();
+
+    fireEvent.mouseDown(screen.getByLabelText('Select a post type'));
+    const dropdown = within(screen.getByRole('listbox')); 
+    fireEvent.click(dropdown.getByText('Clubs'));
+    
+    expect(screen.getByTestId('online-toggler')).not.toBeVisible();
+  });
+
   it('shows the preview button as disabled', () => {
     // get the preview button
     expect(screen.getByTestId('previewButton')).toBeDisabled();
@@ -66,7 +98,7 @@ describe('verifying launch of create post component', () => {
 
   it('Toggling online event disables the map', () => {
     screen.getByTestId('online-toggler').click();
-    
+
     expect(screen.queryByTestId('picker-map')).not.toBeInTheDocument();
     expect(screen.queryByTestId('pac-test')).not.toBeInTheDocument();
     expect(screen.getByTestId('online-loc-input')).toBeInTheDocument();
@@ -75,34 +107,39 @@ describe('verifying launch of create post component', () => {
   it('Switching between online to offline event clears previous input', () => {
     const toggler = screen.getByTestId('online-toggler');
     toggler.click();
-  
-    const online = screen.getByTestId('online-loc-input').querySelector('input');
+
+    const online = screen
+      .getByTestId('online-loc-input')
+      .querySelector('input');
 
     fireEvent.change(online!, {
       target: {
-        value: 'online123'
-      }
+        value: 'online123',
+      },
     });
-    
+
     expect(online?.value).toEqual('online123');
     toggler.click();
     toggler.click();
-    expect(screen.getByTestId('online-loc-input').querySelector('input')?.value).toEqual('');
+    expect(
+      screen.getByTestId('online-loc-input').querySelector('input')?.value
+    ).toEqual('');
     toggler.click();
 
     const offline = screen.getByTestId('pac-input-test').querySelector('input');
     fireEvent.change(offline!, {
       target: {
-        value: 'addr'
-      }
+        value: 'addr',
+      },
     });
     expect(offline?.value).toEqual('addr');
     toggler.click();
     expect(screen.queryByTestId('pac-input-test')).not.toBeInTheDocument();
     toggler.click();
-    expect(screen.getByTestId('pac-input-test').querySelector('input')?.value).toEqual('');
-
-  })
+    expect(
+      screen.getByTestId('pac-input-test').querySelector('input')?.value
+    ).toEqual('');
+  });
 
   it('View map switch properly hides/shows map', () => {
     screen.getByTestId('map-toggle').click();

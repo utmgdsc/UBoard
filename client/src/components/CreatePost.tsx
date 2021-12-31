@@ -223,8 +223,9 @@ function CreatePost() {
             <hr />
             {/* form  begins*/}
             <FormControl sx={{ width: '50%' }}>
-              <InputLabel>Select a post type</InputLabel>
+              <InputLabel id='type-select-label'>Select a post type</InputLabel>
               <Select
+                labelId='type-select-label'
                 autoWidth
                 variant='standard'
                 value={form.type}
@@ -243,6 +244,7 @@ function CreatePost() {
               component='form'
               noValidate
               sx={{ mt: 2 }}
+              data-testid='post-form'
             >
               <Grid container spacing={2}>
                 <Grid item xs={12}>

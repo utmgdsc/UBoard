@@ -5,13 +5,17 @@ import Stack from '@mui/material/Stack';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
+import ReplayIcon from '@mui/icons-material/Replay';
+import Button from '@mui/material/Button';
 
 import GoogleMapReact from 'google-map-react';
 import { PostUserPreview } from '../api/v1';
-import Grid from '@mui/material/Grid';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import useTheme from '@mui/system/useTheme';
-import Typography from '@mui/material/Typography/Typography';
+
+import redmarker from '../assets/red-marker.png';
+import bluemarker from '../assets/blue-marker.png';
+import greenmarker from '../assets/green-marker.png';
 
 export function LocationPickerMap(props: {
   setLocation: (location: string, lat?: number, lng?: number) => void;
@@ -165,7 +169,7 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
     ? '150vh'
     : '30vh';
 
-  // TODO: Manual refresh button
+  // We want to do manual refresh so that the user is not interrupted when interacting the map if the data is changed/new posts are fetched
   const refreshMap = () => {
     if (googleMap.map) {
       setupMarkers(googleMap.map, googleMap.maps);
@@ -226,16 +230,20 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
         });
 
         const percentFilled =
-          (curr.capacity > 0
-            ? Math.ceil(curr.usersCheckedIn / curr.capacity)
-            : 1) * 100;
-            // percentFilled >= 70 ? null : percentFilled >= 50 ? '../assets/blue-marker.png' : '../assets/green-marker.png'
- 
-        // TODO: color code based on capacity
+          (curr.capacity > 0 ? (curr.usersCheckedIn / curr.capacity) : 1) * 100;
+
+        console.log(percentFilled);
+
+        // red marker indicates event is full, blue is almost filled, green is almost empty event (less than 50%)
         const tmpMarker = new maps.Marker({
           position: { lat, lng },
           map,
-          icon: ``,
+          icon:
+            percentFilled >= 100
+              ? redmarker
+              : percentFilled >= 50
+              ? bluemarker
+              : greenmarker,
         });
 
         tmpMarker.addListener('click', () => {
@@ -259,6 +267,9 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
 
   return (
     <>
+      <Button variant='contained' onClick={refreshMap} startIcon={<ReplayIcon/>} sx={{ mt: 1 }}>
+      Refresh Map
+      </Button>
       <Paper
         elevation={5}
         style={{

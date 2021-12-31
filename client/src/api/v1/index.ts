@@ -16,7 +16,7 @@ export type CommentsUser = Comment & {
 
 export type PostUser = Post & {
   likeCount: number;
-  doesUserLike: boolean;
+  doesUserLike: string;
   didUserReport: string;
   createdAt: string;
   UserId: string;
@@ -35,7 +35,7 @@ export type PostUserPreview = {
   title: string;
   createdAt: string;
   likeCount: number;
-  doesUserLike: boolean;
+  doesUserLike: string;
   isUserCheckedIn: string;
   usersCheckedIn: number;
   capacity: number;
@@ -205,6 +205,10 @@ export default class ServerApi {
     return await this.put<{ status: number }>(`/posts/${postID}/upvote`);
   }
 
+  async unlikePost(postID: string) {
+    return await this.put<{ status: number }>(`/posts/${postID}/downvote`);
+  }
+
   async reportPost(postID: string) {
     return await this.put<{ status: number }>(`/posts/${postID}/report`);
   }
@@ -224,6 +228,7 @@ export default class ServerApi {
     tags: string[];
     capacity: number;
     location: string;
+    coords?: { lat: number; lng: number };
   }) {
     const formData = new FormData();
     formData.append('title', form.title);
@@ -231,6 +236,7 @@ export default class ServerApi {
     form.tags.forEach((tag) => formData.append('tags[]', tag));
     formData.append('capacity', String(form.capacity));
     formData.append('location', form.location);
+    formData.append('coords', JSON.stringify(form.coords));
 
     if (form.file) {
       formData.append('file', form.file);
@@ -249,6 +255,7 @@ export default class ServerApi {
       body: string;
       location: string;
       capacity: number;
+      coords?: { lat: number; lng: number };
     }
   ) {
     return await this.put<typeof form, { result?: Post; message?: string }>(

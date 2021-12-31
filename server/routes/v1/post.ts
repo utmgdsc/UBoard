@@ -186,7 +186,7 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.location,
       req.body.capacity,
       req.body.tags,
-      req.body.coords,
+      JSON.parse(req.body.coords),
       req.file
     );
     res.status(result.status).json(result);

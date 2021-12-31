@@ -115,7 +115,6 @@ function RecentPosts(props: {
         <PostPreview
           key={data.id}
           postUser={data}
-          setOpenedPost={setOpenedPost}
         />
       ))}
     </>

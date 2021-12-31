@@ -221,9 +221,9 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
             : `<div></div>`;
 
         const tmpInfo = new google.maps.InfoWindow({
-          content: `<div><h2>${curr.title.slice(0, 100)}</h2> 
-          <p> ${curr.body.slice(0, 120) + '...'} </p>
-          <p> Located at ${curr.location} </p> 
+          content: `<div><h2 style='word-break: break-all'>${curr.title.slice(0, 100)}...</h2> 
+          <p style='word-break: break-all'> ${curr.body.slice(0, 120) + '...'} </p>
+          <p> Located @ ${curr.location} </p> 
           ${hasAttendance}
           <a href="/${curr.id}"> Read More </a>
           </div>`,

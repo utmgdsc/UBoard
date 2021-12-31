@@ -138,28 +138,38 @@ function MoreOptions(props: {
 }
 
 /* Like button. Handles liking/unliking a post */
-function LikeButton(props: { numLikes: number, doesUserLike: string, id: string }) {
-  
+function LikeButton(props: {
+  numLikes: number;
+  doesUserLike: string;
+  id: string;
+}) {
   let numLikes = !isNaN(props.numLikes) ? props.numLikes : 0;
   const isLiked = props.doesUserLike == '1';
 
   const handleClick = async () => {
     if (!isLiked) {
       await api.likePost(props.id);
-    }
-    else {
+    } else {
       await api.unlikePost(props.id);
     }
   };
 
   const likeButton = isLiked ? (
-    <ThumbUpIcon onClick={handleClick} fontSize='large' style={{
-      cursor: 'pointer',
-    }} />
+    <ThumbUpIcon
+      onClick={handleClick}
+      fontSize='large'
+      style={{
+        cursor: 'pointer',
+      }}
+    />
   ) : (
-    <ThumbUpOffAltIcon onClick={handleClick} fontSize='large' style={{
-      cursor: 'pointer',
-    }} />
+    <ThumbUpOffAltIcon
+      onClick={handleClick}
+      fontSize='large'
+      style={{
+        cursor: 'pointer',
+      }}
+    />
   );
 
   return (
@@ -598,7 +608,11 @@ export default function ViewPostDialog() {
               ) : (
                 <></>
               )}
-              <LikeButton numLikes={Number(postData.likeCount)} doesUserLike={postData.doesUserLike} id={postData.id} />
+              <LikeButton
+                numLikes={Number(postData.likeCount)}
+                doesUserLike={postData.doesUserLike}
+                id={postData.id}
+              />
             </Stack>
             <LocationHandler
               coords={postData.coords}

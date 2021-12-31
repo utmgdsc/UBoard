@@ -239,9 +239,7 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
 
         const percentFilled =
           (curr.capacity > 0 ? (curr.usersCheckedIn / curr.capacity) : 1) * 100;
-
-        console.log(percentFilled);
-
+          
         // red marker indicates event is full, blue is almost filled, green is almost empty event (less than 50%)
         const tmpMarker = new maps.Marker({
           position: { lat, lng },

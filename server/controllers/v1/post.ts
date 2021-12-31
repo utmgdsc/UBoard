@@ -206,6 +206,7 @@ export default class PostController {
           'title',
           'createdAt',
           'thumbnail',
+          'capacity',
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
@@ -313,6 +314,7 @@ export default class PostController {
           "Post"."title", 
           "Post"."createdAt", 
           "Post"."thumbnail", 
+          "Post"."capacity",
           (
             SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "Post"."id"

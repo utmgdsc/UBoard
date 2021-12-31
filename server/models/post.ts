@@ -68,6 +68,7 @@ export class Post
     Post.belongsToMany(model.Tag, {
       through: 'PostTags',
     }); /* Junction table for Post & Tags relationship */
+    Post.hasMany(model.Comment);
   }
 }
 

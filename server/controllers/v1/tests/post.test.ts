@@ -15,6 +15,7 @@ jest.mock('backblaze-b2');
 const postController = new PostController(
   db.Post,
   db.UserPostLikes,
+  db.UserCheckin,
   db.UserReports,
   db.Tag,
   new FileManager()
@@ -344,6 +345,58 @@ describe('Test v1 - Post Controller', () => {
       expect(result.status).toBe(500);
 
       expect(await db.UserPostLikes.getLikeCount(post.id)).toBe(1);
+    });
+
+    it('should check a user into (out of) an event', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      let result = await postController.checkin(user.id, post.id);
+      expect(result.status).toBe(204);
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(1);
+
+      result = await postController.checkout(user.id, post.id);
+      expect(result.status).toBe(204);
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(0);
+    });
+
+    it('should check multiple users into an event', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      await postController.checkin(author.id, post.id);
+      await postController.checkin(user.id, post.id);
+
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(2);
+    });
+
+    it('should checkout the correct user', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id);
+
+      await postController.checkin(author.id, post.id);
+      await postController.checkin(user.id, post.id);
+      await postController.checkout(user.id, post.id);
+
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(1);
+      const result = await postController.getPost(author.id, post.id);
+      expect(result.data.result!.isUserCheckedIn).toBeTruthy();
+    });
+
+    it('should not check a user into a full event', async () => {
+      const author = await makeValidUser();
+      const user = await makeUser('otheruser', 'otherUser@mail.utoronto.ca');
+      const post = await makeValidPost(author.id, 1);
+
+      let result = await postController.checkin(author.id, post.id);
+      expect(result.status).toBe(204);
+
+      result = await postController.checkin(user.id, post.id);
+      expect(result.status).toBe(409);
+      expect(await db.UserCheckin.howManyCheckedIn(post.id)).toBe(1);
     });
 
     it('should report a post', async () => {

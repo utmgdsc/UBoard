@@ -71,14 +71,15 @@ export async function makePost(
   authorid: string,
   title: string,
   body: string,
-  coords?: latLng
+  coords?: latLng,
+  capacity = 10
 ): Promise<Post> {
   return await PostModel.create({
     type: 'Events',
     title: title,
     body: body,
     feedbackScore: 10,
-    capacity: 10,
+    capacity,
     location: 'toronto',
     thumbnail: 'some-path',
     UserId: authorid,
@@ -110,11 +111,16 @@ export async function makePostWithTags(
   return post;
 }
 
-export async function makeValidPost(authorID: string): Promise<Post> {
+export async function makeValidPost(
+  authorID: string,
+  capacity = 10
+): Promise<Post> {
   return makePost(
     authorID,
     'This is a new post!',
-    'This is a new post!This is a new post!'
+    'This is a new post!This is a new post!',
+    undefined,
+    capacity
   );
 }
 

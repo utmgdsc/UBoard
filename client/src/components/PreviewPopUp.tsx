@@ -15,6 +15,7 @@ import DialogActions from '@mui/material/DialogActions';
 import GenerateTags from './Tags';
 
 export default function PreviewPopUp(props: {
+  type: string;
   title: string;
   body: string;
   img: File | undefined;
@@ -26,6 +27,7 @@ export default function PreviewPopUp(props: {
   handleClose: () => void;
 }) {
   const {
+    type,
     title,
     body,
     img,
@@ -65,10 +67,18 @@ export default function PreviewPopUp(props: {
           </CardContent>
           <CardContent>
             <Grid container sx={{ py: 1 }}>
-              <Grid item xs={12}>
+              <Grid
+                display={type === 'Events' ? undefined : 'none'}
+                item
+                xs={12}
+              >
                 <Typography>Capacity: {eventCapacity}</Typography>
               </Grid>
-              <Grid item xs={12}>
+              <Grid
+                display={type === 'Events' ? undefined : 'none'}
+                item
+                xs={12}
+              >
                 <Typography>Location: {location}</Typography>
               </Grid>
               <Grid item xs={12}>

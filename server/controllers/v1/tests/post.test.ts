@@ -75,6 +75,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -89,6 +90,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -108,6 +110,7 @@ describe('Test v1 - Post Controller', () => {
 
       await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -118,6 +121,7 @@ describe('Test v1 - Post Controller', () => {
       const newTag = [...tags, 'new'];
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is another post!',
         'This is a new post!This is a new post2!',
         'location',
@@ -136,6 +140,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -162,6 +167,7 @@ describe('Test v1 - Post Controller', () => {
       };
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -184,6 +190,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         undefined,
         'This is a new post!This is a new post!!',
         'location',
@@ -243,6 +250,7 @@ describe('Test v1 - Post Controller', () => {
 
       const deleted = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -252,6 +260,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',

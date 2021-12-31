@@ -154,6 +154,7 @@ postRouter.put('/:postid/report', async (req: Request, res: Response) => {
 postRouter.post('/', async (req: Request, res: Response) => {
   try {
     const result = await postController.createPost(
+      req.body.type,
       getAuthUser(res).id,
       req.body.title,
       req.body.body,

@@ -19,6 +19,7 @@ export type latLng = {
   lng: number;
 };
 interface PostAttributes {
+  type: string;
   id: string;
   title: string;
   body: string;
@@ -46,6 +47,7 @@ export class Post
   extends Model<PostAttributes, PostCreationAttributes>
   implements PostAttributes
 {
+  type!: string;
   id!: string;
   title!: string;
   body!: string;
@@ -74,6 +76,10 @@ export class Post
 module.exports = (sequelize: Sequelize) => {
   Post.init(
     {
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       id: {
         type: DataTypes.UUID,
         defaultValue: UUIDV4,

@@ -580,10 +580,14 @@ export default function ViewPostDialog() {
               )}
               <LikeButton numLikes={Number(postData.feedbackScore)} />
             </Stack>
-            <LocationHandler
-              coords={postData.coords}
-              location={postData.location}
-            />
+            {postData.type === 'Events' ? (
+              <LocationHandler
+                coords={postData.coords}
+                location={postData.location}
+              />
+            ) : (
+              <></>
+            )}
           </Stack>
 
           {/* Comment Section */}

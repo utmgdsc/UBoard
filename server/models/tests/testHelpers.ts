@@ -74,6 +74,7 @@ export async function makePost(
   coords?: latLng
 ): Promise<Post> {
   return await PostModel.create({
+    type: 'Events',
     title: title,
     body: body,
     feedbackScore: 10,

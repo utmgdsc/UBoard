@@ -9,9 +9,21 @@ import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
 
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
 import ServerApi, { PostUserPreview } from '../api/v1';
 
 export const POSTS_PER_PAGE = 6; // Maximum (previewable) posts per page.
+
+const postTypes = [
+  'All',
+  'Events',
+  'Clubs',
+  'Textbooks',
+  'Roommates',
+  'Opportunities',
+];
 
 const api = new ServerApi();
 
@@ -104,6 +116,8 @@ function RecentPosts(props: {
 }
 
 export default function PostDashboard() {
+  const [postType, setPostType] = React.useState('All');
+
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
 
@@ -135,16 +149,26 @@ export default function PostDashboard() {
           data-testid='test-post-container'
         >
           <Grid container spacing={7}>
-            <Grid
-              item
-              xs={12}
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'flex-end',
-              }}
-            >
-              <CreatePost />
+            <Grid item container>
+              <Grid>
+                <Select
+                  variant='standard'
+                  labelId='post-type-select'
+                  id='post-type-select'
+                  value={postType}
+                  onChange={(e) => {
+                    setPostType(e.target.value);
+                  }}
+                  label='Type'
+                >
+                  {postTypes.map((t) => (
+                    <MenuItem value={t}>{t}</MenuItem>
+                  ))}
+                </Select>
+              </Grid>
+              <Grid marginLeft='auto'>
+                <CreatePost />
+              </Grid>
             </Grid>
 
             <RecentPosts

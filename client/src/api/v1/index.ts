@@ -6,6 +6,7 @@ import { UserAttributes } from 'models/user';
 import { PostTag } from 'models/PostTags';
 
 export type PostUser = Post & {
+  type: string;
   likeCount: number;
   doesUserLike: boolean;
   didUserReport: string;

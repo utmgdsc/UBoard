@@ -17,12 +17,25 @@ import ServerApi from '../api/v1/index';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
 
 import { LocationPickerMap } from './LocationMap';
+import { FormControl } from '@mui/material';
+
+const postTypes = [
+  'Events',
+  'Clubs',
+  'Textbooks',
+  'Roommates',
+  'Opportunities',
+];
 
 const api = new ServerApi();
 
 interface FormState {
+  type: string;
   title: string;
   body: string;
   file: File | undefined;
@@ -46,6 +59,7 @@ function CreatePost() {
   );
 
   const [form, setForm] = useState<FormState>({
+    type: '',
     title: '',
     body: '',
     file: undefined,
@@ -94,6 +108,7 @@ function CreatePost() {
 
   const closeDialog = () => {
     setForm({
+      type: '',
       title: '',
       body: '',
       file: undefined,
@@ -203,8 +218,30 @@ function CreatePost() {
             >
               Create Post
             </Typography>
+            <hr />
             {/* form  begins*/}
-            <Box component='form' noValidate sx={{ mt: 2 }}>
+            <FormControl sx={{ width: '50%' }}>
+              <InputLabel>Select a post type</InputLabel>
+              <Select
+                autoWidth
+                variant='standard'
+                value={form.type}
+                onChange={(e) => {
+                  setForm({...form, type: e.target.value});
+                }}
+                label='Type'
+              >
+                {postTypes.map((t) => (
+                  <MenuItem value={t}>{t}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Box
+              display={form.type === '' ? 'none' : undefined}
+              component='form'
+              noValidate
+              sx={{ mt: 2 }}
+            >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
@@ -246,7 +283,12 @@ function CreatePost() {
                   />
                 </Grid>
 
-                <Grid item xs={12} md={3}>
+                <Grid
+                  display={form.type === 'Events' ? undefined : 'none'}
+                  item
+                  xs={12}
+                  md={3}
+                >
                   <TextField
                     label='Event Capacity'
                     placeholder='40'
@@ -326,7 +368,11 @@ function CreatePost() {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid
+                  display={form.type === 'Events' ? undefined : 'none'}
+                  item
+                  xs={12}
+                >
                   <FormGroup>
                     <FormControlLabel
                       control={
@@ -418,6 +464,7 @@ function CreatePost() {
             </Box>
 
             <PreviewPopUp
+              type={form.type}
               title={form.title}
               body={form.body}
               img={form.file}

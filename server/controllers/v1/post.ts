@@ -55,7 +55,7 @@ export default class PostController {
     userPostLikesRepo: typeof UserPostLikes,
     userReports: typeof UserReports,
     tagsRepo: typeof Tag,
-    fileManager: FileManager,
+    fileManager: FileManager
   ) {
     this.postsRepo = postsRepo;
     this.userPostLikesRepo = userPostLikesRepo;
@@ -319,6 +319,7 @@ export default class PostController {
   }> {
     const data = (await this.postsRepo.findByPk(postID, {
       attributes: [
+        'type',
         'id',
         'title',
         'body',
@@ -518,6 +519,7 @@ export default class PostController {
    */
   async createPost(
     userID: string,
+    type?: string,
     title?: string,
     body?: string,
     location?: string,
@@ -529,7 +531,7 @@ export default class PostController {
     status: number;
     data: { result?: Post; message?: string };
   }> {
-    if (!title || !body || !location || capacity == undefined) {
+    if (!type || !title || !body || !location || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
@@ -541,6 +543,7 @@ export default class PostController {
     }
 
     const post = await this.postsRepo.create({
+      type,
       title,
       body,
       location,

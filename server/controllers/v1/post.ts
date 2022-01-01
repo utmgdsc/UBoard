@@ -694,7 +694,7 @@ export default class PostController {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
-    if (!this.fileManager.status()) {
+    if (file && !this.fileManager.status()) {
       return {
         status: 400,
         data: {

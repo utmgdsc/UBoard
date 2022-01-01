@@ -13,6 +13,7 @@ export default class FileManager {
       this.b2.authorize();
     } catch (err) {
       console.error(err);
+      this.b2 = undefined;
     }
   }
 
@@ -22,7 +23,7 @@ export default class FileManager {
    * @returns Whether setting up backblaze was succesful or not
    */
   status() {
-    return !this.b2;
+    return this.b2 !== undefined;
   }
 
   /**

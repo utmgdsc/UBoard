@@ -694,7 +694,12 @@ export default class PostController {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
-    if (file && !this.fileManager.status()) {
+    let filePath: string | undefined = undefined;
+
+    if (file && this.fileManager.status()) {
+      // A post should be able to be created without a file.
+      filePath = await this.fileManager.upload(file.path, file.filename);
+    } else if (file) {
       return {
         status: 400,
         data: {
@@ -702,13 +707,6 @@ export default class PostController {
             'Thumbnail uploads are temporarily disabled. Remove the thumbnail and try again. ',
         },
       };
-    }
-
-    let filePath: string | undefined = undefined;
-
-    if (file) {
-      // A post should be able to be created without a file.
-      filePath = await this.fileManager.upload(file.path, file.filename);
     }
 
     const post = await this.postsRepo.create({

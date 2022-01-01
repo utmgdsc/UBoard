@@ -41,9 +41,10 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
   const [hasCreatedComment, setHasCreatedComment] = React.useState(false);
 
   const submitHandler = async () => {
-    if (commentInput.length >= 10 && commentInput.length < 250) {
+    if (commentInput.length >= 10 && commentInput.length <= 250) {
       await api.createComment(props.postID, commentInput);
       setHasCreatedComment(true);
+      setInput('');
     }
   };
 
@@ -70,7 +71,7 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
   React.useEffect(() => {
     const interval = setInterval(() => {
       fetchComments();
-    }, 3000);
+    }, 10000);
 
     return () => clearInterval(interval);
   });
@@ -108,7 +109,7 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
           {recentComments.map((data) => (
             <PostComment
               data={data}
-              userHasCreatedComment={props.currentUser.id === data.User.id}
+              userAuthoredComment={props.currentUser.id === data.User.id}
             />
           ))}
         </Stack>

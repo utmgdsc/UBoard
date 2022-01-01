@@ -26,6 +26,7 @@ function MoreOptions(props: {
   const [alertMsg, setMsg] = React.useState('An error has occurred');
 
   const closeMenu = () => {
+    showAlert(false);
     setMsg('An error has occurred');
     toggleMenu(false);
   };
@@ -34,7 +35,7 @@ function MoreOptions(props: {
     api
       .deleteComment(props.data.id)
       .then((res) => {
-        if (res.status === 200) {
+        if (res.status === 204) {
           setMsg('Comment has been deleted. ');
         } else {
           setMsg('Failed to delete comment.');
@@ -43,7 +44,10 @@ function MoreOptions(props: {
       .catch((err) => {
         setMsg('Failed to delete comment. ');
       })
-      .finally(() => showAlert(true));
+      .finally(() => {
+        showAlert(true);
+        closeMenu();
+      });
   };
 
   return (
@@ -71,6 +75,7 @@ function MoreOptions(props: {
         <MenuItem
           onClick={() => {
             props.toggleEditor((prev) => !prev);
+            closeMenu();
           }}
         >
           Edit
@@ -89,85 +94,69 @@ function MoreOptions(props: {
 
 export default function PostComment(props: {
   data: CommentsUser;
-  userHasCreatedComment: boolean;
+  userAuthoredComment: boolean;
 }) {
-  const [showMoreText, toggleMoreText] = React.useState(false);
   const [isEditing, toggleEditor] = React.useState(false);
-  const body = props.data.body;
-  const [editingInput, setInput] = React.useState(body);
+  const [editingInput, setInput] = React.useState(props.data.body);
 
   const updateComment = async () => {
     await api.updateComment(props.data.id, { body: editingInput });
+    toggleEditor(false);
   };
 
   return (
     <>
       <Paper elevation={3} sx={{ borderRadius: '10px', p: 2 }}>
-        <Stack direction='row' justifyContent='space-between'>
-          <Stack direction='row' spacing={2}>
-            <AccountCircleIcon fontSize='large' />
-            <Stack sx={{ wordBreak: 'break-word' }}>
-              <Typography style={{ fontWeight: 'bold' }}>
-                {props.data.User.firstName} {props.data.User.lastName}
-              </Typography>
-              <Typography variant='caption'>
-                {new Date(props.data.createdAt).toString()}
-              </Typography>
-              {!isEditing ? (
-                <>
-                  {' '}
-                  <Typography
-                    variant='body1'
-                    style={{ wordWrap: 'break-word' }}
-                  >
-                    {showMoreText ? body : body.slice(0, 125)}
-                  </Typography>
-                  {body.length >= 25 && !showMoreText ? (
-                    <Link
-                      onClick={() => {
-                        toggleMoreText((prev) => !prev);
-                      }}
-                      underline='hover'
-                      color='GrayText'
-                      sx={{ cursor: 'pointer' }}
+        <Stack>
+          <Stack direction='row' justifyContent='space-between'>
+            <Stack direction='row' spacing={2}>
+              <AccountCircleIcon fontSize='large' />
+              <Stack sx={{ wordBreak: 'break-word' }}>
+                <Typography style={{ fontWeight: 'bold' }}>
+                  {props.data.User.firstName} {props.data.User.lastName}
+                </Typography>
+                <Typography variant='caption'>
+                  {new Date(props.data.createdAt).toString()}
+                </Typography>
+                {!isEditing ? (
+                  <>
+                    {' '}
+                    <Typography
+                      variant='body1'
+                      style={{ wordWrap: 'break-word' }}
                     >
-                      Read more
-                    </Link>
-                  ) : body.length >= 25 ? (
-                    <Link
-                      onClick={() => {
-                        toggleMoreText((prev) => !prev);
-                      }}
-                      underline='hover'
-                      color='GrayText'
-                      sx={{ cursor: 'pointer' }}
-                    >
-                      Show less
-                    </Link>
-                  ) : undefined}
-                </>
-              ) : (
-                <>
-                  <TextField
-                    defaultValue={props.data.body}
-                    value={editingInput}
-                    fullWidth
-                    multiline
-                    onChange={(e) => setInput(e.target.value)}
-                  />
-                </>
-              )}
+                      {props.data.body}
+                    </Typography>
+                  </>
+                ) : undefined}
+              </Stack>
+            </Stack>
+            <Stack>
+              {props.userAuthoredComment ? (
+                <MoreOptions
+                  data={props.data}
+                  toggleEditor={toggleEditor}
+                />
+              ) : undefined}
             </Stack>
           </Stack>
-          <Stack>
-            {props.userHasCreatedComment ? (
-              <MoreOptions data={props.data} toggleEditor={toggleEditor} />
-            ) : undefined}
-          </Stack>
           {isEditing ? (
-            <Button variant='contained' onClick={updateComment} sx={{ mr: 2 }}>
-              Update
-            </Button>
+            <>
+              <TextField
+                defaultValue={props.data.body}
+                inputProps={{ maxLength: 250 }}
+                value={editingInput}
+                onChange={(e) => setInput(e.target.value)}
+              />
+              <Button
+                variant='contained'
+                onClick={updateComment}
+                disabled={editingInput.length < 10 || editingInput.length > 250}
+                sx={{ mt: 1 }}
+              >
+                Update
+              </Button>
+            </>
           ) : undefined}
         </Stack>
       </Paper>

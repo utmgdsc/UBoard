@@ -34,11 +34,18 @@ const api = new ServerApi();
 const COMMENTS_PER_PAGE = 10;
 
 function CommentsHandler(props: { postID: string; currentUser: User }) {
+  const [commentInput, setInput] = React.useState('');
   const [recentComments, setComments] = React.useState([] as CommentsUser[]);
   const [totalPages, setPageCount] = React.useState(0);
   const [currPage, setPage] = React.useState(1);
 
-  const fetchComments = () => {
+  const submitHandler = async () => {
+    if (commentInput.length >= 10 && commentInput.length < 250) {
+      await api.createComment(props.postID, commentInput);
+    }
+  }
+
+  const fetchComments = React.useCallback(() => {
     api
       .getComments(props.postID, COMMENTS_PER_PAGE, COMMENTS_PER_PAGE * ( currPage - 1 ))
       .then((res) => {
@@ -51,13 +58,13 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
         }
       })
       .catch((err) => console.log(err));
-  };
+  }, [props, currPage]);
 
   /* Fetch comments by polling */
   React.useEffect(() => {
     const interval = setInterval(() => {
       fetchComments();
-    }, 500);
+    }, 5000);
 
     return () => clearInterval(interval);
   });
@@ -75,16 +82,19 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
         </Typography>
         <TextField
           variant='filled'
-          placeholder='Write a comment'
+          placeholder='Write a comment (Between 10-250 characters)'
           size='small'
+          value={commentInput}
+          onChange={(e) => {setInput(e.target.value)}}
+          inputProps={{maxLength: 250}}
         ></TextField>
-        <Button variant='contained' sx={{ mt: 2 }}>
+        <Button onClick={submitHandler} disabled={commentInput.length < 10 || commentInput.length > 250} variant='contained' sx={{ mt: 2 }}>
           Add Comment
         </Button>
       </Stack>
       <Grid container>
         {recentComments.map((data) => (
-          <Grid item xs={6} sx={{ px: 2, py: 2 }}>
+          <Grid item xs={12} sx={{ px: 2, py: 2 }}>
             <PostComment
               data={data}
               userHasCreatedComment={props.currentUser.id === data.User.id}

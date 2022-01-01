@@ -11,9 +11,11 @@ import Stack from '@mui/material/Stack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
-import { CommentsUser } from '../api/v1';
+import ServerApi, { CommentsUser } from '../api/v1';
 
-function MoreOptions() {
+const api = new ServerApi();
+
+function MoreOptions(props: { data: CommentsUser }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
   const [alertMsg, setMsg] = React.useState('An error has occurred');
@@ -92,7 +94,7 @@ export default function PostComment(props: { data: CommentsUser, userHasCreatedC
               </Stack>
           </Grid>
           <Grid item xs={12} sm={4} md={2} lg={1}>
-          {props.userHasCreatedComment ? <MoreOptions /> : undefined}
+          {props.userHasCreatedComment ? <MoreOptions data={props.data} /> : undefined}
           </Grid>
         </Grid>
         <Typography

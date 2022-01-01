@@ -9,7 +9,6 @@ import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Link from '@mui/material/Link';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 
@@ -20,6 +19,7 @@ const api = new ServerApi();
 function MoreOptions(props: {
   data: CommentsUser;
   toggleEditor: React.Dispatch<React.SetStateAction<boolean>>;
+  setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
@@ -37,6 +37,7 @@ function MoreOptions(props: {
       .then((res) => {
         if (res.status === 204) {
           setMsg('Comment has been deleted. ');
+          props.setHasInteracted(true);
         } else {
           setMsg('Failed to delete comment.');
         }
@@ -95,12 +96,14 @@ function MoreOptions(props: {
 export default function PostComment(props: {
   data: CommentsUser;
   userAuthoredComment: boolean;
+  setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const [isEditing, toggleEditor] = React.useState(false);
   const [editingInput, setInput] = React.useState(props.data.body);
 
   const updateComment = async () => {
     await api.updateComment(props.data.id, { body: editingInput });
+    props.setHasInteracted(true);
     toggleEditor(false);
   };
 
@@ -136,6 +139,7 @@ export default function PostComment(props: {
                 <MoreOptions
                   data={props.data}
                   toggleEditor={toggleEditor}
+                  setHasInteracted={props.setHasInteracted}
                 />
               ) : undefined}
             </Stack>

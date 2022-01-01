@@ -38,12 +38,12 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
   const [recentComments, setComments] = React.useState([] as CommentsUser[]);
   const [totalPages, setPageCount] = React.useState(0);
   const [currPage, setPage] = React.useState(1);
-  const [hasCreatedComment, setHasCreatedComment] = React.useState(false);
+  const [hasInteractedComment, setCommentInteraction] = React.useState(false);
 
   const submitHandler = async () => {
     if (commentInput.length >= 10 && commentInput.length <= 250) {
       await api.createComment(props.postID, commentInput);
-      setHasCreatedComment(true);
+      setCommentInteraction(true);
       setInput('');
     }
   };
@@ -71,16 +71,16 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
   React.useEffect(() => {
     const interval = setInterval(() => {
       fetchComments();
-    }, 10000);
+    }, 8000);
 
     return () => clearInterval(interval);
   });
 
-  /* Fetch comments triggered by page open and comment creation */
+  /* Fetch comments triggered by page open and comment interaction (edit/post/delete) */
   React.useEffect(() => {
     fetchComments();
-    setHasCreatedComment(false);
-  }, [fetchComments, hasCreatedComment]);
+    setCommentInteraction(false);
+  }, [fetchComments, hasInteractedComment]);
 
   return (
     <>
@@ -110,6 +110,7 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
             <PostComment
               data={data}
               userAuthoredComment={props.currentUser.id === data.User.id}
+              setHasInteracted={setCommentInteraction}
             />
           ))}
         </Stack>
@@ -118,6 +119,7 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
           page={currPage}
           onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
             setPage(pg);
+            setCommentInteraction(true);
           }}
           data-testid='test-paginate'
           color='primary'

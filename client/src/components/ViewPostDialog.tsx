@@ -38,16 +38,22 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
   const [recentComments, setComments] = React.useState([] as CommentsUser[]);
   const [totalPages, setPageCount] = React.useState(0);
   const [currPage, setPage] = React.useState(1);
+  const [hasCreatedComment, setHasCreatedComment] = React.useState(false);
 
   const submitHandler = async () => {
     if (commentInput.length >= 10 && commentInput.length < 250) {
       await api.createComment(props.postID, commentInput);
+      setHasCreatedComment(true);
     }
-  }
+  };
 
   const fetchComments = React.useCallback(() => {
     api
-      .getComments(props.postID, COMMENTS_PER_PAGE, COMMENTS_PER_PAGE * ( currPage - 1 ))
+      .getComments(
+        props.postID,
+        COMMENTS_PER_PAGE,
+        COMMENTS_PER_PAGE * (currPage - 1)
+      )
       .then((res) => {
         if (res.data && res.data.data.result) {
           setComments(res.data.data.result);
@@ -64,54 +70,60 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
   React.useEffect(() => {
     const interval = setInterval(() => {
       fetchComments();
-    }, 5000);
+    }, 3000);
 
     return () => clearInterval(interval);
   });
 
-  /* Fetch comments triggered by page open */
+  /* Fetch comments triggered by page open and comment creation */
   React.useEffect(() => {
     fetchComments();
-  });
+    setHasCreatedComment(false);
+  }, [fetchComments, hasCreatedComment]);
 
   return (
     <>
-      <Stack sx={{ px: 8, pb: 5 }}>
-        <Typography variant='h5' sx={{ py: 2 }}>
-          Comments
-        </Typography>
-        <TextField
-          variant='filled'
-          placeholder='Write a comment (Between 10-250 characters)'
-          size='small'
-          value={commentInput}
-          onChange={(e) => {setInput(e.target.value)}}
-          inputProps={{maxLength: 250}}
-        ></TextField>
-        <Button onClick={submitHandler} disabled={commentInput.length < 10 || commentInput.length > 250} variant='contained' sx={{ mt: 2 }}>
-          Add Comment
-        </Button>
-      </Stack>
-      <Grid container>
-        {recentComments.map((data) => (
-          <Grid item xs={12} sx={{ px: 2, py: 2 }}>
+      <Stack spacing={4} sx={{ mx: 8, my: 2 }}>
+        <Stack spacing={2}>
+          <Typography variant='h5'>Comments</Typography>
+          <TextField
+            variant='filled'
+            placeholder='Write a comment (Between 10-250 characters)'
+            size='small'
+            value={commentInput}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
+            inputProps={{ maxLength: 250 }}
+          ></TextField>
+          <Button
+            onClick={submitHandler}
+            disabled={commentInput.length < 10 || commentInput.length > 250}
+            variant='contained'
+          >
+            Add Comment
+          </Button>
+        </Stack>
+        <Stack spacing={1}>
+          {recentComments.map((data) => (
             <PostComment
               data={data}
               userHasCreatedComment={props.currentUser.id === data.User.id}
             />
-          </Grid>
-        ))}
-      </Grid>
-      <Pagination
-            count={totalPages}
-            page={currPage}
-            onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
-              setPage(pg);
-            }}
-            data-testid='test-paginate'
-            color='primary'
-            variant='outlined'
-          />
+          ))}
+        </Stack>
+        <Pagination
+          count={totalPages}
+          page={currPage}
+          onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
+            setPage(pg);
+          }}
+          data-testid='test-paginate'
+          color='primary'
+          variant='outlined'
+          sx={{ display: 'flex', justifyContent: 'center' }}
+        />
+      </Stack>
     </>
   );
 }

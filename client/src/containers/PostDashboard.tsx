@@ -93,10 +93,7 @@ function RecentPosts(props: {
   return (
     <>
       {recentPosts.map((data) => (
-        <PostPreview
-          key={data.id}
-          postUser={data}
-        />
+        <PostPreview key={data.id} postUser={data} />
       ))}
     </>
   );

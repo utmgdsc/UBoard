@@ -14,16 +14,9 @@ import MenuItem from '@mui/material/MenuItem';
 
 import ServerApi, { PostUserPreview } from '../api/v1';
 
-export const POSTS_PER_PAGE = 6; // Maximum (previewable) posts per page.
+import { postTypes } from '../components/constants/postTypes';
 
-const postTypes = [
-  'All',
-  'Events',
-  'Clubs',
-  'Textbooks',
-  'Roommates',
-  'Opportunities',
-];
+export const POSTS_PER_PAGE = 6; // Maximum (previewable) posts per page.
 
 const api = new ServerApi();
 

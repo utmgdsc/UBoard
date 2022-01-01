@@ -26,22 +26,7 @@ import { LocationMap, LocationPickerMap } from './LocationMap';
 import ServerApi, { PostUser } from '../api/v1';
 import GenerateTags from './Tags';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
-
-export const typeLabels: { [key: string]: string } = {
-  Events: 'Capacity',
-  Clubs: 'Capacity',
-  Textbooks: 'Available',
-  Roommates: 'Looking for',
-  Opportunities: 'Positions Available',
-};
-
-const buttonLabels: { [key: string]: string } = {
-  Events: 'Check In',
-  Clubs: 'Apply',
-  Textbooks: 'Interested',
-  Roommates: 'Interested',
-  Opportunities: 'Apply',
-};
+import { typeLabels, typeButtonLabels } from './constants/postTypes';
 
 const api = new ServerApi();
 
@@ -230,7 +215,7 @@ function CapacityBar(props: {
       </Button>
     ) : props.usersCheckedIn < props.maxCapacity ? (
       <Button onClick={handleCheckIn} variant='outlined'>
-        {buttonLabels[props.type]}
+        {typeButtonLabels[props.type]}
       </Button>
     ) : (
       <Button disabled variant='outlined'>

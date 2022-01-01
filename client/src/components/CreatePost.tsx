@@ -24,15 +24,7 @@ import FormControl from '@mui/material/FormControl';
 
 import { LocationPickerMap } from './LocationMap';
 
-import { typeLabels } from './ViewPostDialog';
-
-const postTypes = [
-  'Events',
-  'Clubs',
-  'Textbooks',
-  'Roommates',
-  'Opportunities',
-];
+import { postTypes, typeLabels } from './constants/postTypes';
 
 const api = new ServerApi();
 
@@ -234,7 +226,7 @@ function CreatePost() {
                 }}
                 label='Type'
               >
-                {postTypes.map((t) => (
+                {postTypes.slice(1).map((t) => (
                   <MenuItem key={t} value={t}>{t}</MenuItem>
                 ))}
               </Select>

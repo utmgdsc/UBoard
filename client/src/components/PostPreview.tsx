@@ -49,7 +49,6 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
   // generate tags (if the post has any)
   const tags = (
     <GenerateTags
-      space={4}
       tags={props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []}
     />
   );

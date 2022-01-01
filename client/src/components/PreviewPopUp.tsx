@@ -14,7 +14,7 @@ import DialogActions from '@mui/material/DialogActions';
 
 import GenerateTags from './Tags';
 
-import { typeLabels } from './ViewPostDialog';
+import { typeLabels } from './constants/postTypes';
 
 export default function PreviewPopUp(props: {
   type: string;

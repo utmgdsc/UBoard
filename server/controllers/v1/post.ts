@@ -206,6 +206,7 @@ export default class PostController {
           'title',
           'createdAt',
           'thumbnail',
+          'capacity',
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
@@ -222,6 +223,39 @@ export default class PostController {
               )`
             ),
             'doesUserLike',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'isUserCheckedIn',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id")`
+            ),
+            'usersCheckedIn',
+          ],
+          [
+            sequelize.literal(
+              // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+              `(SELECT COUNT(*) FROM "UserReports" as "Reports" 
+                  WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'didUserReport',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "Comments"
+                  WHERE "Comments"."PostId" = "Post"."id")`
+            ),
+            'totalComments',
           ],
         ],
         include: [
@@ -280,6 +314,7 @@ export default class PostController {
           "Post"."title", 
           "Post"."createdAt", 
           "Post"."thumbnail", 
+          "Post"."capacity",
           (
             SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "Post"."id"
@@ -288,6 +323,22 @@ export default class PostController {
             SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $userID
           ) AS "doesUserLike", 
+          (
+            SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+            WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = $userID
+          ) AS "isUserCheckedIn",
+          (
+            SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+            WHERE "Checkin"."postID" = "Post"."id"
+          ) AS "usersCheckedIn",
+          (
+            SELECT COUNT(*) FROM "UserReports" as "Reports" 
+            WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = $userID
+          ) AS "didUserReport",
+          (
+            SELECT COUNT(*) FROM "Comments"
+            WHERE "Comments"."PostId" = "Post"."id"
+          ) AS "totalComments",
           json_build_object(
             'firstName', "User"."firstName", 
             'lastName', "User"."lastName",

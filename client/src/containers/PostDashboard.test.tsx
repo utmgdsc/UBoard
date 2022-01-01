@@ -11,7 +11,6 @@ function fakePostPreview(
   title: string,
   body: string,
   createdAt: string,
-  tags?: string[]
 ): PostUserPreview {
   return {
     id: (Math.random() * 100).toString(),
@@ -74,9 +73,6 @@ describe('Post Preview correctly displayed', () => {
     render(
       <PostPreview
         postUser={post}
-        setOpenedPost={
-          {} as any as React.Dispatch<React.SetStateAction<boolean>>
-        }
       />
     );
 
@@ -102,9 +98,6 @@ describe('Post Preview correctly displayed', () => {
     render(
       <PostPreview
         postUser={post}
-        setOpenedPost={
-          {} as any as React.Dispatch<React.SetStateAction<boolean>>
-        }
       />
     );
 
@@ -128,9 +121,6 @@ describe('Post Preview correctly displayed', () => {
     render(
       <PostPreview
         postUser={post}
-        setOpenedPost={
-          {} as any as React.Dispatch<React.SetStateAction<boolean>>
-        }
       />
     );
 
@@ -154,9 +144,6 @@ describe('Post Preview correctly displayed', () => {
     render(
       <PostPreview
         postUser={post}
-        setOpenedPost={
-          {} as any as React.Dispatch<React.SetStateAction<boolean>>
-        }
       />
     );
 
@@ -175,9 +162,6 @@ describe('Post Preview correctly displayed', () => {
           `${'b'.repeat(300)}`,
           '2021-11-22T01:41:01.112Z'
         )}
-        setOpenedPost={
-          {} as any as React.Dispatch<React.SetStateAction<boolean>>
-        }
       />
     );
 

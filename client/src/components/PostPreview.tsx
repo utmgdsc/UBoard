@@ -3,16 +3,16 @@ import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
+import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 
 import GenerateTags from './Tags';
-import ViewPostDialog from './ViewPostDialog';
 
 import { PostUserPreview } from '../api/v1/index';
 import { useNavigate } from 'react-router-dom';
-import Button from '@mui/material/Button';
 
 /**
  * Return a string of the date relative to now in minutes, hours or days. If the date
@@ -45,26 +45,36 @@ function relativeTime(date: Date) {
   }
 }
 
-export default function PostPreview(props: {
-  postUser: PostUserPreview;
-  setOpenedPost: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export default function PostPreview(props: { postUser: PostUserPreview }) {
   // generate tags (if the post has any)
   const tags = (
     <GenerateTags
+      space={4}
       tags={props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []}
     />
   );
-
+  const [isHovered, setHover] = React.useState(false);
   const navigate = useNavigate();
 
   return (
     <Grid data-testid='test-postpreview' item xs={12} sm={6} md={4} lg={4}>
       <Card
+        raised={isHovered}
         sx={{
           display: 'flex',
           flexDirection: 'column',
           maxWidth: 500,
+          cursor: 'pointer',
+          borderRadius: '10px',
+        }}
+        onClick={() => {
+          navigate(`/${props.postUser.id}`);
+        }}
+        onMouseEnter={() => {
+          setHover(true);
+        }}
+        onMouseLeave={() => {
+          setHover(false);
         }}
       >
         {!!props.postUser.thumbnail ? (
@@ -95,19 +105,32 @@ export default function PostPreview(props: {
           </Typography>
         </CardContent>
         <CardActions>
-          <Stack sx={{ pl: 1 }}>
-            <Button
-              data-testid='test-btn-preview'
-              variant='outlined'
-              onClick={() => {
-                navigate(`/${props.postUser.id}`);
-              }}
-              sx={{ mb: 3 }}
-            >
-              Read More
-            </Button>
-            {tags}
-          </Stack>
+          <Grid container style={{ textAlign: 'center' }} spacing={2}>
+            <Grid item xs={4}>
+              <ThumbUpIcon />
+              <Typography>{props.postUser.likeCount}</Typography>
+            </Grid>
+            {Number(props.postUser.capacity) > 0 ? (
+              <Grid item xs={4}>
+                <PeopleAltIcon />
+                <Typography>
+                  {props.postUser.usersCheckedIn
+                    ? props.postUser.usersCheckedIn
+                    : 0}
+                  /{props.postUser.capacity}
+                </Typography>
+              </Grid>
+            ) : (
+              <> </>
+            )}
+            <Grid item xs={4}>
+              <ChatBubbleIcon />
+              <Typography>{props.postUser.totalComments}</Typography>
+            </Grid>
+            <Grid item md={12}>
+              {tags}
+            </Grid>
+          </Grid>
         </CardActions>
       </Card>
     </Grid>

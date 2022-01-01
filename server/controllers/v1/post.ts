@@ -694,6 +694,16 @@ export default class PostController {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
+    if (!this.fileManager.status()) {
+      return {
+        status: 400,
+        data: {
+          message:
+            'Thumbnail uploads are temporarily disabled. Remove the thumbnail and try again. ',
+        },
+      };
+    }
+
     let filePath: string | undefined = undefined;
 
     if (file) {

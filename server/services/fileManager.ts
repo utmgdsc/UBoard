@@ -15,6 +15,16 @@ export default class FileManager {
       console.error(err);
     }
   }
+
+  /**
+   * Check the status of the file manager.
+   *
+   * @returns Whether setting up backblaze was succesful or not
+   */
+  status() {
+    return !this.b2;
+  }
+
   /**
    * Upload the file.
    *

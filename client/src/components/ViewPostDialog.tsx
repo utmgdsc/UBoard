@@ -160,7 +160,7 @@ function LikeButton(props: {
   id: string;
 }) {
   let numLikes = !isNaN(props.numLikes) ? props.numLikes : 0;
-  const isLiked = props.doesUserLike == '1';
+  const isLiked = props.doesUserLike === '1';
 
   const handleClick = async () => {
     if (!isLiked) {
@@ -584,6 +584,9 @@ export default function ViewPostDialog() {
           </Grid>
           {/* Top information (author, date, tags..) */}
           <Stack sx={{ pl: 4 }}>
+            <Typography variant='subtitle2' sx={{ mb: 1, mt: 0.5 }}>
+              {postData.type.slice(0, -1)}
+            </Typography>
             <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
               Posted on {new Date(postData.createdAt).toString()} by{' '}
               {postData.User.firstName} {postData.User.lastName}

@@ -29,6 +29,7 @@ export type PostUser = Post & {
 };
 
 export type PostUserPreview = {
+  type: string;
   id: string;
   thumbnail: string;
   body: string;

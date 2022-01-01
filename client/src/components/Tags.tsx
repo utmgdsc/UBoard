@@ -9,7 +9,7 @@ import Typography from '@mui/material/Typography';
 /* Generate pre-formatted TagItems based on an array of provided tags */
 export default function GenerateTags(props: { tags: string[], space?: number }) {
   return (
-    <Stack direction='row' spacing={props.space ? props.space : 1} style={{ alignItems: 'center' }}>
+    <Stack direction='row' spacing={1} style={{ alignItems: 'center' }}>
       {props.tags.map((tag: string) => (
         <Tag tag={tag} key={tag} />
       ))}
@@ -18,9 +18,10 @@ export default function GenerateTags(props: { tags: string[], space?: number }) 
 }
 
 export function Tag(props: { tag: string }) {
+  const truncated = props.tag.length > 10 ? props.tag.slice(0, 7) + '...' : props.tag;
   return (
     <>
-      <TagItem key={props.tag}>{props.tag}</TagItem>
+      <TagItem key={truncated}>{truncated}</TagItem>
     </>
   );
 }

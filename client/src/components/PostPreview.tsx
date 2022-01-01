@@ -86,13 +86,25 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
           />
         ) : undefined}
         <CardContent sx={{ flexGrow: 1, mb: -2 }}>
-          <Typography
-            variant='h5'
-            component='h2'
-            style={{ wordWrap: 'break-word' }}
-          >
-            {props.postUser.title.substring(0, 28) + '...'}
-          </Typography>
+          <Grid container>
+            <Grid item xs={8}>
+              <Typography
+                variant='h5'
+                component='h2'
+                style={{ wordWrap: 'break-word' }}
+              >
+                {props.postUser.title.length > 30
+                  ? props.postUser.title.substring(0, 27) + '...'
+                  : props.postUser.title}
+              </Typography>
+            </Grid>
+            <Grid item xs={4}>
+              <Typography textAlign='right' variant='subtitle2'>
+                {props.postUser.type.slice(0, -1)}
+              </Typography>
+            </Grid>
+          </Grid>
+
           <Typography
             sx={{ fontStyle: 'italic' }}
             style={{ wordWrap: 'break-word' }}
@@ -101,7 +113,9 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
             {props.postUser.User.firstName} {props.postUser.User.lastName}
           </Typography>
           <Typography sx={{ py: 1 }} style={{ wordWrap: 'break-word' }}>
-            {props.postUser.body.substring(0, 150) + '...'}
+            {props.postUser.body.length > 150
+              ? props.postUser.body.substring(0, 147) + '...'
+              : props.postUser.body}
           </Typography>
         </CardContent>
         <CardActions>

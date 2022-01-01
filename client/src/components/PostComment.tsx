@@ -10,28 +10,42 @@ import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Link from '@mui/material/Link';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+
 import ServerApi, { CommentsUser } from '../api/v1';
 
 const api = new ServerApi();
 
-function MoreOptions(props: { data: CommentsUser }) {
+function MoreOptions(props: {
+  data: CommentsUser;
+  toggleEditor: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [isOpen, toggleMenu] = React.useState(false);
   const [isAlertOpen, showAlert] = React.useState(false);
   const [alertMsg, setMsg] = React.useState('An error has occurred');
 
   const closeMenu = () => {
+    setMsg('An error has occurred');
     toggleMenu(false);
   };
 
   const deleteComment = () => {
-    closeMenu();
+    api
+      .deleteComment(props.data.id)
+      .then((res) => {
+        if (res.status === 200) {
+          setMsg('Comment has been deleted. ');
+        } else {
+          setMsg('Failed to delete comment.');
+        }
+      })
+      .catch((err) => {
+        setMsg('Failed to delete comment. ');
+      })
+      .finally(() => showAlert(true));
   };
 
-  const editComment = () => {
-    closeMenu();
-  };
-
-  // TODO: hide this if not author
   return (
     <>
       <IconButton
@@ -54,7 +68,13 @@ function MoreOptions(props: { data: CommentsUser }) {
           style: { minWidth: '110px' },
         }}
       >
-        {/* <MenuItem onClick={ }>Edit</MenuItem> */}
+        <MenuItem
+          onClick={() => {
+            props.toggleEditor((prev) => !prev);
+          }}
+        >
+          Edit
+        </MenuItem>
         <MenuItem onClick={deleteComment}>Delete</MenuItem>
       </Menu>
       <Snackbar
@@ -72,7 +92,13 @@ export default function PostComment(props: {
   userHasCreatedComment: boolean;
 }) {
   const [showMoreText, toggleMoreText] = React.useState(false);
+  const [isEditing, toggleEditor] = React.useState(false);
   const body = props.data.body;
+  const [editingInput, setInput] = React.useState(body);
+
+  const updateComment = async () => {
+    await api.updateComment(props.data.id, { body: editingInput });
+  };
 
   return (
     <>
@@ -87,40 +113,62 @@ export default function PostComment(props: {
               <Typography variant='caption'>
                 {new Date(props.data.createdAt).toString()}
               </Typography>
-              <Typography variant='body1' style={{ wordWrap: 'break-word' }}>
-                {showMoreText ? body : body.slice(0, 125)}
-              </Typography>
-              {/* For longer comments, show 'read more' */}
-              {body.length >= 25 && !showMoreText ? (
-                <Link
-                  onClick={() => {
-                    toggleMoreText((prev) => !prev);
-                  }}
-                  underline='hover'
-                  color='GrayText'
-                  sx={{ cursor: 'pointer' }}
-                >
-                  Read more
-                </Link>
-              ) : body.length >= 25 ? (
-                <Link
-                  onClick={() => {
-                    toggleMoreText((prev) => !prev);
-                  }}
-                  underline='hover'
-                  color='GrayText'
-                  sx={{ cursor: 'pointer' }}
-                >
-                  Show less
-                </Link>
-              ) : undefined}
+              {!isEditing ? (
+                <>
+                  {' '}
+                  <Typography
+                    variant='body1'
+                    style={{ wordWrap: 'break-word' }}
+                  >
+                    {showMoreText ? body : body.slice(0, 125)}
+                  </Typography>
+                  {body.length >= 25 && !showMoreText ? (
+                    <Link
+                      onClick={() => {
+                        toggleMoreText((prev) => !prev);
+                      }}
+                      underline='hover'
+                      color='GrayText'
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      Read more
+                    </Link>
+                  ) : body.length >= 25 ? (
+                    <Link
+                      onClick={() => {
+                        toggleMoreText((prev) => !prev);
+                      }}
+                      underline='hover'
+                      color='GrayText'
+                      sx={{ cursor: 'pointer' }}
+                    >
+                      Show less
+                    </Link>
+                  ) : undefined}
+                </>
+              ) : (
+                <>
+                  <TextField
+                    defaultValue={props.data.body}
+                    value={editingInput}
+                    fullWidth
+                    multiline
+                    onChange={(e) => setInput(e.target.value)}
+                  />
+                </>
+              )}
             </Stack>
           </Stack>
           <Stack>
             {props.userHasCreatedComment ? (
-              <MoreOptions data={props.data} />
+              <MoreOptions data={props.data} toggleEditor={toggleEditor} />
             ) : undefined}
           </Stack>
+          {isEditing ? (
+            <Button variant='contained' onClick={updateComment} sx={{ mr: 2 }}>
+              Update
+            </Button>
+          ) : undefined}
         </Stack>
       </Paper>
     </>

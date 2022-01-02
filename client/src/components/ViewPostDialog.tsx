@@ -499,7 +499,7 @@ export default function ViewPostDialog() {
   });
 
   if (error) {
-    navigate('/404');
+    window.location.replace('/404');
     return <></>;
   } else if (!postData || !postData.User) {
     return (

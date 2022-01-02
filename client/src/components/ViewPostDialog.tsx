@@ -499,14 +499,8 @@ export default function ViewPostDialog() {
   });
 
   if (error) {
-    return (
-      <>
-        <Typography variant='h4'>
-          The post you requested does not exist.{' '}
-        </Typography>
-        <a href='/dashboard'>Return home?</a>
-      </>
-    );
+    navigate('/404');
+    return <></>;
   } else if (!postData || !postData.User) {
     return (
       <>

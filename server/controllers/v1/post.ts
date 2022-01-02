@@ -405,71 +405,77 @@ export default class PostController {
     status: number;
     data: { result?: PostUser; message?: string };
   }> {
-    const data = (await this.postsRepo.findByPk(postID, {
-      attributes: [
-        'id',
-        'title',
-        'body',
-        'thumbnail',
-        'location',
-        'createdAt',
-        'coords',
-        'capacity',
-        'feedbackScore',
-        'UserId',
-        [
-          sequelize.literal(
-            `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
-          ),
-          'likeCount',
-        ],
-        [
-          sequelize.literal(
+    let data: PostUser | undefined = undefined;
+
+    try {
+      data = (await this.postsRepo.findByPk(postID, {
+        attributes: [
+          'id',
+          'title',
+          'body',
+          'thumbnail',
+          'location',
+          'createdAt',
+          'coords',
+          'capacity',
+          'feedbackScore',
+          'UserId',
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
+            ),
+            'likeCount',
+          ],
+          [
+            sequelize.literal(
+              // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+              `(
+                SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
+                WHERE "Likes"."postID" = "Post"."id" 
+                  AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
+              )`
+            ),
+            'doesUserLike',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'isUserCheckedIn',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id")`
+            ),
+            'usersCheckedIn',
+          ],
+          [
             // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-            `(
-              SELECT COUNT(*) FROM "UserPostLikes" as "Likes" 
-              WHERE "Likes"."postID" = "Post"."id" 
-                AND "Likes"."userID" = ${db.sequelize.escape(`${userID}`)}
-            )`
-          ),
-          'doesUserLike',
-        ],
-        [
-          sequelize.literal(
-            `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
-                WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = ${db.sequelize.escape(
+            `(SELECT COUNT(*) FROM "UserReports" as "Reports" 
+                WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = ${db.sequelize.escape(
                   `${userID}`
-                )})`
-          ),
-          'isUserCheckedIn',
+                )})`,
+            'didUserReport',
+          ],
         ],
-        [
-          sequelize.literal(
-            `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
-                WHERE "Checkin"."postID" = "Post"."id")`
-          ),
-          'usersCheckedIn',
+        include: [
+          {
+            model: db.User,
+            attributes: ['firstName', 'lastName', 'userName'],
+          },
+          {
+            model: db.Tag,
+            attributes: ['text'],
+          },
         ],
-        [
-          // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
-          `(SELECT COUNT(*) FROM "UserReports" as "Reports" 
-              WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = ${db.sequelize.escape(
-                `${userID}`
-              )})`,
-          'didUserReport',
-        ],
-      ],
-      include: [
-        {
-          model: db.User,
-          attributes: ['firstName', 'lastName', 'userName'],
-        },
-        {
-          model: db.Tag,
-          attributes: ['text'],
-        },
-      ],
-    })) as PostUser;
+      })) as PostUser;
+    } catch (err) {
+      console.error(`Find Post Error ${err}`);
+    }
 
     if (!data) {
       return {
@@ -477,6 +483,7 @@ export default class PostController {
         data: { message: `Post ${postID} could not be found` },
       };
     }
+
     const result = {
       status: 200,
       data: { result: data },

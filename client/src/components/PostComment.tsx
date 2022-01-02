@@ -147,19 +147,35 @@ export default function PostComment(props: {
           {isEditing ? (
             <>
               <TextField
-                defaultValue={props.data.body}
+                defaultValue={editingInput}
                 inputProps={{ maxLength: 250 }}
-                value={editingInput}
                 onChange={(e) => setInput(e.target.value)}
               />
-              <Button
-                variant='contained'
-                onClick={updateComment}
-                disabled={editingInput.length < 10 || editingInput.length > 250}
-                sx={{ mt: 1 }}
-              >
-                Update
-              </Button>
+              <Stack direction='row' >
+                  <Button
+                    variant='contained'
+                    onClick={updateComment}
+                    disabled={
+                      editingInput.length < 10 || editingInput.length > 250
+                    }
+                    sx={{ mr: 1, mt: 1}}
+                  >
+                    Update
+                  </Button>
+
+                  <Button
+                    variant='contained'
+                    color='secondary'
+                    onClick={() => toggleEditor(false)}
+                    disabled={
+                      editingInput.length < 10 || editingInput.length > 250
+                    }
+                    sx={{ mt: 1 }}
+                  >
+                    Cancel
+                  </Button>
+                  </Stack>
+
             </>
           ) : undefined}
         </Stack>

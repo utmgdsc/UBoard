@@ -108,6 +108,7 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
         <Stack spacing={1}>
           {recentComments.map((data) => (
             <PostComment
+              key={data.id}
               data={data}
               userAuthoredComment={props.currentUser.id === data.User.id}
               setHasInteracted={setCommentInteraction}

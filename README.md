@@ -10,7 +10,7 @@ The project uses yarn. Install node (npm) and do `npm install --global yarn`.
 
 The frontend of our project is in the `client/` folder, and the backend is in `server/`.
 
-## Type Definitions for Client/
+## Type Definitions for Client
 
 Additional setup needs to be done in order to use the type definitions from the server in our client files.
 

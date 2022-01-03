@@ -731,9 +731,17 @@ export default class PostController {
 
     let filePath: string | undefined = undefined;
 
-    if (file) {
+    if (file && this.fileManager.status()) {
       // A post should be able to be created without a file.
       filePath = await this.fileManager.upload(file.path, file.filename);
+    } else if (file) {
+      return {
+        status: 400,
+        data: {
+          message:
+            'Thumbnail uploads are temporarily disabled. Remove the thumbnail and try again. ',
+        },
+      };
     }
 
     const post = await this.postsRepo.create({

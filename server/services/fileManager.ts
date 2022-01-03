@@ -2,23 +2,42 @@ import b2 from 'backblaze-b2';
 import fs from 'fs';
 
 export default class FileManager {
-  protected b2: b2;
+  protected b2?: b2;
 
   constructor() {
-    this.b2 = new b2({
-      applicationKeyId: process.env.BACKBLAZE_APP_KEY_ID as string,
-      applicationKey: process.env.BACKBLAZE_APP_KEY as string,
-    });
-    this.b2.authorize();
+    try {
+      this.b2 = new b2({
+        applicationKeyId: process.env.BACKBLAZE_APP_KEY_ID as string,
+        applicationKey: process.env.BACKBLAZE_APP_KEY as string,
+      });
+      this.b2.authorize();
+    } catch (err) {
+      console.error(err);
+      this.b2 = undefined;
+    }
   }
+
+  /**
+   * Check the status of the file manager.
+   *
+   * @returns Whether setting up backblaze was succesful or not
+   */
+  status() {
+    return this.b2 !== undefined;
+  }
+
   /**
    * Upload the file.
    *
    * @param localFilePath - Path to the file on the temporary directory.
    * @param fileName	- The name of the file.
-   * @return The location of the file on the file storage service
+   * @return The location of the file on the file storage service or an empty string on failure
    */
   async upload(localFilePath: string, fileName: string) {
+    if (!this.b2) {
+      return '';
+    }
+
     const uploadUrl = await this.b2.getUploadUrl({
       bucketId: process.env.BACKBLAZE_BUCKET_ID as string,
     });

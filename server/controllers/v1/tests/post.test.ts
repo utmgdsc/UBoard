@@ -10,6 +10,14 @@ import {
 import FileManager from '../../../services/fileManager';
 import PostController, { MAX_REPORTS } from '../post';
 
+jest.mock('../../../services/fileManager', () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      status: jest.fn(() => true),
+    };
+  });
+});
+
 jest.mock('backblaze-b2');
 
 const postController = new PostController(

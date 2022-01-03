@@ -157,8 +157,8 @@ function CreatePost(props: {
         if (res.status === 200) {
           setMsg('Post has been succesfully created.');
         } else {
+          setMsg(`Failed to create post. ${res.data.message ? res.data.message: ''}`);
           console.error(res.data.message)
-          setMsg('Failed to create post');
         }
       })
       .catch((err) => {

@@ -288,7 +288,10 @@ function PostEditor(props: {
     if (form.body.length < 25) {
       setMsg('Body must be atleast 25 characters');
       showAlert(true);
-    } else if (form.title === '' || form.location === '') {
+    } else if (
+      form.title === '' ||
+      (props.type === 'Events' && form.location === '')
+    ) {
       setMsg('Enter all required fields');
       showAlert(true);
     } else if (isNaN(form.capacity)) {

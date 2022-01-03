@@ -197,7 +197,7 @@ postRouter.post('/', async (req: Request, res: Response) => {
       req.body.location,
       req.body.capacity,
       req.body.tags,
-      JSON.parse(req.body.coords),
+      req.body.coords ? JSON.parse(req.body.coords) : { lat: -1, lng: -1 },
       req.file
     );
     res.status(result.status).json(result);

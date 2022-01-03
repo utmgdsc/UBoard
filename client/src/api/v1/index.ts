@@ -38,6 +38,8 @@ export type PostUserPreview = {
   title: string;
   createdAt: string;
   likeCount: number;
+  coords: { lat: number; lng: number };
+  location: string;
   doesUserLike: string;
   isUserCheckedIn: string;
   usersCheckedIn: number;

@@ -109,17 +109,12 @@ function RecentPosts(props: {
 
   return (
     <>
-      {!props.mapView ? (
-        recentPosts.map((data) => (
-          <PostPreview
-            key={data.id}
-            postUser={data}
-          />
-        ))
-      ) : (
+      {props.type === 'Events' && props.mapView ? (
         <Box sx={{ mt: 2, ml: 1, px: 2, pl: 8, pr: 4 }}>
           <EventsMapView posts={recentPosts} />
         </Box>
+      ) : (
+        recentPosts.map((data) => <PostPreview key={data.id} postUser={data} />)
       )}
     </>
   );
@@ -183,24 +178,26 @@ export default function PostDashboard() {
                   ))}
                 </Select>
               </Grid>
-              <Grid>
-                <FormControl>
-                  <FormControlLabel
-                    value='mapview'
-                    control={
-                      <Switch
-                        color='primary'
-                        checked={isMapView}
-                        onChange={(e) => {
-                          toggleMapView(e.target.checked);
-                        }}
-                      />
-                    }
-                    label='Toggle Map View'
-                    labelPlacement='start'
-                  />
-                </FormControl>
-              </Grid>
+              {postType === 'Events' && (
+                <Grid>
+                  <FormControl>
+                    <FormControlLabel
+                      value='mapview'
+                      control={
+                        <Switch
+                          color='primary'
+                          checked={isMapView}
+                          onChange={(e) => {
+                            toggleMapView(e.target.checked);
+                          }}
+                        />
+                      }
+                      label='Toggle Map View'
+                      labelPlacement='start'
+                    />
+                  </FormControl>
+                </Grid>
+              )}
               <Grid marginLeft='auto'>
                 <CreatePost isOpen={openedCreate} toggleDialog={toggleDialog} />
               </Grid>

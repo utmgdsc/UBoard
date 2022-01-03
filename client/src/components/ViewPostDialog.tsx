@@ -26,6 +26,7 @@ import { LocationMap, LocationPickerMap } from './LocationMap';
 import ServerApi, { PostUser } from '../api/v1';
 import GenerateTags from './Tags';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
+import { typeLabels, typeButtonLabels } from './constants/postTypes';
 
 const api = new ServerApi();
 
@@ -139,12 +140,13 @@ function MoreOptions(props: {
 
 /* Like button. Handles liking/unliking a post */
 function LikeButton(props: {
+  setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   numLikes: number;
   doesUserLike: string;
   id: string;
 }) {
   let numLikes = !isNaN(props.numLikes) ? props.numLikes : 0;
-  const isLiked = props.doesUserLike == '1';
+  const isLiked = props.doesUserLike === '1';
 
   const handleClick = async () => {
     if (!isLiked) {
@@ -152,6 +154,7 @@ function LikeButton(props: {
     } else {
       await api.unlikePost(props.id);
     }
+    props.setInteractionBit((bit) => !bit);
   };
 
   const likeButton = isLiked ? (
@@ -181,6 +184,8 @@ function LikeButton(props: {
 }
 
 function CapacityBar(props: {
+  type: string;
+  setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   maxCapacity: number;
   postID: string;
   isUserCheckedIn: string;
@@ -191,19 +196,14 @@ function CapacityBar(props: {
   const handleCheckIn = async () => {
     if (props.isUserCheckedIn === '1') {
       await api.checkout(props.postID);
-      // As there is no global state management system, we would have to wait
-      // for the autoreload system to update the post info. This is a hack to
-      // ensure that the checked in state is immediately updated.
-      props.isUserCheckedIn = '0';
-      props.usersCheckedIn -= 1;
     } else {
       const result = await api.checkin(props.postID);
-      if (result.status !== 409) {
-        props.isUserCheckedIn = '1';
+      if (result.status === 409) {
+        // TODO indicate a standard alert to the user that the event could not be
+        // checked into (over capacity)
       }
-      // TODO indicate a standard alert to the user that the event could not be
-      // checked into (over capacity)
     }
+    props.setInteractionBit((bit) => !bit);
   };
 
   const buttonHandler =
@@ -213,7 +213,7 @@ function CapacityBar(props: {
       </Button>
     ) : props.usersCheckedIn < props.maxCapacity ? (
       <Button onClick={handleCheckIn} variant='outlined'>
-        Check In
+        {typeButtonLabels[props.type]}
       </Button>
     ) : (
       <Button disabled variant='outlined'>
@@ -224,7 +224,7 @@ function CapacityBar(props: {
   return (
     <Stack spacing={1} sx={{ mr: 4 }}>
       <Typography variant='body1' sx={{ pr: 2 }}>
-        Capacity: {props.usersCheckedIn}/{maxCapacity}
+        {typeLabels[props.type]}: {props.usersCheckedIn}/{maxCapacity}
       </Typography>
       <LinearProgress
         variant='determinate'
@@ -236,6 +236,7 @@ function CapacityBar(props: {
 }
 
 function PostEditor(props: {
+  type: string;
   id: string;
   title: string;
   body: string;
@@ -287,7 +288,10 @@ function PostEditor(props: {
     if (form.body.length < 25) {
       setMsg('Body must be atleast 25 characters');
       showAlert(true);
-    } else if (form.title === '' || form.location === '') {
+    } else if (
+      form.title === '' ||
+      (props.type === 'Events' && form.location === '')
+    ) {
       setMsg('Enter all required fields');
       showAlert(true);
     } else if (isNaN(form.capacity)) {
@@ -322,7 +326,10 @@ function PostEditor(props: {
         />
       </Stack>
 
-      <Stack sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}>
+      <Stack
+        display={props.type === 'Events' ? undefined : 'none'}
+        sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}
+      >
         <FormGroup>
           <FormControlLabel
             control={
@@ -361,7 +368,7 @@ function PostEditor(props: {
           onChange={(e) => setForm({ ...form, body: e.target.value })}
         />
         <Stack sx={{ pt: 2, pb: 2 }}>
-          <Typography> Capacity </Typography>
+          <Typography>{typeLabels[props.type]}</Typography>
           <TextField
             size='small'
             defaultValue={props.capacity}
@@ -452,9 +459,10 @@ export default function ViewPostDialog() {
   const { postid } = useParams();
   const navigate = useNavigate();
   const [error, toggleError] = React.useState(false);
+  const [interactionBit, setInteractionBit] = React.useState(false);
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
-  const fetchData = () => {
+  const fetchData = React.useCallback(() => {
     api
       .fetchPost(postid!)
       .then((res) => {
@@ -472,31 +480,13 @@ export default function ViewPostDialog() {
         console.error(`Error fetching post ${err}`);
         toggleError(true);
       });
-  };
+  }, [postid, userContext.data]);
 
   React.useEffect(() => {
-    // Fetch data (on initial load)
-    if (!postData.User && !error) {
+    if (!error && !isEditing) {
       fetchData();
     }
-  });
-
-  React.useEffect(() => {
-    if (!isEditing && !error) {
-      // ensure data updates instantly for the user that finished editing
-      fetchData();
-    }
-  }, [isEditing]);
-
-  React.useEffect(() => {
-    /* Fetch incase data has changed / post was edited */
-    if (!error) {
-      const interval = setInterval(() => {
-        fetchData();
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  });
+  }, [fetchData, error, isEditing, interactionBit]);
 
   if (error) {
     window.location.replace('/404');
@@ -513,6 +503,7 @@ export default function ViewPostDialog() {
     <>
       {isEditing ? ( // show the editing UI instead of normal post
         <PostEditor
+          type={postData.type}
           id={postData.id}
           title={postData.title}
           body={postData.body}
@@ -556,6 +547,9 @@ export default function ViewPostDialog() {
           </Grid>
           {/* Top information (author, date, tags..) */}
           <Stack sx={{ pl: 4 }}>
+            <Typography variant='subtitle2' sx={{ mb: 1, mt: 0.5 }}>
+              {postData.type.slice(0, -1)}
+            </Typography>
             <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
               Posted on {new Date(postData.createdAt).toString()} by{' '}
               {postData.User.firstName} {postData.User.lastName}
@@ -594,6 +588,8 @@ export default function ViewPostDialog() {
             <Stack direction='row' sx={{ px: 4, pb: 5 }}>
               {Number(postData.capacity) > 0 ? (
                 <CapacityBar
+                  type={postData.type}
+                  setInteractionBit={setInteractionBit}
                   maxCapacity={Number(postData.capacity)}
                   postID={postData.id}
                   isUserCheckedIn={postData.isUserCheckedIn}
@@ -603,15 +599,20 @@ export default function ViewPostDialog() {
                 <></>
               )}
               <LikeButton
+                setInteractionBit={setInteractionBit}
                 numLikes={Number(postData.likeCount)}
                 doesUserLike={postData.doesUserLike}
                 id={postData.id}
               />
             </Stack>
-            <LocationHandler
-              coords={postData.coords}
-              location={postData.location}
-            />
+            {postData.type === 'Events' ? (
+              <LocationHandler
+                coords={postData.coords}
+                location={postData.location}
+              />
+            ) : (
+              <></>
+            )}
           </Stack>
           {/* Comment Section */}
           <Stack sx={{ px: 8, pb: 5 }}>

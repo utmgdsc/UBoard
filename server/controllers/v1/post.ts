@@ -1,4 +1,4 @@
-import sequelize from 'sequelize';
+import sequelize, { Sequelize } from 'sequelize';
 import { latLng, Post } from '../../models/post';
 import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
@@ -83,6 +83,7 @@ export default class PostController {
    */
   async getPosts(
     userID: string,
+    type: string,
     limit: number,
     offset: number
   ): Promise<{
@@ -94,6 +95,7 @@ export default class PostController {
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
         attributes: [
+          'type',
           'id',
           'body',
           'title',
@@ -164,8 +166,11 @@ export default class PostController {
         ],
         order: [['createdAt', 'DESC']],
         offset: offset,
+        where: type === 'All' ? Sequelize.literal('true') : { type: type },
       }),
-      this.postsRepo.count(),
+      this.postsRepo.count({
+        where: type === 'All' ? Sequelize.literal('true') : { type: type },
+      }),
     ]);
 
     return {
@@ -190,6 +195,7 @@ export default class PostController {
   async getUserPosts(
     userID: string,
     queryUserID: string,
+    type: string,
     limit: number,
     offset: number
   ): Promise<{
@@ -201,6 +207,7 @@ export default class PostController {
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
         attributes: [
+          'type',
           'id',
           'body',
           'title',
@@ -270,9 +277,17 @@ export default class PostController {
         ],
         order: [['createdAt', 'DESC']],
         offset: offset,
-        where: { UserId: queryUserID },
+        where:
+          type === 'All'
+            ? { UserId: queryUserID }
+            : { UserId: queryUserID, type: type },
       }),
-      this.postsRepo.count({ where: { UserId: queryUserID } }),
+      this.postsRepo.count({
+        where:
+          type === 'All'
+            ? { UserId: queryUserID }
+            : { UserId: queryUserID, type: type },
+      }),
     ]);
 
     return {
@@ -291,6 +306,7 @@ export default class PostController {
 
   async searchForPosts(
     userID: string,
+    type: string,
     query: string,
     limit: number,
     offset: number
@@ -309,6 +325,7 @@ export default class PostController {
     const data = await Promise.all([
       db.sequelize.query(
         `SELECT 
+          "Post"."type",
           "Post"."id", 
           "Post"."body", 
           "Post"."title", 
@@ -356,12 +373,12 @@ export default class PostController {
           FROM "PostTags" GROUP BY 1
         ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
         CROSS JOIN to_tsquery($query) AS "query" 
-        WHERE "query" @@ ${weights} 
+        WHERE "query" @@ ${weights} AND ("Post"."type" = $type OR $type = 'All')
         ORDER BY "rank" DESC 
         LIMIT $limit 
         OFFSET $offset;`,
         {
-          bind: { userID, query, limit, offset },
+          bind: { userID, query, type, limit, offset },
           type: QueryTypes.SELECT,
         }
       ) as PostUserPreview[],
@@ -373,9 +390,9 @@ export default class PostController {
           FROM "PostTags" GROUP BY 1
         ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
         CROSS JOIN to_tsquery($query) AS "query" 
-        WHERE "query" @@ ${weights}`,
+        WHERE "query" @@ ${weights} AND ("Post"."type" = $type OR $type = 'All')`,
         {
-          bind: { query },
+          bind: { query, type },
           type: QueryTypes.SELECT,
         }
       ),
@@ -405,11 +422,12 @@ export default class PostController {
     status: number;
     data: { result?: PostUser; message?: string };
   }> {
-    let data: PostUser | undefined = undefined;
+    let data: undefined | PostUser = undefined;
 
     try {
       data = (await this.postsRepo.findByPk(postID, {
         attributes: [
+          'type',
           'id',
           'title',
           'body',
@@ -474,7 +492,7 @@ export default class PostController {
         ],
       })) as PostUser;
     } catch (err) {
-      console.error(`Find Post Error ${err}`);
+      console.error(err);
     }
 
     if (!data) {
@@ -483,7 +501,6 @@ export default class PostController {
         data: { message: `Post ${postID} could not be found` },
       };
     }
-
     const result = {
       status: 200,
       data: { result: data },
@@ -686,6 +703,7 @@ export default class PostController {
    */
   async createPost(
     userID: string,
+    type?: string,
     title?: string,
     body?: string,
     location?: string,
@@ -697,7 +715,13 @@ export default class PostController {
     status: number;
     data: { result?: Post; message?: string };
   }> {
-    if (!title || !body || !location || capacity == undefined) {
+    if (
+      !type ||
+      !title ||
+      !body ||
+      location == undefined ||
+      capacity == undefined
+    ) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
@@ -709,6 +733,7 @@ export default class PostController {
     }
 
     const post = await this.postsRepo.create({
+      type,
       title,
       body,
       location,

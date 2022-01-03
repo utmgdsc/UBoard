@@ -77,6 +77,7 @@ export async function makePost(
   capacity = 10
 ): Promise<Post> {
   return await PostModel.create({
+    type: 'Events',
     title: title,
     body: body,
     feedbackScore: 10,

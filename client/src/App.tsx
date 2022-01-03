@@ -93,7 +93,7 @@ function App() {
         <Routes>
           <Route path='/' element={<AuthContainer />} />
           <Route path='/dashboard' element={<ProtectedRoute destination={<PostDashboard />} />} />
-          <Route path=':postid' element={<ProtectedRoute destination={<ViewPostDialog />} />}  /> 
+          <Route path='/post-:postid' element={<ProtectedRoute destination={<ViewPostDialog />} />}  /> 
           <Route path='/confirm-account' element={<EmailConfirmContainer />} />
           <Route path='/password-reset' element={<PassResetContainer />} />
         </Routes>

@@ -594,14 +594,8 @@ export default function ViewPostDialog() {
   }, [fetchData, interactionBit]);
 
   if (error) {
-    return (
-      <>
-        <Typography variant='h4'>
-          The post you requested does not exist.{' '}
-        </Typography>
-        <a href='/dashboard'>Return home?</a>
-      </>
-    );
+    window.location.replace('/404');
+    return <></>;
   } else if (!postData || !postData.User) {
     return (
       <>

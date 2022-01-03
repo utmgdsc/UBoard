@@ -4,10 +4,14 @@ import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Pagination from '@mui/material/Pagination';
+import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 import Header from '../components/Header';
 import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
+import { EventsMapView } from '../components/LocationMap';
 
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -31,6 +35,7 @@ function RecentPosts(props: {
   prevState: string;
   setPrevState: React.Dispatch<React.SetStateAction<string>>;
   pageNum: number;
+  mapView: boolean;
   userId: string;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
@@ -104,9 +109,13 @@ function RecentPosts(props: {
 
   return (
     <>
-      {recentPosts.map((data) => (
-        <PostPreview key={data.id} postUser={data} />
-      ))}
+      {props.type === 'Events' && props.mapView ? (
+        <Box sx={{ mt: 2, ml: 1, px: 2, pl: 8, pr: 4 }}>
+          <EventsMapView posts={recentPosts} />
+        </Box>
+      ) : (
+        recentPosts.map((data) => <PostPreview key={data.id} postUser={data} />)
+      )}
     </>
   );
 }
@@ -116,6 +125,7 @@ export default function PostDashboard() {
 
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
+  const [isMapView, toggleMapView] = React.useState(false);
 
   const [userId, setUserId] = React.useState('');
 
@@ -168,12 +178,33 @@ export default function PostDashboard() {
                   ))}
                 </Select>
               </Grid>
+              {postType === 'Events' && (
+                <Grid>
+                  <FormControl>
+                    <FormControlLabel
+                      value='mapview'
+                      control={
+                        <Switch
+                          color='primary'
+                          checked={isMapView}
+                          onChange={(e) => {
+                            toggleMapView(e.target.checked);
+                          }}
+                        />
+                      }
+                      label='Toggle Map View'
+                      labelPlacement='start'
+                    />
+                  </FormControl>
+                </Grid>
+              )}
               <Grid marginLeft='auto'>
                 <CreatePost isOpen={openedCreate} toggleDialog={toggleDialog} />
               </Grid>
             </Grid>
 
             <RecentPosts
+              mapView={isMapView}
               openedCreate={openedCreate}
               userId={userId}
               type={postType}

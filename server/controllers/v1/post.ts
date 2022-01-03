@@ -32,6 +32,8 @@ export type PostUserPreview = {
   createdAt: Date;
   likeCount: number;
   doesUserLike: boolean;
+  coords: latLng;
+  location: string;
   isUserCheckedIn: boolean;
   usersCheckedIn: number;
   capacity: number;
@@ -101,6 +103,8 @@ export default class PostController {
           'title',
           'createdAt',
           'thumbnail',
+          'coords',
+          'location',
           'capacity',
           [
             sequelize.literal(

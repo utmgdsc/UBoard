@@ -158,24 +158,13 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
 
   // kinda hacky, but we need to explicitly define height/width for google maps in sx
   const theme = useTheme();
-  const smQuery = useMediaQuery(theme.breakpoints.between('sm', 'md'));
-  const bgQuery = useMediaQuery(theme.breakpoints.between('md', 'lg'));
-  const xbgQuery = useMediaQuery(theme.breakpoints.up('lg'));
-  const mapHeight = smQuery
-    ? '65vh'
-    : bgQuery
-    ? '90vh'
-    : xbgQuery
-    ? '90vh'
-    : '30vh';
+  const smQuery = useMediaQuery(theme.breakpoints.down('md'));
+  const xlQuery = useMediaQuery(theme.breakpoints.up('lg'));
+
+  const mapHeight = smQuery ? '60vw' : '40vw';
 
     const mapWidth = smQuery
-    ? '95vh'
-    : bgQuery
-    ? '100vh'
-    : xbgQuery
-    ? '159vh'
-    : '40vh';
+    ? '90vw' : xlQuery ? '55vw' : '74vw';
 
   // We want to do manual refresh so that the user is not interrupted when interacting the map if the data is changed/new posts are fetched
   const refreshMap = () => {

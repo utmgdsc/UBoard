@@ -590,7 +590,7 @@ export default function ViewPostDialog() {
 
   /* Update on interaction */
   React.useEffect(() => {
-      fetchData();
+    fetchData();
   }, [fetchData, interactionBit]);
 
   if (error) {

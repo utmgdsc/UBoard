@@ -17,12 +17,19 @@ import ServerApi from '../api/v1/index';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
 
 import { LocationPickerMap } from './LocationMap';
+
+import { postTypes, typeLabels } from './constants/postTypes';
 
 const api = new ServerApi();
 
 interface FormState {
+  type: string;
   title: string;
   body: string;
   file: File | undefined;
@@ -44,11 +51,14 @@ function CreatePost(props: {
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
   const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);
-  const [location, setLocation] = React.useState(
-    {} as { location: string; lat: number; lng: number }
-  );
+  const [location, setLocation] = React.useState({
+    location: '',
+    lat: -1,
+    lng: -1,
+  } as { location: string; lat: number; lng: number });
 
   const [form, setForm] = useState<FormState>({
+    type: '',
     title: '',
     body: '',
     file: undefined,
@@ -97,6 +107,7 @@ function CreatePost(props: {
 
   const closeDialog = () => {
     setForm({
+      type: '',
       title: '',
       body: '',
       file: undefined,
@@ -146,6 +157,7 @@ function CreatePost(props: {
         if (res.status === 200) {
           setMsg('Post has been succesfully created.');
         } else {
+          console.error(res.data.message)
           setMsg('Failed to create post');
         }
       })
@@ -206,8 +218,34 @@ function CreatePost(props: {
             >
               Create Post
             </Typography>
+            <hr />
             {/* form  begins*/}
-            <Box component='form' noValidate sx={{ mt: 2 }}>
+            <FormControl sx={{ width: '50%' }}>
+              <InputLabel id='type-select-label'>Select a post type</InputLabel>
+              <Select
+                labelId='type-select-label'
+                autoWidth
+                variant='standard'
+                value={form.type}
+                onChange={(e) => {
+                  setForm({ ...form, type: e.target.value });
+                }}
+                label='Type'
+              >
+                {postTypes.slice(1).map((t) => (
+                  <MenuItem key={t} value={t}>
+                    {t}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <Box
+              display={form.type === '' ? 'none' : undefined}
+              component='form'
+              noValidate
+              sx={{ mt: 2 }}
+              data-testid='post-form'
+            >
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <TextField
@@ -251,7 +289,7 @@ function CreatePost(props: {
 
                 <Grid item xs={12} md={3}>
                   <TextField
-                    label='Event Capacity'
+                    label={typeLabels[form.type]}
                     placeholder='40'
                     fullWidth
                     size='small'
@@ -329,7 +367,11 @@ function CreatePost(props: {
                     }}
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid
+                  display={form.type === 'Events' ? undefined : 'none'}
+                  item
+                  xs={12}
+                >
                   <FormGroup>
                     <FormControlLabel
                       control={
@@ -421,6 +463,7 @@ function CreatePost(props: {
             </Box>
 
             <PreviewPopUp
+              type={form.type}
               title={form.title}
               body={form.body}
               img={form.file}

@@ -17,6 +17,7 @@ const postController = new PostController(
 );
 
 postRouter.get('', async (req: Request, res: Response) => {
+  const type = req.query.type;
   const limit = req.query.limit;
   const offset = req.query.offset;
 
@@ -31,6 +32,7 @@ postRouter.get('', async (req: Request, res: Response) => {
   try {
     const result = await postController.getPosts(
       getAuthUser(res).id,
+      type as string,
       Number(limit),
       Number(offset)
     );
@@ -41,6 +43,7 @@ postRouter.get('', async (req: Request, res: Response) => {
 });
 
 postRouter.get('/search', async (req: Request, res: Response) => {
+  const type = req.query.type;
   const query = req.query.query;
   const limit = req.query.limit;
   const offset = req.query.offset;
@@ -56,6 +59,7 @@ postRouter.get('/search', async (req: Request, res: Response) => {
   try {
     const result = await postController.searchForPosts(
       getAuthUser(res).id,
+      type as string,
       query as string,
       Number(limit),
       Number(offset)
@@ -68,6 +72,7 @@ postRouter.get('/search', async (req: Request, res: Response) => {
 
 postRouter.get('/user/:userId', async (req: Request, res: Response) => {
   const userId = req.params.userId;
+  const type = req.query.type;
   const limit = req.query.limit;
   const offset = req.query.offset;
 
@@ -83,6 +88,7 @@ postRouter.get('/user/:userId', async (req: Request, res: Response) => {
     const result = await postController.getUserPosts(
       getAuthUser(res).id,
       userId as string,
+      type as string,
       Number(limit),
       Number(offset)
     );
@@ -185,6 +191,7 @@ postRouter.post('/', async (req: Request, res: Response) => {
   try {
     const result = await postController.createPost(
       getAuthUser(res).id,
+      req.body.type,
       req.body.title,
       req.body.body,
       req.body.location,

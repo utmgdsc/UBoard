@@ -19,6 +19,7 @@ import Switch from '@mui/material/Switch';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Pagination from '@mui/material/Pagination';
 
 import { UserContext } from '../App';
 import PostComment from './PostComment';
@@ -28,7 +29,7 @@ import ServerApi, { CommentsUser, PostUser } from '../api/v1';
 import GenerateTags from './Tags';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
 import { User } from 'models/user';
-import Pagination from '@mui/material/Pagination';
+import { typeLabels, typeButtonLabels } from './constants/postTypes';
 
 const api = new ServerApi();
 const COMMENTS_PER_PAGE = 10;
@@ -277,6 +278,7 @@ function LikeButton(props: {
 }
 
 function CapacityBar(props: {
+  type: string;
   setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   maxCapacity: number;
   postID: string;
@@ -305,7 +307,7 @@ function CapacityBar(props: {
       </Button>
     ) : props.usersCheckedIn < props.maxCapacity ? (
       <Button onClick={handleCheckIn} variant='outlined'>
-        Check In
+        {typeButtonLabels[props.type]}
       </Button>
     ) : (
       <Button disabled variant='outlined'>
@@ -316,7 +318,7 @@ function CapacityBar(props: {
   return (
     <Stack spacing={1} sx={{ mr: 4 }}>
       <Typography variant='body1' sx={{ pr: 2 }}>
-        Capacity: {props.usersCheckedIn}/{maxCapacity}
+        {typeLabels[props.type]}: {props.usersCheckedIn}/{maxCapacity}
       </Typography>
       <LinearProgress
         variant='determinate'
@@ -328,6 +330,7 @@ function CapacityBar(props: {
 }
 
 function PostEditor(props: {
+  type: string;
   id: string;
   title: string;
   body: string;
@@ -379,7 +382,10 @@ function PostEditor(props: {
     if (form.body.length < 25) {
       setMsg('Body must be atleast 25 characters');
       showAlert(true);
-    } else if (form.title === '' || form.location === '') {
+    } else if (
+      form.title === '' ||
+      (props.type === 'Events' && form.location === '')
+    ) {
       setMsg('Enter all required fields');
       showAlert(true);
     } else if (isNaN(form.capacity)) {
@@ -414,7 +420,10 @@ function PostEditor(props: {
         />
       </Stack>
 
-      <Stack sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}>
+      <Stack
+        display={props.type === 'Events' ? undefined : 'none'}
+        sx={{ pl: 4, pt: 3, pb: 3, px: 4 }}
+      >
         <FormGroup>
           <FormControlLabel
             control={
@@ -453,7 +462,7 @@ function PostEditor(props: {
           onChange={(e) => setForm({ ...form, body: e.target.value })}
         />
         <Stack sx={{ pt: 2, pb: 2 }}>
-          <Typography> Capacity </Typography>
+          <Typography>{typeLabels[props.type]}</Typography>
           <TextField
             size='small'
             defaultValue={props.capacity}
@@ -594,6 +603,7 @@ export default function ViewPostDialog() {
     <>
       {isEditing ? ( // show the editing UI instead of normal post
         <PostEditor
+          type={postData.type}
           id={postData.id}
           title={postData.title}
           body={postData.body}
@@ -637,6 +647,9 @@ export default function ViewPostDialog() {
           </Grid>
           {/* Top information (author, date, tags..) */}
           <Stack sx={{ pl: 4 }}>
+            <Typography variant='subtitle2' sx={{ mb: 1, mt: 0.5 }}>
+              {postData.type.slice(0, -1)}
+            </Typography>
             <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
               Posted on {new Date(postData.createdAt).toString()} by{' '}
               {postData.User.firstName} {postData.User.lastName}
@@ -675,6 +688,7 @@ export default function ViewPostDialog() {
             <Stack direction='row' sx={{ px: 4, pb: 5 }}>
               {Number(postData.capacity) > 0 ? (
                 <CapacityBar
+                  type={postData.type}
                   setInteractionBit={setInteractionBit}
                   maxCapacity={Number(postData.capacity)}
                   postID={postData.id}
@@ -691,10 +705,14 @@ export default function ViewPostDialog() {
                 id={postData.id}
               />
             </Stack>
-            <LocationHandler
-              coords={postData.coords}
-              location={postData.location}
-            />
+            {postData.type === 'Events' ? (
+              <LocationHandler
+                coords={postData.coords}
+                location={postData.location}
+              />
+            ) : (
+              <></>
+            )}
           </Stack>
           {/* Comment Section */}
           <CommentsHandler

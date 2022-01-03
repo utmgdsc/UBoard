@@ -2,7 +2,7 @@ import React from 'react';
 import CreatePost from './CreatePost';
 import { unmountComponentAtNode } from 'react-dom';
 import { act } from 'react-dom/test-utils';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 
 const MockCreatePost = () => {
   const [isOpen, toggleDialog] = React.useState(false);
@@ -32,6 +32,38 @@ afterEach(() => {
 });
 
 describe('verifying launch of create post component', () => {
+  it('should only show dropdown until a post type is selected', () => {
+    const postForm = screen.getByTestId('post-form');
+
+    expect(postForm).not.toBeVisible();
+
+    fireEvent.mouseDown(screen.getByLabelText('Select a post type'));
+    const dropdown = within(screen.getByRole('listbox')); 
+    fireEvent.click(dropdown.getByText('Events'));
+
+    expect(postForm).toBeVisible();
+  });
+
+  it('should display location fields if "Events" is selected', () => {
+    expect(screen.getByTestId('online-toggler')).not.toBeVisible();
+
+    fireEvent.mouseDown(screen.getByLabelText('Select a post type'));
+    const dropdown = within(screen.getByRole('listbox')); 
+    fireEvent.click(dropdown.getByText('Events'));
+    
+    expect(screen.getByTestId('online-toggler')).toBeVisible();
+  });
+
+  it('should not display location fields if "Events" is not selected', () => {
+    expect(screen.getByTestId('online-toggler')).not.toBeVisible();
+
+    fireEvent.mouseDown(screen.getByLabelText('Select a post type'));
+    const dropdown = within(screen.getByRole('listbox')); 
+    fireEvent.click(dropdown.getByText('Clubs'));
+    
+    expect(screen.getByTestId('online-toggler')).not.toBeVisible();
+  });
+
   it('shows the preview button as disabled', () => {
     // get the preview button
     expect(screen.getByTestId('previewButton')).toBeDisabled();

@@ -49,7 +49,13 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
   // generate tags (if the post has any)
   const tags = (
     <GenerateTags
-      tags={props.postUser.Tags ? props.postUser.Tags.map((t) => t.text) : []}
+      tags={
+        props.postUser.Tags
+          ? props.postUser.Tags.map((t) =>
+              t.text.length > 10 ? t.text.slice(0, 7) + '...' : t.text
+            )
+          : []
+      }
     />
   );
   const [isHovered, setHover] = React.useState(false);

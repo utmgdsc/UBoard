@@ -83,7 +83,15 @@ export default function PreviewPopUp(props: {
               </Grid>
               <Grid item xs={12}>
                 <Typography>Tags: </Typography>
-                <GenerateTags tags={tags} />
+                <GenerateTags
+                  tags={
+                    tags
+                      ? tags.map((t) =>
+                          t.length > 10 ? t.slice(0, 7) + '...' : t
+                        )
+                      : []
+                  }
+                />
               </Grid>
             </Grid>
           </CardContent>

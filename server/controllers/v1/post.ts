@@ -709,7 +709,7 @@ export default class PostController {
     status: number;
     data: { result?: Post; message?: string };
   }> {
-    if (!type || !title || !body || !location || capacity == undefined) {
+    if (!type || !title || !body || location == undefined || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 

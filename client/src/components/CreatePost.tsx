@@ -48,9 +48,11 @@ function CreatePost() {
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
   const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);
-  const [location, setLocation] = React.useState(
-    {} as { location: string; lat: number; lng: number }
-  );
+  const [location, setLocation] = React.useState({
+    location: '',
+    lat: -1,
+    lng: -1,
+  } as { location: string; lat: number; lng: number });
 
   const [form, setForm] = useState<FormState>({
     type: '',
@@ -152,6 +154,7 @@ function CreatePost() {
         if (res.status === 200) {
           setMsg('Post has been succesfully created.');
         } else {
+          console.error(res.data.message)
           setMsg('Failed to create post');
         }
       })
@@ -227,7 +230,9 @@ function CreatePost() {
                 label='Type'
               >
                 {postTypes.slice(1).map((t) => (
-                  <MenuItem key={t} value={t}>{t}</MenuItem>
+                  <MenuItem key={t} value={t}>
+                    {t}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -279,11 +284,7 @@ function CreatePost() {
                   />
                 </Grid>
 
-                <Grid
-                  item
-                  xs={12}
-                  md={3}
-                >
+                <Grid item xs={12} md={3}>
                   <TextField
                     label={typeLabels[form.type]}
                     placeholder='40'

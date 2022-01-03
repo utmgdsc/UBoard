@@ -18,10 +18,9 @@ export default function GenerateTags(props: { tags: string[], space?: number }) 
 }
 
 export function Tag(props: { tag: string }) {
-  const truncated = props.tag.length > 10 ? props.tag.slice(0, 7) + '...' : props.tag;
   return (
     <>
-      <TagItem key={truncated}>{truncated}</TagItem>
+      <TagItem key={props.tag}>{props.tag}</TagItem>
     </>
   );
 }

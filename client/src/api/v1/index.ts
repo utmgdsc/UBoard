@@ -12,9 +12,11 @@ export type CommentsUser = Comment & {
     lastName: string;
     id: string;
   };
+  createdAt: string;
 };
 
 export type PostUser = Post & {
+  type: string;
   likeCount: number;
   doesUserLike: string;
   didUserReport: string;
@@ -326,5 +328,54 @@ export default class ServerApi {
       '/users/reset-password',
       form
     );
+  }
+
+  async updateComment(id: string, form: { body: string }) {
+    return await this.put<typeof form, {}>(`/comments/${id}`, form);
+  }
+
+  async getComments(postid: string, limit: number, offset: number) {
+    return await this.get<
+      { limit: number; offset: number; postid: string },
+      {
+        data: {
+          result?: CommentsUser[];
+          total: number;
+          message?: string;
+        };
+      }
+    >('/comments/', { limit, offset, postid });
+  }
+
+  async getComment(commentid: string) {
+    return await this.get<
+      {},
+      {
+        data: {
+          result?: CommentsUser;
+          message?: string;
+        };
+      }
+    >(`/comments/${commentid}`, {});
+  }
+
+  async deleteComment(commentid: string) {
+    return await this.delete<{
+      data: {
+        message?: string;
+      };
+    }>(`/comments/${commentid}`);
+  }
+
+  async createComment(postid: string, body: string) {
+    return await this.post<
+      { postid: string; body: string },
+      {
+        data: {
+          result?: Comment;
+          message?: string;
+        };
+      }
+    >('/comments/', { postid, body });
   }
 }

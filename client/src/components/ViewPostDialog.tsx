@@ -19,16 +19,110 @@ import Switch from '@mui/material/Switch';
 import Checkbox from '@mui/material/Checkbox';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Pagination from '@mui/material/Pagination';
 
 import { UserContext } from '../App';
+import PostComment from './PostComment';
 import { LocationMap, LocationPickerMap } from './LocationMap';
 
-import ServerApi, { PostUser } from '../api/v1';
+import ServerApi, { CommentsUser, PostUser } from '../api/v1';
 import GenerateTags from './Tags';
 import { NavigateFunction, useNavigate, useParams } from 'react-router-dom';
+import { User } from 'models/user';
 import { typeLabels, typeButtonLabels } from './constants/postTypes';
 
 const api = new ServerApi();
+const COMMENTS_PER_PAGE = 10;
+
+function CommentsHandler(props: { postID: string; currentUser: User }) {
+  const [commentInput, setInput] = React.useState('');
+  const [recentComments, setComments] = React.useState([] as CommentsUser[]);
+  const [totalPages, setPageCount] = React.useState(0);
+  const [currPage, setPage] = React.useState(1);
+  const [hasInteractedComment, setCommentInteraction] = React.useState(false);
+
+  const submitHandler = async () => {
+    if (commentInput.length >= 10 && commentInput.length <= 250) {
+      await api.createComment(props.postID, commentInput);
+      setCommentInteraction(true);
+      setInput('');
+    }
+  };
+
+  const fetchComments = React.useCallback(() => {
+    api
+      .getComments(
+        props.postID,
+        COMMENTS_PER_PAGE,
+        COMMENTS_PER_PAGE * (currPage - 1)
+      )
+      .then((res) => {
+        if (res.data && res.data.data.result) {
+          setComments(res.data.data.result);
+          setPageCount(Math.ceil(res.data.data.total / COMMENTS_PER_PAGE));
+        } else {
+          setComments([]);
+          setPageCount(1);
+        }
+      })
+      .catch((err) => console.log(err));
+  }, [props, currPage]);
+
+  /* Fetch comments triggered by page open and comment interaction (edit/post/delete) */
+  React.useEffect(() => {
+    fetchComments();
+    setCommentInteraction(false);
+  }, [fetchComments, hasInteractedComment]);
+
+  return (
+    <>
+      <Stack spacing={4} sx={{ mx: 8, my: 2 }}>
+        <Stack spacing={2}>
+          <Typography variant='h5'>Comments</Typography>
+          <TextField
+            variant='filled'
+            placeholder='Write a comment (Between 10-250 characters)'
+            size='small'
+            value={commentInput}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
+            inputProps={{ maxLength: 250 }}
+          ></TextField>
+          <Button
+            onClick={submitHandler}
+            disabled={commentInput.length < 10 || commentInput.length > 250}
+            variant='contained'
+          >
+            Add Comment
+          </Button>
+        </Stack>
+        <Stack spacing={1}>
+          {recentComments.map((data) => (
+            <PostComment
+              key={data.id}
+              data={data}
+              userAuthoredComment={props.currentUser.id === data.User.id}
+              setHasInteracted={setCommentInteraction}
+            />
+          ))}
+        </Stack>
+        <Pagination
+          count={totalPages}
+          page={currPage}
+          onChange={(event: React.ChangeEvent<unknown>, pg: number) => {
+            setPage(pg);
+            setCommentInteraction(true);
+          }}
+          data-testid='test-paginate'
+          color='primary'
+          variant='outlined'
+          sx={{ display: 'flex', justifyContent: 'center' }}
+        />
+      </Stack>
+    </>
+  );
+}
 
 /* Post settings, choosing between deleting, editing or reporting a post. The delete
   and edit options are only shown if the user is authorized. */
@@ -463,6 +557,10 @@ export default function ViewPostDialog() {
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = React.useCallback(() => {
+    if (error || isEditing) {
+      return;
+    }
+
     api
       .fetchPost(postid!)
       .then((res) => {
@@ -480,13 +578,20 @@ export default function ViewPostDialog() {
         console.error(`Error fetching post ${err}`);
         toggleError(true);
       });
-  }, [postid, userContext.data]);
+  }, [postid, userContext.data, error, isEditing]);
 
+  /* Fetch post changes by polling */
   React.useEffect(() => {
-    if (!error && !isEditing) {
+    const interval = setInterval(() => {
       fetchData();
-    }
-  }, [fetchData, error, isEditing, interactionBit]);
+    }, 3000);
+    return () => clearInterval(interval);
+  });
+
+  /* Update on interaction */
+  React.useEffect(() => {
+    fetchData();
+  }, [fetchData, interactionBit]);
 
   if (error) {
     window.location.replace('/404');
@@ -615,20 +720,10 @@ export default function ViewPostDialog() {
             )}
           </Stack>
           {/* Comment Section */}
-          <Stack sx={{ px: 8, pb: 5 }}>
-            <Typography variant='h5' sx={{ py: 2 }}>
-              Comments
-            </Typography>
-            <TextField
-              variant='filled'
-              placeholder='Write a comment'
-              size='small'
-            ></TextField>
-            <Button variant='contained' sx={{ mt: 2 }}>
-              Add Comment
-            </Button>
-          </Stack>
-          {/* TODO: Create Comment component later */}
+          <CommentsHandler
+            postID={postData.id}
+            currentUser={userContext.data}
+          />
         </>
       )}{' '}
     </>

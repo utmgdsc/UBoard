@@ -26,10 +26,9 @@ function RecentPosts(props: {
   userId: string;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
-  const [openedPost, setOpenedPost] = React.useState(false);
 
   const checkForPosts = React.useCallback(() => {
-    if (!openedPost && !props.openedCreate) {
+    if (!props.openedCreate) {
       let result;
       let newState = '';
       if (props.userId !== '') {
@@ -75,7 +74,7 @@ function RecentPosts(props: {
         props.setPrevState(newState);
       }
     }
-  }, [props, openedPost]);
+  }, [props]);
 
   /* Fetch new posts by polling */
   React.useEffect(() => {

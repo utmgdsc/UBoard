@@ -16,6 +16,7 @@ export const POSTS_PER_PAGE = 6; // Maximum (previewable) posts per page.
 const api = new ServerApi();
 
 function RecentPosts(props: {
+  openedCreate: boolean;
   query: string;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
@@ -25,10 +26,9 @@ function RecentPosts(props: {
   userId: string;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
-  const [openedPost, setOpenedPost] = React.useState(false);
 
   const checkForPosts = React.useCallback(() => {
-    if (!openedPost) {
+    if (!props.openedCreate) {
       let result;
       let newState = '';
       if (props.userId !== '') {
@@ -74,13 +74,13 @@ function RecentPosts(props: {
         props.setPrevState(newState);
       }
     }
-  }, [props, openedPost]);
+  }, [props]);
 
   /* Fetch new posts by polling */
   React.useEffect(() => {
     const interval = setInterval(() => {
       checkForPosts();
-    }, 500);
+    }, 3000);
 
     return () => clearInterval(interval);
   });
@@ -93,10 +93,7 @@ function RecentPosts(props: {
   return (
     <>
       {recentPosts.map((data) => (
-        <PostPreview
-          key={data.id}
-          postUser={data}
-        />
+        <PostPreview key={data.id} postUser={data} />
       ))}
     </>
   );
@@ -124,6 +121,8 @@ export default function PostDashboard() {
 
   const [query, setEscapedQuery] = useQuery();
 
+  const [openedCreate, toggleDialog] = React.useState(false);
+
   return (
     <>
       <Header setUserId={setUserId} setEscapedQuery={setEscapedQuery} />
@@ -143,10 +142,11 @@ export default function PostDashboard() {
                 alignItems: 'flex-end',
               }}
             >
-              <CreatePost />
+              <CreatePost isOpen={openedCreate} toggleDialog={toggleDialog} />
             </Grid>
 
             <RecentPosts
+              openedCreate={openedCreate}
               userId={userId}
               query={query}
               setPage={setPage}

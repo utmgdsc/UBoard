@@ -5,8 +5,17 @@ import Stack from '@mui/material/Stack';
 import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
+import ReplayIcon from '@mui/icons-material/Replay';
+import Button from '@mui/material/Button';
 
 import GoogleMapReact from 'google-map-react';
+import { PostUserPreview } from '../api/v1';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import useTheme from '@mui/system/useTheme';
+
+import redmarker from '../assets/red-marker.png';
+import bluemarker from '../assets/blue-marker.png';
+import greenmarker from '../assets/green-marker.png';
 
 export function LocationPickerMap(props: {
   setLocation: (location: string, lat?: number, lng?: number) => void;
@@ -135,6 +144,149 @@ export function LocationPickerMap(props: {
         />
       </Paper>
     </Stack>
+  );
+}
+
+export function EventsMapView(props: { posts: PostUserPreview[] }) {
+  const [googleMap, setMap] = React.useState(
+    {} as {
+      map: google.maps.Map;
+      maps: typeof google.maps;
+      markers: google.maps.Marker[];
+    }
+  );
+
+  // kinda hacky, but we need to explicitly define height/width for google maps in sx
+  const theme = useTheme();
+  const smQuery = useMediaQuery(theme.breakpoints.down('md'));
+  const xlQuery = useMediaQuery(theme.breakpoints.up('lg'));
+
+  const mapHeight = smQuery ? '60vw' : '40vw';
+
+    const mapWidth = smQuery
+    ? '90vw' : xlQuery ? '55vw' : '74vw';
+
+  // We want to do manual refresh so that the user is not interrupted when interacting the map if the data is changed/new posts are fetched
+  const refreshMap = () => {
+    if (googleMap.map) {
+      setupMarkers(googleMap.map, googleMap.maps);
+    }
+  };
+
+  // enable additional options (i.e streetview)
+  const getOptions = (maps: GoogleMapReact.Maps) => {
+    return {
+      mapTypeControl: true,
+      streetViewControl: true,
+      fullScreenControl: true,
+      fullSCreenControlOptions: true,
+      styles: [
+        {
+          featureType: 'poi',
+          elementType: 'labels',
+          stylers: [{ visibility: 'on' }],
+        },
+      ],
+    };
+  };
+
+  const clearMarkers = () => {
+    if (!googleMap.map) {
+      return;
+    }
+
+    for (let i = 0; i < googleMap.markers.length; i++) {
+      googleMap.markers[i].setMap(null);
+    }
+
+    setMap({ ...googleMap, markers: [] as google.maps.Marker[] });
+  };
+
+  const setupMarkers = (map: google.maps.Map, maps: typeof google.maps) => {
+    clearMarkers();
+    let markers = [] as google.maps.Marker[];
+
+    for (let i = 0; i < props.posts.length; i++) {
+      const curr = props.posts[i];
+      const { lat, lng } = curr.coords;
+      if (lat !== -1 && lng !== -1) {
+        // show markers for in-person events
+
+        const hasAttendance =
+          curr.capacity > 0
+            ? `<p> Capacity: ${curr.usersCheckedIn}/${curr.capacity}</p>`
+            : `<div></div>`;
+
+        const tmpInfo = new google.maps.InfoWindow({
+          content: `<div><h2 style='word-break: break-all'>${curr.title.slice(0, 100)}...</h2> 
+          <p style='word-break: break-all'> ${curr.body.slice(0, 120) + '...'} </p>
+          <p> Located @ ${curr.location} </p> 
+          ${hasAttendance}
+          <a href="/post-${curr.id}"> Read More </a>
+          </div>`,
+        });
+
+        const percentFilled =
+          (curr.capacity > 0 ? (curr.usersCheckedIn / curr.capacity) : 1) * 100;
+          
+        // red marker indicates event is full, blue is almost filled, green is almost empty event (less than 50%)
+        const tmpMarker = new maps.Marker({
+          position: { lat, lng },
+          map,
+          icon:
+            percentFilled >= 100
+              ? redmarker
+              : percentFilled >= 50
+              ? bluemarker
+              : greenmarker,
+        });
+
+        tmpMarker.addListener('click', () => {
+          tmpInfo.open({
+            anchor: tmpMarker,
+            map,
+            shouldFocus: false,
+          });
+        });
+
+        markers.push(tmpMarker);
+      }
+    }
+
+    setMap({ map, maps, markers });
+  };
+
+  const loadMap = (map: google.maps.Map, maps: typeof google.maps) => {
+    setupMarkers(map, maps);
+  };
+
+  return (
+    <>
+      <Button variant='contained' onClick={refreshMap} startIcon={<ReplayIcon/>} sx={{ mt: 1 }}>
+      Refresh Map
+      </Button>
+      <Paper
+        elevation={5}
+        style={{
+          height: mapHeight,
+          width: mapWidth,
+          justifyContent: 'center',
+        }}
+        sx={{ mt: 4, mb: 4 }}
+      >
+        <GoogleMapReact
+          bootstrapURLKeys={{
+            key: process.env.REACT_APP_MAPS_API as string,
+            libraries: ['places'],
+          }}
+          defaultCenter={{ lat: 43.59, lng: -79.65 }}
+          defaultZoom={9}
+          options={getOptions}
+          onGoogleApiLoaded={({ map, maps }) => loadMap(map, maps)}
+          yesIWantToUseGoogleMapApiInternals
+        />
+      </Paper>
+    </>
   );
 }
 

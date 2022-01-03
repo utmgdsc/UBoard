@@ -13,13 +13,18 @@ function fakePostPreview(
   createdAt: string,
 ): PostUserPreview {
   return {
+    type: 'Events',
     id: (Math.random() * 100).toString(),
     thumbnail: 'placeholder',
     body,
     title,
     createdAt,
     likeCount: 0,
-    doesUserLike: false,
+    doesUserLike: '0',
+    isUserCheckedIn: '0',
+    usersCheckedIn: 0,
+    capacity: 0,
+    totalComments: 0,
     Tags: [],
     User: {
       id: 'user-123',
@@ -76,8 +81,8 @@ describe('Post Preview correctly displayed', () => {
       />
     );
 
-    expect(screen.getByText(`${post.title}...`)).toBeInTheDocument();
-    expect(screen.getByText(`${post.body}...`)).toBeInTheDocument();
+    expect(screen.getByText(post.title)).toBeInTheDocument();
+    expect(screen.getByText(post.body)).toBeInTheDocument();
     expect(
       screen.getByText(
         `2 day(s) ago by ${post.User.firstName} ${post.User.lastName}`
@@ -165,8 +170,8 @@ describe('Post Preview correctly displayed', () => {
       />
     );
 
-    expect(screen.getByText(`${'a'.repeat(28) + '...'}`)).toBeInTheDocument();
-    expect(screen.getByText(`${'b'.repeat(150) + '...'}`)).toBeInTheDocument();
+    expect(screen.getByText(`${'a'.repeat(27) + '...'}`)).toBeInTheDocument();
+    expect(screen.getByText(`${'b'.repeat(147) + '...'}`)).toBeInTheDocument();
   });
 
   it('Ensure pagination works properly when many posts are made', async () => {
@@ -191,7 +196,7 @@ describe('Post Preview correctly displayed', () => {
 
     const mockFetch = jest
       .spyOn(ServerApi.prototype, 'fetchRecentPosts')
-      .mockImplementation((limit, offset) => {
+      .mockImplementation((type, limit, offset) => {
         const results = posts.slice(offset, limit + offset);
         return Promise.resolve({
           status: 200,
@@ -210,11 +215,11 @@ describe('Post Preview correctly displayed', () => {
     });
 
     for (let i = 0; i < POSTS_PER_PAGE; i++) {
-      expect(screen.getByText(posts[i].title + '...')).toBeInTheDocument();
+      expect(screen.getByText(posts[i].title)).toBeInTheDocument();
     }
 
     // This post exceeds max per page, so it is not here
-    expect(screen.queryByText('I will be on pg2...')).not.toBeInTheDocument();
+    expect(screen.queryByText('I will be on pg2')).not.toBeInTheDocument();
 
     // Switch to page 2, this page should only contain 1 post
     await act(async () => {
@@ -228,10 +233,10 @@ describe('Post Preview correctly displayed', () => {
 
     for (let i = 0; i < POSTS_PER_PAGE; i++) {
       expect(
-        screen.queryByText(posts[i].title + '...')
+        screen.queryByText(posts[i].title)
       ).not.toBeInTheDocument();
     }
-    expect(screen.getByText('I will be on pg2...')).toBeInTheDocument();
+    expect(screen.getByText('I will be on pg2')).toBeInTheDocument();
     mockFetch.mockClear();
   });
 });

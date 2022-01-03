@@ -43,7 +43,7 @@ describe('Test v1 - Post Controller', () => {
       ];
       await db.UserPostLikes.likePost(author.id, posts[0].id);
 
-      const result = await postController.getPosts(author.id, 100, 0);
+      const result = await postController.getPosts(author.id, 'Events', 100, 0);
 
       expect(result.status).toBe(200);
       expect(result.data.count).toBe(2);
@@ -84,6 +84,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -98,6 +99,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -117,6 +119,7 @@ describe('Test v1 - Post Controller', () => {
 
       await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -127,6 +130,7 @@ describe('Test v1 - Post Controller', () => {
       const newTag = [...tags, 'new'];
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is another post!',
         'This is a new post!This is a new post2!',
         'location',
@@ -145,6 +149,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -171,6 +176,7 @@ describe('Test v1 - Post Controller', () => {
       };
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -193,6 +199,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         undefined,
         'This is a new post!This is a new post!!',
         'location',
@@ -252,6 +259,7 @@ describe('Test v1 - Post Controller', () => {
 
       const deleted = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -261,6 +269,7 @@ describe('Test v1 - Post Controller', () => {
 
       const result = await postController.createPost(
         author.id,
+        'Events',
         'This is a new post!',
         'This is a new post!This is a new post!',
         'location',
@@ -446,7 +455,7 @@ describe('Test v1 - Post Controller', () => {
         (await postController.deletePost(author.id, posts[0].id)).status
       ).toBe(204);
 
-      const result = await postController.getPosts(author.id, 100, 0);
+      const result = await postController.getPosts(author.id, 'Events', 100, 0);
 
       expect(result.data.total).toBe(1);
     });

@@ -17,6 +17,7 @@ const postController = new PostController(
 );
 
 postRouter.get('', async (req: Request, res: Response) => {
+  const type = req.query.type;
   const limit = req.query.limit;
   const offset = req.query.offset;
 
@@ -31,6 +32,7 @@ postRouter.get('', async (req: Request, res: Response) => {
   try {
     const result = await postController.getPosts(
       getAuthUser(res).id,
+      type as string,
       Number(limit),
       Number(offset)
     );
@@ -41,6 +43,7 @@ postRouter.get('', async (req: Request, res: Response) => {
 });
 
 postRouter.get('/search', async (req: Request, res: Response) => {
+  const type = req.query.type;
   const query = req.query.query;
   const limit = req.query.limit;
   const offset = req.query.offset;
@@ -56,6 +59,7 @@ postRouter.get('/search', async (req: Request, res: Response) => {
   try {
     const result = await postController.searchForPosts(
       getAuthUser(res).id,
+      type as string,
       query as string,
       Number(limit),
       Number(offset)
@@ -68,6 +72,7 @@ postRouter.get('/search', async (req: Request, res: Response) => {
 
 postRouter.get('/user/:userId', async (req: Request, res: Response) => {
   const userId = req.params.userId;
+  const type = req.query.type;
   const limit = req.query.limit;
   const offset = req.query.offset;
 
@@ -83,6 +88,7 @@ postRouter.get('/user/:userId', async (req: Request, res: Response) => {
     const result = await postController.getUserPosts(
       getAuthUser(res).id,
       userId as string,
+      type as string,
       Number(limit),
       Number(offset)
     );
@@ -122,7 +128,7 @@ postRouter.put('/:postid/upvote', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -134,7 +140,7 @@ postRouter.put('/:postid/downvote', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -147,7 +153,7 @@ postRouter.put('/:postid/checkin', async (req: Request, res: Response) => {
       req.params.postid
     );
 
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -159,7 +165,7 @@ postRouter.put('/:postid/checkout', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -171,7 +177,11 @@ postRouter.put('/:postid/report', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    if (result.status === 200) {
+      res.status(result.status).json(result);
+    } else {
+      res.status(result.status).end();
+    }
   } catch (err) {
     console.error(err);
   }
@@ -181,12 +191,13 @@ postRouter.post('/', async (req: Request, res: Response) => {
   try {
     const result = await postController.createPost(
       getAuthUser(res).id,
+      req.body.type,
       req.body.title,
       req.body.body,
       req.body.location,
       req.body.capacity,
       req.body.tags,
-      JSON.parse(req.body.coords),
+      req.body.coords ? JSON.parse(req.body.coords) : { lat: -1, lng: -1 },
       req.file
     );
     res.status(result.status).json(result);

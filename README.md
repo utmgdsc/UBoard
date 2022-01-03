@@ -1,17 +1,18 @@
-# UofTBoard
+# UBoard
 
 The official University of Toronto bulletin board.
 
-## Building and Running with Docker
+UBoard is a platform where students can keep up to date with their community. Students can post about, and search for, community related events, academics, club announcements, and more.
 
-```
-docker build -t uoftboard .
-docker run -p 80:80 -e PORT=80 -e JWT_SECRET=test -e PAGE_URL=test uoftboard
-```
+## Development
 
-## Setting up types for client
+The project uses yarn. Install node (npm) and do `npm install --global yarn`.
 
-Setup needs to be done in order to use the type definitions from the server in our client files.
+The frontend of our project is in the `client/` folder, and the backend is in `server/`.
+
+## Type Definitions for Client/
+
+Additional setup needs to be done in order to use the type definitions from the server in our client files.
 
 Before continuing, make sure you `git pull` and then run `yarn build` in server directory.
 
@@ -36,3 +37,30 @@ Linux/Mac:
 Then, types should be picked up from the import path models/..., which allows us to import like so:
 
 `import { UserAttributes } from "models/user"`
+
+## Building and Running with Docker
+
+The site can be run inside of a docker container.
+
+```
+docker build -t uoftboard .
+docker run -p 80:80 -e PORT=80 -e JWT_SECRET=secret -e PAGE_URL=localhost uoftboard
+```
+
+Note that additional environment variables are needed for additional features to function. These can be added with the `-e` flag.
+
+Google Cloud API key with Maps, Pages, and Geolocation enabled.
+`REACT_APP_MAPS_API`
+
+Backblaze used for blob storage for thumbnails.
+`BACKBLAZE_APP_KEY`
+`BACKBLAZE_APP_KEY_ID`
+`BACKBLAZE_BUCKET_ID`
+`BACKBLAZE_BUCKET_NAME`
+
+Required for database to function
+`DATABASE_URL`
+
+Email Confirmations
+`FROM_EMAIL`
+`SENDGRID_API`

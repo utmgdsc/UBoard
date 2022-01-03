@@ -233,7 +233,7 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
           <p style='word-break: break-all'> ${curr.body.slice(0, 120) + '...'} </p>
           <p> Located @ ${curr.location} </p> 
           ${hasAttendance}
-          <a href="/${curr.id}"> Read More </a>
+          <a href="/post-${curr.id}"> Read More </a>
           </div>`,
         });
 

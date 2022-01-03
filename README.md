@@ -57,6 +57,6 @@ Backblaze used for blob storage for thumbnails.
 Required for database to function
 `DATABASE_URL`
 
-Email Confirmations
+SendGrid API keys for email functionality
 `FROM_EMAIL`
 `SENDGRID_API`

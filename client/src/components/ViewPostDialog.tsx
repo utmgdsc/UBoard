@@ -139,7 +139,6 @@ function MoreOptions(props: {
 
 /* Like button. Handles liking/unliking a post */
 function LikeButton(props: {
-  interactionBit: boolean;
   setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   numLikes: number;
   doesUserLike: string;
@@ -154,7 +153,7 @@ function LikeButton(props: {
     } else {
       await api.unlikePost(props.id);
     }
-    props.setInteractionBit(!props.interactionBit);
+    props.setInteractionBit((bit) => !bit);
   };
 
   const likeButton = isLiked ? (
@@ -184,7 +183,6 @@ function LikeButton(props: {
 }
 
 function CapacityBar(props: {
-  interactionBit: boolean;
   setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   maxCapacity: number;
   postID: string;
@@ -203,7 +201,7 @@ function CapacityBar(props: {
         // checked into (over capacity)
       }
     }
-    props.setInteractionBit(!props.interactionBit);
+    props.setInteractionBit((bit) => !bit);
   };
 
   const buttonHandler =
@@ -476,7 +474,7 @@ export default function ViewPostDialog() {
   }, [postid, userContext.data]);
 
   React.useEffect(() => {
-    if (!error) {
+    if (!error && !isEditing) {
       fetchData();
     }
   }, [fetchData, error, isEditing, interactionBit]);
@@ -583,7 +581,6 @@ export default function ViewPostDialog() {
             <Stack direction='row' sx={{ px: 4, pb: 5 }}>
               {Number(postData.capacity) > 0 ? (
                 <CapacityBar
-                  interactionBit={interactionBit}
                   setInteractionBit={setInteractionBit}
                   maxCapacity={Number(postData.capacity)}
                   postID={postData.id}
@@ -594,7 +591,6 @@ export default function ViewPostDialog() {
                 <></>
               )}
               <LikeButton
-                interactionBit={interactionBit}
                 setInteractionBit={setInteractionBit}
                 numLikes={Number(postData.likeCount)}
                 doesUserLike={postData.doesUserLike}

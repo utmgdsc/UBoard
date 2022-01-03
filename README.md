@@ -54,7 +54,7 @@ Backblaze used for blob storage for thumbnails.
 `BACKBLAZE_BUCKET_ID`
 `BACKBLAZE_BUCKET_NAME`
 
-Required for database to function
+PostgreSQL database URL
 `DATABASE_URL`
 
 SendGrid API keys for email functionality

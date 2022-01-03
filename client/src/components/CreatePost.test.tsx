@@ -4,13 +4,19 @@ import { unmountComponentAtNode } from 'react-dom';
 import { act } from 'react-dom/test-utils';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
 
+const MockCreatePost = () => {
+  const [isOpen, toggleDialog] = React.useState(false);
+
+  return <CreatePost isOpen={isOpen} toggleDialog={toggleDialog} />;
+};
+
 let container: HTMLElement | null = null;
 beforeEach(() => {
   // setup a DOM element as a render target
   container = document.createElement('div');
   document.body.appendChild(container);
   act(() => {
-    render(<CreatePost />);
+    render(<MockCreatePost />);
   });
   screen.getByTestId('newPostButton').click();
 });

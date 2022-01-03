@@ -140,6 +140,7 @@ function MoreOptions(props: {
 
 /* Like button. Handles liking/unliking a post */
 function LikeButton(props: {
+  setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   numLikes: number;
   doesUserLike: string;
   id: string;
@@ -153,6 +154,7 @@ function LikeButton(props: {
     } else {
       await api.unlikePost(props.id);
     }
+    props.setInteractionBit((bit) => !bit);
   };
 
   const likeButton = isLiked ? (
@@ -183,6 +185,7 @@ function LikeButton(props: {
 
 function CapacityBar(props: {
   type: string;
+  setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   maxCapacity: number;
   postID: string;
   isUserCheckedIn: string;
@@ -193,19 +196,14 @@ function CapacityBar(props: {
   const handleCheckIn = async () => {
     if (props.isUserCheckedIn === '1') {
       await api.checkout(props.postID);
-      // As there is no global state management system, we would have to wait
-      // for the autoreload system to update the post info. This is a hack to
-      // ensure that the checked in state is immediately updated.
-      props.isUserCheckedIn = '0';
-      props.usersCheckedIn -= 1;
     } else {
       const result = await api.checkin(props.postID);
-      if (result.status !== 409) {
-        props.isUserCheckedIn = '1';
+      if (result.status === 409) {
+        // TODO indicate a standard alert to the user that the event could not be
+        // checked into (over capacity)
       }
-      // TODO indicate a standard alert to the user that the event could not be
-      // checked into (over capacity)
     }
+    props.setInteractionBit((bit) => !bit);
   };
 
   const buttonHandler =
@@ -458,9 +456,10 @@ export default function ViewPostDialog() {
   const { postid } = useParams();
   const navigate = useNavigate();
   const [error, toggleError] = React.useState(false);
+  const [interactionBit, setInteractionBit] = React.useState(false);
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
-  const fetchData = () => {
+  const fetchData = React.useCallback(() => {
     api
       .fetchPost(postid!)
       .then((res) => {
@@ -478,31 +477,13 @@ export default function ViewPostDialog() {
         console.error(`Error fetching post ${err}`);
         toggleError(true);
       });
-  };
+  }, [postid, userContext.data]);
 
   React.useEffect(() => {
-    // Fetch data (on initial load)
-    if (!postData.User && !error) {
+    if (!error && !isEditing) {
       fetchData();
     }
-  });
-
-  React.useEffect(() => {
-    if (!isEditing && !error) {
-      // ensure data updates instantly for the user that finished editing
-      fetchData();
-    }
-  }, [isEditing]);
-
-  React.useEffect(() => {
-    /* Fetch incase data has changed / post was edited */
-    if (!error) {
-      const interval = setInterval(() => {
-        fetchData();
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  });
+  }, [fetchData, error, isEditing, interactionBit]);
 
   if (error) {
     return (
@@ -611,6 +592,7 @@ export default function ViewPostDialog() {
               {Number(postData.capacity) > 0 ? (
                 <CapacityBar
                   type={postData.type}
+                  setInteractionBit={setInteractionBit}
                   maxCapacity={Number(postData.capacity)}
                   postID={postData.id}
                   isUserCheckedIn={postData.isUserCheckedIn}
@@ -620,6 +602,7 @@ export default function ViewPostDialog() {
                 <></>
               )}
               <LikeButton
+                setInteractionBit={setInteractionBit}
                 numLikes={Number(postData.likeCount)}
                 doesUserLike={postData.doesUserLike}
                 id={postData.id}

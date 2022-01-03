@@ -39,12 +39,15 @@ interface FormState {
   coords: { lat: number; lng: number };
 }
 
-function CreatePost() {
+function CreatePost(props: {
+  isOpen: boolean;
+  toggleDialog: React.Dispatch<React.SetStateAction<boolean>>;
+}) {
   const [openPopup, setOpenPopup] = useState(false); // for preview popup
   const [isAlertOpen, showAlert] = useState(false); // for snackbar
   const [alertMsg, setMsg] = useState('An error has occurred'); // for snackbar message
   const [capacityError, setCapacityError] = useState(''); // for capacity input validation
-  const [isOpen, toggleDialog] = useState(false); // for create post dialog toggle
+  const [isOpen, toggleDialog] = [props.isOpen, props.toggleDialog]; // for create post dialog toggle
   const [allowTagInput, toggleTagInput] = React.useState(true);
   const [tagInputValue, setTagInputValue] = React.useState('');
   const [isOnlineEvent, toggleOnlineEvent] = React.useState(false);

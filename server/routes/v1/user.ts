@@ -21,7 +21,7 @@ async function signOut(req: Request, res: Response) {
       httpOnly: true,
     })
     .status(204)
-    .json();
+    .end();
 }
 
 export async function signInHandler(req: Request, res: Response) {
@@ -98,7 +98,7 @@ async function requestPasswordResetHandler(req: Request, res: Response) {
     res.status(result.status).json(result.data);
     return;
   }
-  res.status(result.status).json();
+  res.status(result.status).end();
 }
 
 async function confirmEmailHandler(req: Request, res: Response) {
@@ -110,7 +110,7 @@ async function confirmEmailHandler(req: Request, res: Response) {
   }
 
   if (await uContr.confirmEmail(token)) {
-    res.status(204).json();
+    res.status(204).end();
   } else {
     res.status(400).json({ message: 'Token is invalid or expired.' });
   }
@@ -131,7 +131,7 @@ async function resetPassHandler(req: Request, res: Response) {
   );
 
   if (status) {
-    res.status(204).json();
+    res.status(204).end();
   } else {
     res.status(400).json({ message: 'Token is invalid or expired.' });
   }

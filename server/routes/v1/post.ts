@@ -128,7 +128,7 @@ postRouter.put('/:postid/upvote', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -140,7 +140,7 @@ postRouter.put('/:postid/downvote', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -153,7 +153,7 @@ postRouter.put('/:postid/checkin', async (req: Request, res: Response) => {
       req.params.postid
     );
 
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -165,7 +165,7 @@ postRouter.put('/:postid/checkout', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    res.status(result.status).end();
   } catch (err) {
     console.error(err);
   }
@@ -177,7 +177,11 @@ postRouter.put('/:postid/report', async (req: Request, res: Response) => {
       getAuthUser(res).id,
       req.params.postid
     );
-    res.status(result.status);
+    if (result.status === 200) {
+      res.status(result.status).json(result);
+    } else {
+      res.status(result.status).end();
+    }
   } catch (err) {
     console.error(err);
   }

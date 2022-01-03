@@ -139,7 +139,8 @@ function MoreOptions(props: {
 
 /* Like button. Handles liking/unliking a post */
 function LikeButton(props: {
-  setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
+  interactionBit: boolean;
+  setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   numLikes: number;
   doesUserLike: string;
   id: string;
@@ -153,7 +154,7 @@ function LikeButton(props: {
     } else {
       await api.unlikePost(props.id);
     }
-    props.setHasInteracted(true);
+    props.setInteractionBit(!props.interactionBit);
   };
 
   const likeButton = isLiked ? (
@@ -183,7 +184,8 @@ function LikeButton(props: {
 }
 
 function CapacityBar(props: {
-  setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
+  interactionBit: boolean;
+  setInteractionBit: React.Dispatch<React.SetStateAction<boolean>>;
   maxCapacity: number;
   postID: string;
   isUserCheckedIn: string;
@@ -201,7 +203,7 @@ function CapacityBar(props: {
         // checked into (over capacity)
       }
     }
-    props.setHasInteracted(true);
+    props.setInteractionBit(!props.interactionBit);
   };
 
   const buttonHandler =
@@ -450,7 +452,7 @@ export default function ViewPostDialog() {
   const { postid } = useParams();
   const navigate = useNavigate();
   const [error, toggleError] = React.useState(false);
-  const [hasInteracted, setHasInteracted] = React.useState(false);
+  const [interactionBit, setInteractionBit] = React.useState(false);
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = React.useCallback(() => {
@@ -476,9 +478,8 @@ export default function ViewPostDialog() {
   React.useEffect(() => {
     if (!error) {
       fetchData();
-      setHasInteracted(false);
     }
-  }, [fetchData, error, isEditing, hasInteracted]);
+  }, [fetchData, error, isEditing, interactionBit]);
 
   if (error) {
     return (
@@ -582,7 +583,8 @@ export default function ViewPostDialog() {
             <Stack direction='row' sx={{ px: 4, pb: 5 }}>
               {Number(postData.capacity) > 0 ? (
                 <CapacityBar
-                  setHasInteracted={setHasInteracted}
+                  interactionBit={interactionBit}
+                  setInteractionBit={setInteractionBit}
                   maxCapacity={Number(postData.capacity)}
                   postID={postData.id}
                   isUserCheckedIn={postData.isUserCheckedIn}
@@ -592,7 +594,8 @@ export default function ViewPostDialog() {
                 <></>
               )}
               <LikeButton
-                setHasInteracted={setHasInteracted}
+                interactionBit={interactionBit}
+                setInteractionBit={setInteractionBit}
                 numLikes={Number(postData.likeCount)}
                 doesUserLike={postData.doesUserLike}
                 id={postData.id}

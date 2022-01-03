@@ -10,8 +10,6 @@ import Button from '@mui/material/Button';
 
 import GoogleMapReact from 'google-map-react';
 import { PostUserPreview } from '../api/v1';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import useTheme from '@mui/system/useTheme';
 
 import redmarker from '../assets/red-marker.png';
 import bluemarker from '../assets/blue-marker.png';
@@ -156,16 +154,6 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
     }
   );
 
-  // kinda hacky, but we need to explicitly define height/width for google maps in sx
-  const theme = useTheme();
-  const smQuery = useMediaQuery(theme.breakpoints.down('md'));
-  const xlQuery = useMediaQuery(theme.breakpoints.up('lg'));
-
-  const mapHeight = smQuery ? '60vw' : '40vw';
-
-    const mapWidth = smQuery
-    ? '90vw' : xlQuery ? '55vw' : '74vw';
-
   // We want to do manual refresh so that the user is not interrupted when interacting the map if the data is changed/new posts are fetched
   const refreshMap = () => {
     if (googleMap.map) {
@@ -268,9 +256,8 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
       <Paper
         elevation={5}
         style={{
-          height: mapHeight,
-          width: mapWidth,
-          justifyContent: 'center',
+          height: '56vw',
+          width: '90vw',
         }}
         sx={{ mt: 4, mb: 4 }}
       >

@@ -58,8 +58,8 @@ export class UserPostLikes extends Model {
 module.exports = (sequelize: Sequelize) => {
   UserPostLikes.init(
     {
-      userID: DataTypes.UUID,
-      postID: DataTypes.UUID,
+      userID: { type: DataTypes.UUID },
+      postID: { type: DataTypes.UUID },
     },
     {
       sequelize,

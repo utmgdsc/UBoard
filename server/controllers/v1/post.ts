@@ -1,4 +1,4 @@
-import sequelize from 'sequelize';
+import sequelize, { Sequelize } from 'sequelize';
 import { latLng, Post } from '../../models/post';
 import { Tag } from '../../models/tags';
 import { UserPostLikes } from '../../models/userPostLikes';
@@ -85,6 +85,7 @@ export default class PostController {
    */
   async getPosts(
     userID: string,
+    type: string,
     limit: number,
     offset: number
   ): Promise<{
@@ -96,6 +97,7 @@ export default class PostController {
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
         attributes: [
+          'type',
           'id',
           'body',
           'title',
@@ -168,8 +170,11 @@ export default class PostController {
         ],
         order: [['createdAt', 'DESC']],
         offset: offset,
+        where: type === 'All' ? Sequelize.literal('true') : { type: type },
       }),
-      this.postsRepo.count(),
+      this.postsRepo.count({
+        where: type === 'All' ? Sequelize.literal('true') : { type: type },
+      }),
     ]);
 
     return {
@@ -194,6 +199,7 @@ export default class PostController {
   async getUserPosts(
     userID: string,
     queryUserID: string,
+    type: string,
     limit: number,
     offset: number
   ): Promise<{
@@ -205,11 +211,13 @@ export default class PostController {
         limit: limit > MAX_RESULTS ? MAX_RESULTS : limit,
         // Since we are returning multiple results, we want to limit the data.
         attributes: [
+          'type',
           'id',
           'body',
           'title',
           'createdAt',
           'thumbnail',
+          'capacity',
           [
             sequelize.literal(
               `(SELECT COUNT(*) FROM "UserPostLikes" as "Likes" WHERE "Likes"."postID" = "Post"."id")`
@@ -227,6 +235,39 @@ export default class PostController {
             ),
             'doesUserLike',
           ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'isUserCheckedIn',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+                  WHERE "Checkin"."postID" = "Post"."id")`
+            ),
+            'usersCheckedIn',
+          ],
+          [
+            sequelize.literal(
+              // https://sequelize.org/master/class/lib/sequelize.js~Sequelize.html#instance-method-escape
+              `(SELECT COUNT(*) FROM "UserReports" as "Reports" 
+                  WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = ${db.sequelize.escape(
+                    `${userID}`
+                  )})`
+            ),
+            'didUserReport',
+          ],
+          [
+            sequelize.literal(
+              `(SELECT COUNT(*) FROM "Comments"
+                  WHERE "Comments"."PostId" = "Post"."id")`
+            ),
+            'totalComments',
+          ],
         ],
         include: [
           {
@@ -240,9 +281,17 @@ export default class PostController {
         ],
         order: [['createdAt', 'DESC']],
         offset: offset,
-        where: { UserId: queryUserID },
+        where:
+          type === 'All'
+            ? { UserId: queryUserID }
+            : { UserId: queryUserID, type: type },
       }),
-      this.postsRepo.count({ where: { UserId: queryUserID } }),
+      this.postsRepo.count({
+        where:
+          type === 'All'
+            ? { UserId: queryUserID }
+            : { UserId: queryUserID, type: type },
+      }),
     ]);
 
     return {
@@ -261,6 +310,7 @@ export default class PostController {
 
   async searchForPosts(
     userID: string,
+    type: string,
     query: string,
     limit: number,
     offset: number
@@ -279,11 +329,13 @@ export default class PostController {
     const data = await Promise.all([
       db.sequelize.query(
         `SELECT 
+          "Post"."type",
           "Post"."id", 
           "Post"."body", 
           "Post"."title", 
           "Post"."createdAt", 
           "Post"."thumbnail", 
+          "Post"."capacity",
           (
             SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "Post"."id"
@@ -292,6 +344,22 @@ export default class PostController {
             SELECT COUNT(*) FROM "UserPostLikes" AS "Likes" 
             WHERE "Likes"."postID" = "Post"."id" AND "Likes"."userID" = $userID
           ) AS "doesUserLike", 
+          (
+            SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+            WHERE "Checkin"."postID" = "Post"."id" AND "Checkin"."userID" = $userID
+          ) AS "isUserCheckedIn",
+          (
+            SELECT COUNT(*) FROM "UserCheckins" as "Checkin" 
+            WHERE "Checkin"."postID" = "Post"."id"
+          ) AS "usersCheckedIn",
+          (
+            SELECT COUNT(*) FROM "UserReports" as "Reports" 
+            WHERE "Reports"."postID" = "Post"."id" AND "Reports"."userID" = $userID
+          ) AS "didUserReport",
+          (
+            SELECT COUNT(*) FROM "Comments"
+            WHERE "Comments"."PostId" = "Post"."id"
+          ) AS "totalComments",
           json_build_object(
             'firstName', "User"."firstName", 
             'lastName', "User"."lastName",
@@ -309,12 +377,12 @@ export default class PostController {
           FROM "PostTags" GROUP BY 1
         ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
         CROSS JOIN to_tsquery($query) AS "query" 
-        WHERE "query" @@ ${weights} 
+        WHERE "query" @@ ${weights} AND ("Post"."type" = $type OR $type = 'All')
         ORDER BY "rank" DESC 
         LIMIT $limit 
         OFFSET $offset;`,
         {
-          bind: { userID, query, limit, offset },
+          bind: { userID, query, type, limit, offset },
           type: QueryTypes.SELECT,
         }
       ) as PostUserPreview[],
@@ -326,9 +394,9 @@ export default class PostController {
           FROM "PostTags" GROUP BY 1
         ) AS "PostTag" ON "PostTag"."PostId" = "Post"."id"
         CROSS JOIN to_tsquery($query) AS "query" 
-        WHERE "query" @@ ${weights}`,
+        WHERE "query" @@ ${weights} AND ("Post"."type" = $type OR $type = 'All')`,
         {
-          bind: { query },
+          bind: { query, type },
           type: QueryTypes.SELECT,
         }
       ),
@@ -360,6 +428,7 @@ export default class PostController {
   }> {
     const data = (await this.postsRepo.findByPk(postID, {
       attributes: [
+        'type',
         'id',
         'title',
         'body',
@@ -632,6 +701,7 @@ export default class PostController {
    */
   async createPost(
     userID: string,
+    type?: string,
     title?: string,
     body?: string,
     location?: string,
@@ -643,7 +713,7 @@ export default class PostController {
     status: number;
     data: { result?: Post; message?: string };
   }> {
-    if (!title || !body || !location || capacity == undefined) {
+    if (!type || !title || !body || location == undefined || capacity == undefined) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }
 
@@ -655,6 +725,7 @@ export default class PostController {
     }
 
     const post = await this.postsRepo.create({
+      type,
       title,
       body,
       location,

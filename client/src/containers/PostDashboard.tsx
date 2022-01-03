@@ -13,16 +13,25 @@ import PostPreview from '../components/PostPreview';
 import CreatePost from '../components/CreatePost';
 import { EventsMapView } from '../components/LocationMap';
 
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+
 import ServerApi, { PostUserPreview } from '../api/v1';
+
+import { postTypes } from '../components/constants/postTypes';
 
 export const POSTS_PER_PAGE = 6; // Maximum (previewable) posts per page.
 
 const api = new ServerApi();
 
 function RecentPosts(props: {
+  type: string;
+  openedCreate: boolean;
   query: string;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   setPageCount: React.Dispatch<React.SetStateAction<number>>;
+  changedType: boolean;
+  setChangedType: React.Dispatch<React.SetStateAction<boolean>>;
   prevState: string;
   setPrevState: React.Dispatch<React.SetStateAction<string>>;
   pageNum: number;
@@ -30,10 +39,9 @@ function RecentPosts(props: {
   userId: string;
 }) {
   const [recentPosts, updateRecent] = React.useState([] as PostUserPreview[]);
-  const [openedPost, setOpenedPost] = React.useState(false);
 
   const checkForPosts = React.useCallback(() => {
-    if (!openedPost) {
+    if (!props.openedCreate) {
       let result;
       let newState = '';
       if (props.userId !== '') {
@@ -42,6 +50,7 @@ function RecentPosts(props: {
         }
         result = api.fetchUserPosts(
           props.userId,
+          props.type,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
@@ -50,6 +59,7 @@ function RecentPosts(props: {
           newState = 'search';
         }
         result = api.fetchRecentPosts(
+          props.type,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
         );
@@ -58,6 +68,7 @@ function RecentPosts(props: {
           newState = 'recent';
         }
         result = api.searchForPosts(
+          props.type,
           props.query,
           POSTS_PER_PAGE,
           POSTS_PER_PAGE * (props.pageNum - 1)
@@ -74,18 +85,19 @@ function RecentPosts(props: {
           }
         })
         .catch((err) => console.log(err));
-      if (newState !== '') {
+      if (newState !== '' || props.changedType) {
         props.setPage(1);
+        props.setChangedType(false);
         props.setPrevState(newState);
       }
     }
-  }, [props, openedPost]);
+  }, [props]);
 
   /* Fetch new posts by polling */
   React.useEffect(() => {
     const interval = setInterval(() => {
       checkForPosts();
-    }, 500);
+    }, 3000);
 
     return () => clearInterval(interval);
   });
@@ -114,12 +126,15 @@ function RecentPosts(props: {
 }
 
 export default function PostDashboard() {
+  const [postType, setPostType] = React.useState('All');
+
   const [pageCount, setPageCount] = React.useState(1);
   const [page, setPage] = React.useState(1);
   const [isMapView, toggleMapView] = React.useState(false);
 
   const [userId, setUserId] = React.useState('');
 
+  const [changedType, setChangedType] = React.useState(false);
   const [prevState, setPrevState] = React.useState('recent');
 
   const useQuery = (): [string, (q: string) => void] => {
@@ -136,6 +151,8 @@ export default function PostDashboard() {
 
   const [query, setEscapedQuery] = useQuery();
 
+  const [openedCreate, toggleDialog] = React.useState(false);
+
   return (
     <>
       <Header setUserId={setUserId} setEscapedQuery={setEscapedQuery} />
@@ -146,40 +163,59 @@ export default function PostDashboard() {
           data-testid='test-post-container'
         >
           <Grid container spacing={7}>
-            <Grid
-              item
-              xs={12}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-              }}
-            >
-              <FormControl>
-                <FormControlLabel
-                  value='mapview'
-                  control={
-                    <Switch
-                      color='primary'
-                      checked={isMapView}
-                      onChange={(e) => {
-                        toggleMapView(e.target.checked);
-                      }}
-                    />
-                  }
-                  label='Toggle Map View'
-                  labelPlacement='start'
-                />
-              </FormControl>
-              <CreatePost />
+            <Grid item container>
+              <Grid>
+                <Select
+                  variant='standard'
+                  labelId='post-type-select-label'
+                  id='post-type-select'
+                  value={postType}
+                  onChange={(e) => {
+                    setChangedType(true);
+                    setPostType(e.target.value);
+                  }}
+                  label='Type'
+                >
+                  {postTypes.map((t) => (
+                    <MenuItem key={t} value={t}>
+                      {t}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Grid>
+              <Grid>
+                <FormControl>
+                  <FormControlLabel
+                    value='mapview'
+                    control={
+                      <Switch
+                        color='primary'
+                        checked={isMapView}
+                        onChange={(e) => {
+                          toggleMapView(e.target.checked);
+                        }}
+                      />
+                    }
+                    label='Toggle Map View'
+                    labelPlacement='start'
+                  />
+                </FormControl>
+              </Grid>
+              <Grid marginLeft='auto'>
+                <CreatePost isOpen={openedCreate} toggleDialog={toggleDialog} />
+              </Grid>
             </Grid>
 
             <RecentPosts
               mapView={isMapView}
+              openedCreate={openedCreate}
               userId={userId}
+              type={postType}
               query={query}
               setPage={setPage}
               setPageCount={setPageCount}
+              changedType={changedType}
+              setChangedType={setChangedType}
               prevState={prevState}
               setPrevState={setPrevState}
               pageNum={page}

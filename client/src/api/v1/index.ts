@@ -344,7 +344,11 @@ export default class ServerApi {
   }
 
   async deleteComment(commentid: string) {
-    return await this.delete(`/comments/${commentid}`);
+    return await this.delete<{
+      data: {
+        message?: string;
+      };
+    }>(`/comments/${commentid}`);
   }
 
   async createComment(postid: string, body: string) {

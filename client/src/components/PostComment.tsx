@@ -40,9 +40,11 @@ function MoreOptions(props: {
           props.setHasInteracted(true);
         } else {
           setMsg('Failed to delete comment.');
+          console.error('Failure: ' + res.data!.data!.message);
         }
       })
       .catch((err) => {
+        console.error(err);
         setMsg('Failed to delete comment. ');
       })
       .finally(() => {

@@ -67,15 +67,6 @@ function CommentsHandler(props: { postID: string; currentUser: User }) {
       .catch((err) => console.log(err));
   }, [props, currPage]);
 
-  /* Fetch comments by polling */
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      fetchComments();
-    }, 8000);
-
-    return () => clearInterval(interval);
-  });
-
   /* Fetch comments triggered by page open and comment interaction (edit/post/delete) */
   React.useEffect(() => {
     fetchComments();

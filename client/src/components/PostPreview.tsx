@@ -73,7 +73,7 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
           borderRadius: '10px',
         }}
         onClick={() => {
-          navigate(`/${props.postUser.id}`);
+          navigate(`/post-${props.postUser.id}`);
         }}
         onMouseEnter={() => {
           setHover(true);

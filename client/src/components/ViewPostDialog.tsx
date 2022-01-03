@@ -557,6 +557,10 @@ export default function ViewPostDialog() {
 
   /* Need to fetch the rest of the post data (or update it incase the post has changed) */
   const fetchData = React.useCallback(() => {
+    if (error || isEditing) {
+      return;
+    }
+
     api
       .fetchPost(postid!)
       .then((res) => {
@@ -574,13 +578,20 @@ export default function ViewPostDialog() {
         console.error(`Error fetching post ${err}`);
         toggleError(true);
       });
-  }, [postid, userContext.data]);
+  }, [postid, userContext.data, error, isEditing]);
 
+  /* Fetch post changes by polling */
   React.useEffect(() => {
-    if (!error && !isEditing) {
+    const interval = setInterval(() => {
       fetchData();
-    }
-  }, [fetchData, error, isEditing, interactionBit]);
+    }, 3000);
+    return () => clearInterval(interval);
+  });
+
+  /* Update on interaction */
+  React.useEffect(() => {
+      fetchData();
+  }, [fetchData, interactionBit]);
 
   if (error) {
     return (

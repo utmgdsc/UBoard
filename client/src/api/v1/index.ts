@@ -16,6 +16,7 @@ export type CommentsUser = Comment & {
 };
 
 export type PostUser = Post & {
+  type: string;
   likeCount: number;
   doesUserLike: string;
   didUserReport: string;

@@ -110,7 +110,7 @@ function RecentPosts(props: {
   return (
     <>
       {props.type === 'Events' && props.mapView ? (
-        <Box sx={{ mt: 2, pl: 7 }}>
+        <Box sx={{ mt: 2, ml: 7, width: '100%' }}>
           <EventsMapView posts={recentPosts} />
         </Box>
       ) : (

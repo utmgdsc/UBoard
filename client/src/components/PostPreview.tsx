@@ -62,7 +62,13 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
   const navigate = useNavigate();
 
   return (
-    <Grid data-testid='test-postpreview' item xs={12} sm={6} md={4} lg={4}>
+    <Grid
+      data-testid='test-postpreview'
+      item
+      xs={12}
+      sm={6}
+      md={4}
+    >
       <Card
         raised={isHovered}
         sx={{

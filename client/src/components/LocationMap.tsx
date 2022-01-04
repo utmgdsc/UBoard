@@ -206,8 +206,13 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
             : `<div></div>`;
 
         const tmpInfo = new google.maps.InfoWindow({
-          content: `<div><h2 style='word-break: break-all'>${curr.title.slice(0, 100)}...</h2> 
-          <p style='word-break: break-all'> ${curr.body.slice(0, 120) + '...'} </p>
+          content: `<div><h2 style='word-break: break-all'>${curr.title.slice(
+            0,
+            100
+          )}...</h2> 
+          <p style='word-break: break-all'> ${
+            curr.body.slice(0, 120) + '...'
+          } </p>
           <p> Located @ ${curr.location} </p> 
           ${hasAttendance}
           <a href="/post-${curr.id}"> Read More </a>
@@ -215,8 +220,8 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
         });
 
         const percentFilled =
-          (curr.capacity > 0 ? (curr.usersCheckedIn / curr.capacity) : 1) * 100;
-          
+          (curr.capacity > 0 ? curr.usersCheckedIn / curr.capacity : 1) * 100;
+
         // red marker indicates event is full, blue is almost filled, green is almost empty event (less than 50%)
         const tmpMarker = new maps.Marker({
           position: { lat, lng },
@@ -250,14 +255,20 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
 
   return (
     <>
-      <Button variant='contained' onClick={refreshMap} startIcon={<ReplayIcon/>} sx={{ mt: 1 }}>
-      Refresh Map
+      <Button
+        variant='contained'
+        onClick={refreshMap}
+        startIcon={<ReplayIcon />}
+        sx={{ mt: 1 }}
+      >
+        Refresh Map
       </Button>
       <Paper
         elevation={5}
         style={{
-          height: '56vw',
-          width: '90vw',
+          maxHeight: 'calc(100vh - 256px)',
+          height: '50vw',
+          width: '100%',
         }}
         sx={{ mt: 4, mb: 4 }}
       >

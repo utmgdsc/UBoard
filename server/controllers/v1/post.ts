@@ -724,7 +724,8 @@ export default class PostController {
       !title ||
       !body ||
       location == undefined ||
-      capacity == undefined
+      capacity == undefined ||
+      (type === 'Events' && location === '')
     ) {
       return { status: 400, data: { message: 'Missing fields.' } };
     }

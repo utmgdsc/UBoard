@@ -10,8 +10,6 @@ import Button from '@mui/material/Button';
 
 import GoogleMapReact from 'google-map-react';
 import { PostUserPreview } from '../api/v1';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import useTheme from '@mui/system/useTheme';
 
 import redmarker from '../assets/red-marker.png';
 import bluemarker from '../assets/blue-marker.png';
@@ -156,16 +154,6 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
     }
   );
 
-  // kinda hacky, but we need to explicitly define height/width for google maps in sx
-  const theme = useTheme();
-  const smQuery = useMediaQuery(theme.breakpoints.down('md'));
-  const xlQuery = useMediaQuery(theme.breakpoints.up('lg'));
-
-  const mapHeight = smQuery ? '60vw' : '40vw';
-
-    const mapWidth = smQuery
-    ? '90vw' : xlQuery ? '55vw' : '74vw';
-
   // We want to do manual refresh so that the user is not interrupted when interacting the map if the data is changed/new posts are fetched
   const refreshMap = () => {
     if (googleMap.map) {
@@ -218,8 +206,13 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
             : `<div></div>`;
 
         const tmpInfo = new google.maps.InfoWindow({
-          content: `<div><h2 style='word-break: break-all'>${curr.title.slice(0, 100)}...</h2> 
-          <p style='word-break: break-all'> ${curr.body.slice(0, 120) + '...'} </p>
+          content: `<div><h2 style='word-break: break-all'>${curr.title.slice(
+            0,
+            100
+          )}...</h2> 
+          <p style='word-break: break-all'> ${
+            curr.body.slice(0, 120) + '...'
+          } </p>
           <p> Located @ ${curr.location} </p> 
           ${hasAttendance}
           <a href="/post-${curr.id}"> Read More </a>
@@ -227,8 +220,8 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
         });
 
         const percentFilled =
-          (curr.capacity > 0 ? (curr.usersCheckedIn / curr.capacity) : 1) * 100;
-          
+          (curr.capacity > 0 ? curr.usersCheckedIn / curr.capacity : 1) * 100;
+
         // red marker indicates event is full, blue is almost filled, green is almost empty event (less than 50%)
         const tmpMarker = new maps.Marker({
           position: { lat, lng },
@@ -262,15 +255,20 @@ export function EventsMapView(props: { posts: PostUserPreview[] }) {
 
   return (
     <>
-      <Button variant='contained' onClick={refreshMap} startIcon={<ReplayIcon/>} sx={{ mt: 1 }}>
-      Refresh Map
+      <Button
+        variant='contained'
+        onClick={refreshMap}
+        startIcon={<ReplayIcon />}
+        sx={{ mt: 1 }}
+      >
+        Refresh Map
       </Button>
       <Paper
         elevation={5}
         style={{
-          height: mapHeight,
-          width: mapWidth,
-          justifyContent: 'center',
+          maxHeight: 'calc(100vh - 256px)',
+          height: '50vw',
+          width: '100%',
         }}
         sx={{ mt: 4, mb: 4 }}
       >

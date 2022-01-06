@@ -62,7 +62,13 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
   const navigate = useNavigate();
 
   return (
-    <Grid data-testid='test-postpreview' item xs={12} sm={6} md={4} lg={4}>
+    <Grid
+      data-testid='test-postpreview'
+      item
+      xs={12}
+      sm={6}
+      md={4}
+    >
       <Card
         raised={isHovered}
         sx={{
@@ -105,7 +111,7 @@ export default function PostPreview(props: { postUser: PostUserPreview }) {
             </Grid>
             <Grid item xs={4}>
               <Typography textAlign='right' variant='subtitle2'>
-                {props.postUser.type.slice(0, -1)}
+                {props.postUser.type}
               </Typography>
             </Grid>
           </Grid>

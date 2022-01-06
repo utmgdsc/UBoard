@@ -653,7 +653,7 @@ export default function ViewPostDialog() {
           {/* Top information (author, date, tags..) */}
           <Stack sx={{ pl: 4 }}>
             <Typography variant='subtitle2' sx={{ mb: 1, mt: 0.5 }}>
-              {postData.type.slice(0, -1)}
+              {postData.type}
             </Typography>
             <Typography variant='body2' sx={{ mb: 1, mt: 0.5 }}>
               Posted on {new Date(postData.createdAt).toString()} by{' '}
